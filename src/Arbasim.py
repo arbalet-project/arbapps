@@ -63,7 +63,6 @@ class Arbasim(threading.Thread):
         logging.info("Pygame initialized")
         self.screen = pygame.display.set_mode((self.sim_width, self.sim_height), 0, 32)
         self.sim_state = "idle"
-        pygame.display.set_caption("Arbasim [{}]".format(self.sim_state))
         self.font = pygame.font.SysFont('sans', 14)
 
     def stop(self, reason=None):
@@ -82,6 +81,7 @@ class Arbasim(threading.Thread):
             self.arbastate = arbastate
         finally:
             self.lock_state.release()
+        self.sim_state = "running"
 
     def run(self):
         # Main Simulation loop
@@ -91,8 +91,10 @@ class Arbasim(threading.Thread):
                     self.stop("User request")
                     break
 
-            # Render background
+            # Render background and title
             pygame.draw.rect(self.screen,(0, 0, 0), pygame.Rect(0, 0, self.sim_width+2, self.sim_height+2))
+            pygame.display.set_caption("Arbasim [{}]".format(self.sim_state))
+
 
             # Render grid and pixels
             self.grid.render(self.screen, self.arbastate)
