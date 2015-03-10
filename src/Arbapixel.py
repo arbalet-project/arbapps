@@ -32,9 +32,6 @@ class Arbapixel(object):
               'grey' : [171,171,171],
               'darkgrey' : [85,85,85]}
 
-    def __init__(self):
-        self.setColor('white')
-
     def __init__(self, r, g=None, b=None):
         if g!=None and b!=None:
             self.setColor([r, g, b])
