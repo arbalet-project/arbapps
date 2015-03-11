@@ -27,7 +27,7 @@ import logging
 import threading
 import time
 from Grid import *
-from Arbastate import *
+from Arbamodel import *
 
 class Arbasim(threading.Thread):
     def __init__(self, arbalet_width, arbalet_height, sim_width, sim_height, rate=30):
@@ -47,9 +47,9 @@ class Arbasim(threading.Thread):
         self.running = True
         self.refresh_rate = rate
 
-        # Current table state storing all pixels
-        self.arbastate = None
-        self.lock_state = threading.Lock()
+        # Current table model storing all pixels
+        self.arbamodel = None
+        self.lock_model = threading.Lock()
 
         self.sim_width = sim_width
         self.sim_height = sim_height
@@ -70,18 +70,18 @@ class Arbasim(threading.Thread):
         logging.info("Simulator exiting, reason: {}", reason if reason!=None else 'unknown')
         self.running = False
 
-    def set_state(self, arbastate):
+    def set_model(self, arbamodel):
         """
-        Updates the current state of the simulator
-        :param arbastate:
+        Updates the current model of the simulator
+        :param arbamodel:
         :return:
         """
-        self.lock_state.acquire()
+        self.lock_model.acquire()
         try:
-            self.arbastate = arbastate
+            self.arbamodel = arbamodel
         finally:
-            self.lock_state.release()
-        self.sim_state = "running"
+            self.lock_model.release()
+        self.sim_state = "running" if arbamodel!=None else "idle"
 
     def run(self):
         # Main Simulation loop
@@ -97,7 +97,7 @@ class Arbasim(threading.Thread):
 
 
             # Render grid and pixels
-            self.grid.render(self.screen, self.arbastate)
+            self.grid.render(self.screen, self.arbamodel)
             caption = "[{}] Caption...".format(self.sim_state)
             rendered_caption = self.font.render(caption, 1, (255, 255, 255))
             location_caption = pygame.Rect((10,10), (300,20))
@@ -115,31 +115,31 @@ if __name__ == '__main__':
     sim.start()
     time.sleep(1)
 
-    # We construct 2 different states to give an example
-    state_red = Arbastate(width, height)
-    state_green = Arbastate(width, height)
+    # We construct 2 different models to give an example
+    model_red = Arbamodel(width, height)
+    model_green = Arbamodel(width, height)
 
-    # The "green" state is filled in background but not shown
+    # The "green" model is filled in background but not shown
     for w in range(width):
         for h in range(height):
-            state_green.set_pixel(h, w, 'green')
+            model_green.set_pixel(h, w, 'green')
 
-    # The "red" state is now shown
-    sim.set_state(state_red)
+    # The "red" model is now shown
+    sim.set_model(model_red)
 
-    # The "red" state is updated by reference, shown in live
+    # The "red" model is updated by reference, shown in live
     for w in range(width):
         for h in range(height):
-            state_red.set_pixel(h, w, 'red')
+            model_red.set_pixel(h, w, 'red')
             time.sleep(0.05)
 
     time.sleep(1)
 
-    # We switch immediately to the "green" state...
-    sim.set_state(state_green)
+    # We switch immediately to the "green" model...
+    sim.set_model(model_green)
     time.sleep(1)
 
     # ...and back to the "red" again
-    sim.set_state(state_red)
+    sim.set_model(model_red)
     time.sleep(1)
     sim.stop("__main__ example ended")

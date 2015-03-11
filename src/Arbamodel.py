@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
     Arbalet - ARduino-BAsed LEd Table
-    Arbastate - Arbalet State
+    Arbamodel - Arbalet State
 
     Store a snapshot of the table state
 
@@ -25,7 +25,7 @@
 from Arbapixel import *
 import copy
 
-class Arbastate(object):
+class Arbamodel(object):
     # line, column
     def __init__(self, width, height):
         self.height = height
@@ -45,8 +45,8 @@ class Arbastate(object):
         self.state[h][w].setColor(color)
 
 if __name__ == '__main__':
-    s1 = Arbastate(100, 50)
-    s2 = Arbastate(100, 50)
+    s1 = Arbamodel(100, 50)
+    s2 = Arbamodel(100, 50)
     s1.set_pixel(10, 10, 'white')
     s2.set_pixel(10, 10, [255, 255, 255])
     s3 = copy.deepcopy(s1)
