@@ -30,7 +30,7 @@ from Grid import *
 from Arbamodel import *
 
 class Arbasim(threading.Thread):
-    def __init__(self, arbalet_width, arbalet_height, sim_width, sim_height, rate=30):
+    def __init__(self, arbalet_width, arbalet_height, sim_width, sim_height, rate=30, autorun=True):
         """
         Arbasim constructor: launches the simulation
         Simulate a "arbalet_width x arbalet_height px" table rendered in a "sim_width x sim_height" window
@@ -65,7 +65,11 @@ class Arbasim(threading.Thread):
         self.sim_state = "idle"
         self.font = pygame.font.SysFont('sans', 14)
 
-    def stop(self, reason=None):
+        # Autorun
+        if autorun:
+            self.start()
+
+    def close(self, reason=None):
         self.sim_state = "exiting"
         logging.info("Simulator exiting, reason: {}", reason if reason!=None else 'unknown')
         self.running = False
@@ -88,7 +92,7 @@ class Arbasim(threading.Thread):
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.stop("User request")
+                    self.close("User request")
                     break
 
             # Render background and title
@@ -105,41 +109,3 @@ class Arbasim(threading.Thread):
 
             pygame.display.update()
             time.sleep(1./self.refresh_rate)
-
-
-if __name__ == '__main__':
-    width = 10
-    height = 15
-    factor_sim = 30
-    sim = Arbasim(width, height, width*factor_sim, height*factor_sim)
-    sim.start()
-    time.sleep(1)
-
-    # We construct 2 different models to give an example
-    model_red = Arbamodel(width, height)
-    model_green = Arbamodel(width, height)
-
-    # The "green" model is filled in background but not shown
-    for w in range(width):
-        for h in range(height):
-            model_green.set_pixel(h, w, 'green')
-
-    # The "red" model is now shown
-    sim.set_model(model_red)
-
-    # The "red" model is updated by reference, shown in live
-    for w in range(width):
-        for h in range(height):
-            model_red.set_pixel(h, w, 'red')
-            time.sleep(0.05)
-
-    time.sleep(1)
-
-    # We switch immediately to the "green" model...
-    sim.set_model(model_green)
-    time.sleep(1)
-
-    # ...and back to the "red" again
-    sim.set_model(model_red)
-    time.sleep(1)
-    sim.stop("__main__ example ended")
