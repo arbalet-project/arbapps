@@ -38,8 +38,8 @@ class Arbapp(object):
         self.arbalet = Arbalet("simulation" in opts or "s" in opts or len(opts)==0,
                                "hardware" in opts or "a" in opts,
                                width, height)
-        self.run()
-        self.close("Program naturally ended")
+        #self.run()
+        #self.close("Program naturally ended")
 
     def readopts(self, argv):
         return [x.lstrip('-') for x in argv if x.lstrip('-') in self.authorized_opts]
