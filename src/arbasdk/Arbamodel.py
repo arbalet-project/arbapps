@@ -27,10 +27,10 @@ import copy
 
 class Arbamodel(object):
     # line, column
-    def __init__(self, width, height):
+    def __init__(self, width, height, color=None):
         self.height = height
         self.width = width
-        self.state = [[Arbapixel('white') for j in range(width)] for i in range(height)]
+        self.state = [[Arbapixel(color if color else 'white') for j in range(width)] for i in range(height)]
 
     def get_width(self):
         return self.width
@@ -43,6 +43,11 @@ class Arbamodel(object):
 
     def set_pixel(self, h, w, color):
         self.state[h][w].setColor(color)
+
+    def set_all(self, color):
+        for w in range(self.width):
+            for h in range(self.height):
+                self.state[h][w].setColor(color)
 
 if __name__ == '__main__':
     s1 = Arbamodel(100, 50)
