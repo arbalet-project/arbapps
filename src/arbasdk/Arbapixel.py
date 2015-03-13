@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
     Arbalet - ARduino-BAsed LEd Table
-    Arbasim - Arbalet Simulator
+    Arbapixel - Arbalet Pixel
 
-    Simulate an Arbalet table
+    Represent a rgb-colored pixel in an Arbalet table
 
     Copyright (C) 2015 Yoan Mollard <yoan@konqifr.fr>
 
@@ -21,16 +21,9 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
+from pygame.color import Color
 
 class Arbapixel(object):
-
-    colors = {'black': [0, 0, 0],
-              'white' : [255,255,255],
-              'blue': [0,0,255],
-              'green' : [0,255,0],
-              'red' : [255,0,0],
-              'grey' : [171,171,171],
-              'darkgrey' : [85,85,85]}
 
     def __init__(self, r, g=None, b=None):
         if g!=None and b!=None:
@@ -40,7 +33,7 @@ class Arbapixel(object):
 
     def setColor(self, color):
         if isinstance(color, str):
-            self.setColor(self.colors[color.lower()])
+            self.setColor(Color(color)[:3])
         elif isinstance(color, tuple):
             self.setColor(list(color))
         elif isinstance(color, list) and len(color)==3:
