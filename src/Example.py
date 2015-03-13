@@ -20,8 +20,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-from Arbapp import *
-from Arbamodel import *
+import time
+from arbasdk.Arbamodel import Arbamodel
+from arbasdk.Arbapp import Arbapp
 
 class Example(Arbapp):
     def run(self):

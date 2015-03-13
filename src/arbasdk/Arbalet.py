@@ -24,8 +24,6 @@
 
 from Arbamodel import *
 from Arbasim import *
-import getopt
-import sys
 
 class Arbalet(object):
     def __init__(self, simulation, hardware, width, height, factor_sim=30):

@@ -23,9 +23,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-from Arbamodel import *
 from Arbalet import *
 import sys
+
 class Arbapp(object):
 
     # Authorized arguments
