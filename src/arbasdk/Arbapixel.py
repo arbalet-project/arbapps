@@ -26,10 +26,17 @@ from pygame.color import Color
 class Arbapixel(object):
 
     def __init__(self, r, g=None, b=None):
+
         if g!=None and b!=None:
-            self.setColor([r, g, b])
+            self.setColor([self.__limit(r), self.__limit(g), self.__limit(b)])
         else:
             self.setColor(r)
+
+    def __limit(self, v):
+        """
+        Limitator avoiding overflows and underflows
+        """
+        return max(0, min(255, v))
 
     def setColor(self, color):
         if isinstance(color, str):
@@ -44,25 +51,34 @@ class Arbapixel(object):
     def getColor(self):
         return self.pixel
 
-    def isColor(self, color):
-        if isinstance(color, list):
-            return self.pixel==color
-        elif isinstance(color, str):
-            return self.pixel==self.colors[color]
-        else:
-            return False
+    def __add__(self, c):
+        return Arbapixel(self.__limit(self.pixel[0]+c.pixel[0]),
+                         self.__limit(self.pixel[1]+c.pixel[1]),
+                         self.__limit(self.pixel[2]+c.pixel[2]))
+    def __sub__(self, c):
+        return Arbapixel(self.__limit(self.pixel[0]-c.pixel[0]),
+                         self.__limit(self.pixel[1]-c.pixel[1]),
+                         self.__limit(self.pixel[2]-c.pixel[2]))
+    def __mul__(self, m):
+        return Arbapixel(self.__limit(self.pixel[0]*m),
+                         self.__limit(self.pixel[1]*m),
+                         self.__limit(self.pixel[2]*m))
 
-    def __repr__(self):
-        return self.__str__()
+    def __div__(self, m):
+        return Arbapixel(self.__limit(self.pixel[0]/float(m)),
+                         self.__limit(self.pixel[1]/float(m)),
+                         self.__limit(self.pixel[2]/float(m)))
 
-    def __str__(self):
-        try:
-            return [key for key in self.colors.keys() if self.isColor(key)][0]
-        except:
-            return self.pixel
+    def __eq__(self, c):
+        return self.pixel[0]==c.getColor()[0] and self.pixel[1]==c.getColor()[1] and self.pixel[2]==c.getColor()[2]
 
 if __name__ == '__main__':
     black1 = Arbapixel('red')
     black2 = Arbapixel(255, 0, 0)
-    print "{} = {} ? {}".format(black1.getColor(), black2.getColor(), black1.isColor(black2.getColor()))
+    print "{} = {} ? {}".format(black1.getColor(), black2.getColor(), black1 == black2)
 
+    white1 = Arbapixel('white')
+    white2 = Arbapixel('red') + Arbapixel('green') + Arbapixel('blue')
+    white3 = Arbapixel(1, 1, 1)*255
+    print "{} = {} = {} ? {}".format(white1.getColor(), white2.getColor(), white3.getColor(),
+                                     white1 == white2 and white2==white3)
