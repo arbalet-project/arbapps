@@ -36,7 +36,7 @@ class Arbapixel(object):
         """
         Limitator avoiding overflows and underflows
         """
-        return max(0, min(255, v))
+        return int(max(0, min(255, v)))
 
     def setColor(self, color):
         if isinstance(color, str):
@@ -45,8 +45,10 @@ class Arbapixel(object):
             self.setColor(list(color))
         elif isinstance(color, list) and len(color)==3:
             self.pixel = color
+        elif isinstance(color, Arbapixel):
+            self.pixel = color.getColor()
         else:
-            raise Exception("[setColor] Unexpected color type")
+            raise Exception("[setColor] Unexpected color type {}".format(type(color)))
 
     def getColor(self):
         return self.pixel
@@ -71,6 +73,12 @@ class Arbapixel(object):
 
     def __eq__(self, c):
         return self.pixel[0]==c.getColor()[0] and self.pixel[1]==c.getColor()[1] and self.pixel[2]==c.getColor()[2]
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return "Arbapixel(" + str(self.pixel[0]) + ', ' + str(self.pixel[1]) + ', ' + str(self.pixel[2]) + ')'
 
 if __name__ == '__main__':
     black1 = Arbapixel('red')
