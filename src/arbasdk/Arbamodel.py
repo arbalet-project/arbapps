@@ -27,10 +27,10 @@ import copy
 
 class Arbamodel(object):
     # line, column
-    def __init__(self, width, height, color=None):
+    def __init__(self, width, height, *color):
         self.height = height
         self.width = width
-        self.state = [[Arbapixel(color if color else 'white') for j in range(width)] for i in range(height)]
+        self.state = [[Arbapixel(*color) if len(color)>0 else Arbapixel(0, 0, 0, 0) for j in range(width)] for i in range(height)]
 
     def get_width(self):
         return self.width
@@ -41,18 +41,49 @@ class Arbamodel(object):
     def get_pixel(self, h, w):
         return self.state[h][w]
 
-    def set_pixel(self, h, w, color):
-        self.state[h][w].setColor(color)
+    def set_pixel(self, h, w, *color):
+        self.state[h][w] = Arbapixel(*color)
 
-    def set_all(self, color):
+    def set_all(self, *color):
         for w in range(self.width):
             for h in range(self.height):
-                self.state[h][w].setColor(color)
+                self.state[h][w] = Arbapixel(*color)
+
+    def __add__(self, other):
+        model = Arbamodel(self.width, self.height)
+        for w in range(self.width):
+            for h in range(self.height):
+                model.state[h][w] = self.state[h][w] + other.state[h][w]
+        return model
+
+    def __eq__(self, other):
+        for w in range(self.width):
+            for h in range(self.height):
+                if self.state[h][w] != other.state[h][w]:
+                    return False
+        return True
+
+    def __sub__(self, other):
+        model = Arbamodel(self.width, self.height)
+        for w in range(self.width):
+            for h in range(self.height):
+                model.state[h][w] = self.state[h][w] - other.state[h][w]
+        return model
+
+    def __repr__(self):
+        return self.state
+
+    def __str__(self):
+        return str(self.state)
+
+    def __mul__(self, m):
+        model = Arbamodel()
+        for w in range(self.width):
+            for h in range(self.height):
+                model.state[h][w] = self.state[h][w]*m
+        return model
 
 if __name__ == '__main__':
-    s1 = Arbamodel(100, 50)
-    s2 = Arbamodel(100, 50)
-    s1.set_pixel(10, 10, 'white')
-    s2.set_pixel(10, 10, [255, 255, 255])
-    s3 = copy.deepcopy(s1)
-    print s1==s3
+    s1 = Arbamodel(100, 50, 255, 0, 0, 0)
+    s2 = Arbamodel(100, 50, 0, 0, 255, 128)
+    print s1+s2

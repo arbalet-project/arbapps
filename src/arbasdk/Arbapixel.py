@@ -23,14 +23,12 @@
 """
 from pygame.color import Color
 
+# This class has a hack to inherit from pygame.Color with getattr since its C
+# implementation does not allow to inherit properly
 class Arbapixel(object):
 
-    def __init__(self, r, g=None, b=None):
-
-        if g!=None and b!=None:
-            self.setColor([self.__limit(r), self.__limit(g), self.__limit(b)])
-        else:
-            self.setColor(r)
+    def __init__(self, *args):
+        self.__pygame_color = Color(*args)
 
     def __limit(self, v):
         """
@@ -38,55 +36,48 @@ class Arbapixel(object):
         """
         return int(max(0, min(255, v)))
 
-    def setColor(self, color):
-        if isinstance(color, str):
-            self.setColor(Color(color)[:3])
-        elif isinstance(color, tuple):
-            self.setColor(list(color))
-        elif isinstance(color, list) and len(color)==3:
-            self.pixel = color
-        elif isinstance(color, Arbapixel):
-            self.pixel = color.getColor()
-        else:
-            raise Exception("[setColor] Unexpected color type {}".format(type(color)))
+    def __set__(self, instance, value):
+        self.__pygame_color = value
 
-    def getColor(self):
-        return self.pixel
+    def __getattr__(self, name):
+        return getattr(self.__pygame_color, name)
 
-    def __add__(self, c):
-        return Arbapixel(self.__limit(self.pixel[0]+c.pixel[0]),
-                         self.__limit(self.pixel[1]+c.pixel[1]),
-                         self.__limit(self.pixel[2]+c.pixel[2]))
-    def __sub__(self, c):
-        return Arbapixel(self.__limit(self.pixel[0]-c.pixel[0]),
-                         self.__limit(self.pixel[1]-c.pixel[1]),
-                         self.__limit(self.pixel[2]-c.pixel[2]))
-    def __mul__(self, m):
-        return Arbapixel(self.__limit(self.pixel[0]*m),
-                         self.__limit(self.pixel[1]*m),
-                         self.__limit(self.pixel[2]*m))
+    def __add__(self, other):
+        return Arbapixel(self.__limit(self.r+other.r),
+                         self.__limit(self.g+other.g),
+                         self.__limit(self.b+other.b),
+                         self.__limit(self.a+other.a))
 
-    def __div__(self, m):
-        return Arbapixel(self.__limit(self.pixel[0]/float(m)),
-                         self.__limit(self.pixel[1]/float(m)),
-                         self.__limit(self.pixel[2]/float(m)))
+    def __eq__(self, other):
+        return self.__pygame_color == other.__pygame_color
 
-    def __eq__(self, c):
-        return self.pixel[0]==c.getColor()[0] and self.pixel[1]==c.getColor()[1] and self.pixel[2]==c.getColor()[2]
+    def __sub__(self, other):
+        return Arbapixel(self.__limit(self.r-other.r),
+                         self.__limit(self.g-other.g),
+                         self.__limit(self.b-other.b),
+                         self.__limit(self.a-other.a))
 
     def __repr__(self):
-        return self.__str__()
+        return self.__pygame_color.__repr__()
 
     def __str__(self):
-        return "Arbapixel(" + str(self.pixel[0]) + ', ' + str(self.pixel[1]) + ', ' + str(self.pixel[2]) + ')'
+        return self.__pygame_color.__str__()
+
+    def __mul__(self, m):
+        return Arbapixel(self.__limit(self.r*m),
+                         self.__limit(self.g*m),
+                         self.__limit(self.b*m),
+                         self.__limit(self.a*m))
+
+    def get_color(self):
+        return self.__pygame_color
 
 if __name__ == '__main__':
     black1 = Arbapixel('red')
     black2 = Arbapixel(255, 0, 0)
-    print "{} = {} ? {}".format(black1.getColor(), black2.getColor(), black1 == black2)
+    print "{} = {} ? {}".format(black1, black2, black1 == black2)
 
     white1 = Arbapixel('white')
     white2 = Arbapixel('red') + Arbapixel('green') + Arbapixel('blue')
     white3 = Arbapixel(1, 1, 1)*255
-    print "{} = {} = {} ? {}".format(white1.getColor(), white2.getColor(), white3.getColor(),
-                                     white1 == white2 and white2==white3)
+    print "{} = {} = {} ? {}".format(white1, white2, white3, white1 == white2 and white2==white3)

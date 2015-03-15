@@ -36,23 +36,23 @@ class Grid(object):
 
     def render(self, screen, state):
         screen.lock()
-        # Draw vertical lines
-        for w in range(self.num_cells_wide):
-            pygame.draw.line(screen, self.color, (w*self.cell_width, 0), (w*self.cell_width, self.height))
-        # Draw horizontal lines
-        for h in range(self.num_cells_tall):
-            pygame.draw.line(screen, self.color, (0, h*self.cell_height), (self.width, h*self.cell_height), self.border_thickness)
         # Draw pixels
         if state:
             i = 0
             for w in range(state.get_width()):
                 for h in range(state.get_height()):
                     i = i+1
-                    pixel = state.get_pixel(h, w)
-                    screen.fill(pixel.getColor(), pygame.Rect(w*self.cell_width,
-                                                              h*self.cell_height,
-                                                              self.cell_width-self.border_thickness,
-                                                              self.cell_height-self.border_thickness))
+                    pixel = state.get_pixel(h, w).get_color()
+                    screen.fill(pixel, pygame.Rect(w*self.cell_width,
+                                                   h*self.cell_height,
+                                                   self.cell_width,
+                                                   self.cell_height))
+        # Draw vertical lines
+        for w in range(self.num_cells_wide):
+            pygame.draw.line(screen, self.color, (w*self.cell_width, 0), (w*self.cell_width, self.height), self.border_thickness)
+        # Draw horizontal lines
+        for h in range(self.num_cells_tall):
+            pygame.draw.line(screen, self.color, (0, h*self.cell_height), (self.width, h*self.cell_height), self.border_thickness)
         screen.unlock()
 
 
