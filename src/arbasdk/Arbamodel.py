@@ -23,14 +23,20 @@
 """
 
 from Arbapixel import *
-import copy
+from copy import deepcopy
+from itertools import product
 
 class Arbamodel(object):
     # line, column
     def __init__(self, width, height, *color):
         self.height = height
         self.width = width
-        self.state = [[Arbapixel(*color) if len(color)>0 else Arbapixel(0, 0, 0, 0) for j in range(width)] for i in range(height)]
+        self.state = [[Arbapixel(*color) if len(color)>0 else Arbapixel('black') for j in range(width)] for i in range(height)]
+        self.groups = {}
+        self.reverse_groups = [[None for j in range(width)] for i in range(height)]
+
+    def copy(self):
+        return deepcopy(self)
 
     def get_width(self):
         return self.width
@@ -43,11 +49,53 @@ class Arbamodel(object):
 
     def set_pixel(self, h, w, *color):
         self.state[h][w] = Arbapixel(*color)
+        self.delete_from_group([(h, w)])
+
+    def group_pixels(self, pixels, group_name, *color):
+        if not (isinstance(pixels, list) or isinstance(pixels, tuple)) and len(pixels)>0 and \
+            (isinstance(pixels[0], list) or isinstance(pixels[0], tuple) and len(pixels[0])==2):
+            raise Exception("[Arbamodel.create_groupe] Unexpected parameter type {}, must be a list of coordinates".format(type(pixels)))
+        pixel = Arbapixel(*color)
+        for h,w in pixels:
+            self.state[h][w] = pixel
+
+        # Remove pixels from a former group
+        self.delete_from_group(pixels)
+
+        if not self.groups.has_key(group_name):
+            self.groups[group_name] = set()
+        self.groups[group_name] = self.groups[group_name].union(map(tuple, pixels))
+        for h, w in pixels:
+            self.reverse_groups[h][w] = group_name
+
+    def set_group(self, group_name, *color):
+        h, w = next(iter(self.groups[group_name])) # raises a StopIteration if group is empty
+        self.state[h][w].set_color(*color)
+
+    def delete_from_group(self, pixels):
+        if not (isinstance(pixels, list) or isinstance(pixels, tuple)) and len(pixels)>0 and \
+        (isinstance(pixels[0], list) or isinstance(pixels[0], tuple) and len(pixels[0])==2):
+            raise Exception("[Arbamodel.delete_from_group] Unexpected parameter type {}, must be a list of coordinates".format(type(pixels)))
+
+        for h, w in pixels:
+            if self.reverse_groups[h][w]:
+                group_name = self.reverse_groups[h][w]
+                self.groups[group_name].remove((h, w))
+                self.reverse_groups[h][w] = None
+                # If group has no more pixel, delete it
+                if len(self.groups[group_name])==0:
+                    self.groups.pop(group_name)
+                # Copy a new instance of this pixel, apart from the group
+                self.state[h][w] = deepcopy(self.state[h][w])
+
+    def get_groups(self):
+        return self.groups
 
     def set_all(self, *color):
-        for w in range(self.width):
-            for h in range(self.height):
-                self.state[h][w] = Arbapixel(*color)
+        if not self.groups.has_key('all'):
+            self.group_pixels(list(product(range(self.height), range(self.width))), "all", *color)
+        else:
+            self.state[0][0].set_color(*color)
 
     def __add__(self, other):
         model = Arbamodel(self.width, self.height)
@@ -84,6 +132,9 @@ class Arbamodel(object):
         return model
 
 if __name__ == '__main__':
-    s1 = Arbamodel(100, 50, 255, 0, 0, 0)
-    s2 = Arbamodel(100, 50, 0, 0, 255, 128)
-    print s1+s2
+    m = Arbamodel(10, 10, 'black')
+    m.group_pixels(zip(range(10), range(10)), "my_red_pixels", 'red')
+    print m
+    m.delete_from_group([[0,0]])
+    m.set_group("my_red_pixels", "white")
+    print m

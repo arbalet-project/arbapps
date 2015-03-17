@@ -28,7 +28,15 @@ from pygame.color import Color
 class Arbapixel(object):
 
     def __init__(self, *args):
-        self.__pygame_color = Color(*args)
+        self.__set_pygame_color(*args)
+
+    def __set_pygame_color(self, *args):
+        if len(args)==1 and isinstance(args[0], Arbapixel): # Simulates a copy constructor
+            self.__pygame_color = args[0].get_color()
+        elif len(args)==1 and (isinstance(args[0], list) or isinstance(args[0], tuple)) and (len(args[0])==3 or len(args[0])==4):
+            self.__pygame_color = Color(*(args[0]))
+        else:
+            self.__pygame_color = Color(*args)  # Normal constructor
 
     def __limit(self, v):
         """
@@ -37,7 +45,7 @@ class Arbapixel(object):
         return int(max(0, min(255, v)))
 
     def __set__(self, instance, value):
-        self.__pygame_color = value
+        self.__set_pygame_color(value)
 
     def __getattr__(self, name):
         return getattr(self.__pygame_color, name)
@@ -71,6 +79,9 @@ class Arbapixel(object):
 
     def get_color(self):
         return self.__pygame_color
+
+    def set_color(self, *color):
+        self.__set_pygame_color(*color)
 
 if __name__ == '__main__':
     black1 = Arbapixel('red')
