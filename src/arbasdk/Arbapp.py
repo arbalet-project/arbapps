@@ -25,6 +25,15 @@
 
 from Arbalet import *
 import sys
+from threading import Thread
+
+class Keyboard(Thread):
+    def __init__(self):
+        self.setDaemon(True)
+
+    def run(self):
+        self.pressed_keys  = pygame.key.get_pressed()
+
 
 class Arbapp(object):
 
@@ -49,6 +58,12 @@ class Arbapp(object):
 
     def run(self):
         raise Exception("Arbapp.run() must be overidden")
+
+    def start(self):
+        try:
+            self.run()
+        finally:
+            self.close()
 
     def close(self, reason='unknown'):
         self.arbalet.close(reason)

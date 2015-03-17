@@ -58,4 +58,5 @@ class Example(Arbapp):
         time.sleep(1)
 
 # Actual call starting the program
-Example(width = 10, height = 15)
+e = Example(width = 10, height = 15)
+e.start()
