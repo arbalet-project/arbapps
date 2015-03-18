@@ -69,8 +69,14 @@ class Arbamodel(object):
             self.reverse_groups[h][w] = group_name
 
     def set_group(self, group_name, *color):
+        if (not self.groups.has_key(group_name)) and group_name=="all":
+            self.group_pixels(self.get_all_combinations(), "all", *color)
         h, w = next(iter(self.groups[group_name])) # raises a StopIteration if group is empty
         self.state[h][w].set_color(*color)
+
+    def get_group_pixel(self, group_name):
+        h, w = next(iter(self.groups[group_name]))
+        return self.state[h][w]
 
     def delete_from_group(self, pixels):
         if not (isinstance(pixels, list) or isinstance(pixels, tuple)) and len(pixels)>0 and \
@@ -90,6 +96,9 @@ class Arbamodel(object):
 
     def get_groups(self):
         return self.groups
+
+    def get_all_combinations(self):
+        return map(tuple, product(range(self.height), range(self.width)))
 
     def set_all(self, *color):
         if not self.groups.has_key('all'):
