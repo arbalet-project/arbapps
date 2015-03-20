@@ -26,7 +26,8 @@ from arbasdk.Arbamodel import Arbamodel
 from arbasdk.Arbapp import Arbapp
 from arbasdk.Arbapixel import Arbapixel
 from itertools import product
-from threading import Thread
+from threading import Thread, Semaphore
+from copy import deepcopy
 
 class ColorDemo(Arbapp):
 
@@ -35,6 +36,32 @@ class ColorDemo(Arbapp):
         self.model = Arbamodel(self.width, self.height)
         self.set_model(self.model)
         self.max_rate = 100  # Max refreshing rate in Hz
+        self.semaphore = Semaphore(self.width*self.height)  # Thread synchronization
+
+    def group_fade_colors(self, group_name, colors, duration, synchronized=None):
+        num_steps = min(int(round(self.max_rate*duration, 0)), 256)
+        #print num_steps, "steps for", duration, "sec"
+        pairs = zip(colors, colors[1:])
+        for color1, color2 in pairs:
+            if synchronized:
+                synchronized.acquire()
+            for v in range(num_steps):
+                col = Arbapixel(color1)*((num_steps-v)/float(num_steps)) + Arbapixel(color2)*(v/float(num_steps))
+                self.model.set_group(group_name, col)
+                time.sleep(duration/float(num_steps))
+            #print "# to", color2
+
+    def group_fade_colors_loop(self, group_name, colors, duration_transition, overall_duration, synchronized=None):
+        if colors[:-1]!=colors[0]:
+            colors = deepcopy(colors)
+            colors.append(colors[0])
+        t0 = time.time()
+        while time.time()-t0 < overall_duration:
+            self.group_fade_colors(group_name, colors, duration_transition, synchronized)
+
+
+# DEPRECATED
+
 
     def group_fade_up(self, group_name, duration, color):
         num_steps = min(int(round(self.max_rate*duration, 0)), 256)
@@ -59,6 +86,18 @@ class ColorDemo(Arbapp):
         t0 = time.time()
         while time.time()-t0<overall_time:
             self.group_fade_up_down(group_name, loop_time, color, fade_time)
+
+
+
+
+
+
+
+
+
+
+
+
 
     def all_color_wheel(self, overall_time, fading=True):
         # 6 transitions + 2 fades in overall_time seconds
@@ -94,13 +133,27 @@ class ColorDemo(Arbapp):
             t.join()
 
 
-
+    def living_pixels(self, colors, synchronized=None):
+        for w in range(self.width):
+            for h in range(self.height):
+                color = random.choice(colors)
+                self.model.group_pixels([[h, w]], str(h)+'-'+str(w), 'black')
+        threads = []
+        for w in range(self.width):
+            for h in range(self.height):
+                color = random.choice(colors)
+                speed = random.randrange(350, 700)/100.
+                t = Thread(None, self.group_fade_colors_loop, None, (str(h)+'-'+str(w), colors, speed, 60, synchronized))
+                t.start()
+                threads.append(t)
+        for t in threads:
+            t.join()
 
     def run(self):
         #self.all_color_wheel(5)
         #for combination in list(product([0, 128, 255], repeat=3))[1:]:
         #    self.all_fade_up_down("all", 0.7, combination)
-        self.random_flashing_pixels(['slateblue', 'gold', 'deeppink', 'peru', 'yellowgreen'])
+        self.living_pixels(['slateblue', 'gold', 'deeppink', 'peru', 'yellowgreen'])
         time.sleep(1)
 
 # Actual call starting the program
