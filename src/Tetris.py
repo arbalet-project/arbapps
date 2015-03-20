@@ -78,8 +78,8 @@ class Tetris(Arbapp):
     def game_over(self):
         return False
 
-    def draw_tetromino(self, tetromino, clear=False):
-        print "Pasting" if not clear else "Clearing", tetromino.type, "at place", tetromino.position
+    def draw_tetromino(self, tetromino):
+        #print "Pasting" if not clear else "Clearing", tetromino.type, "at place", tetromino.position
         for x, z in enumerate(tetromino.get_value()):
             for y, v in enumerate(z):
                 px = x + tetromino.position[0] # x-position of the pixel we are about to draw
@@ -87,17 +87,14 @@ class Tetris(Arbapp):
 
                 before_world = px<0
                 in_world = not before_world and px<self.height
-                touchdown = not clear and (not before_world and not in_world or in_world and self.grid[px][py]>0 and v)
+                touchdown = not before_world and not in_world or in_world and self.grid[px][py]>0 and v
 
                 if touchdown:
                     self.touchdown = True
                     # Restore the old grid before collision
                     self.grid = self.old_grid
-                elif in_world:
-                    if clear :
-                        self.grid[px][py] = 0
-                    elif self.grid[px][py]==0: # Don't overwrite a previous tetro and
-                        self.grid[px][py] = v
+                elif in_world and self.grid[px][py]==0: # Don't overwrite a previous tetro and
+                    self.grid[px][py] = v
 
 
 
@@ -106,12 +103,12 @@ class Tetris(Arbapp):
         self.touchdown = False
         tetro = Tetromino(0, self.width/2)
         while not self.touchdown:
-            self.draw_tetromino(tetro)
             self.old_grid = deepcopy(self.grid)
+            self.draw_tetromino(tetro)
             time.sleep(1./self.speed)
             self.update_view()
             if not self.touchdown:
-                self.draw_tetromino(tetro, True)
+                self.grid = self.old_grid
                 tetro.falldown()
 
 
@@ -133,5 +130,4 @@ class Tetris(Arbapp):
 
 # Actual call starting the program
 t = Tetris(width = 10, height = 15)
-t.run()
-t.close("Game over")
+t.start()
