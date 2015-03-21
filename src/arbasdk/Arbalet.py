@@ -22,8 +22,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-from Arbamodel import *
-from Arbasim import *
+from . Arbamodel import *
+from . Arbasim import *
+from . Arbalink import *
 
 class Arbalet(object):
     def __init__(self, simulation, hardware, width, height, factor_sim=30):
@@ -36,7 +37,8 @@ class Arbalet(object):
             self.arbasim = Arbasim(self.width, self.height, self.width*factor_sim, self.height*factor_sim)
 
         if self.hardware:
-            raise Exception("Arduino link not implemented")
+            self.arbalink = Arbalink('/dev/ttyACM1', 115200, 30) # TODO read from a config file
+
 
     def set_model(self, model):
         if self.simulation:
