@@ -27,26 +27,28 @@ from threading import Thread
 from serial import Serial, SerialException
 from sys import stderr
 from time import sleep, time
+from json import load
 
 class Arbalink(Thread):
-    def __init__(self, device, speed, rate=30, autorun=True):
+    def __init__(self, device, config_filename, rate=30, autorun=True):
         Thread.__init__(self)
         self.setDaemon(True)
         self.device = device
-        self.speed = speed
         self.serial = None
         self.model = None
         self.refresh_rate = rate
+
+        with open(config_filename, 'r') as f:
+            self.config = load(f)
 
         if autorun:
             self.start()
 
     def connect(self):
         try:
-            self.serial = Serial(self.device, self.speed)
+            self.serial = Serial(self.device, self.config['speed'])
         except Exception, e:
-            if self.verbose:
-                print >> stderr, "[Arbalink] Connection to {} at speed {} failed: {}".format(self.device, self.speed, e.message)
+            print >> stderr, "[Arbalink] Connection to {} at speed {} failed: {}".format(self.device, self.config['speed'], e.message)
             self.serial = None
             return False
         sleep(2)
@@ -67,7 +69,6 @@ class Arbalink(Thread):
     def set_model(self, arbamodel):
         self.model = arbamodel
 
-
     def close(self, reason='unknown'):
         self.running = False
         if self.serial:
@@ -79,17 +80,19 @@ class Arbalink(Thread):
         while(self.running):
             if self.serial and self.serial.isOpen():
                 if self.model:
-                    array = bytearray()
+                    array = bytearray(' '*(self.model.get_height()*self.model.get_width()*3))
                     for h in range(self.model.get_height()):
                         for w in range(self.model.get_width()):
-                            array.append(self.model.model[h][w].r)
-                            array.append(self.model.model[h][w].g)
-                            array.append(self.model.model[h][w].b)
+                            idx = self.config['mapping'][h][w]*3 # = mapping shift by 3 colors
+                            # an IndexError here on bytearray could mean that config file is wrong
+                            array[idx] = self.model.model[h][w].r
+                            array[idx+1] = self.model.model[h][w].g
+                            array[idx+2] = self.model.model[h][w].b
                     try:
-                        print "[Arbalink] Submitting new matrix"
+                        #print "[Arbalink] Submitting new matrix"
                         self.serial.write(array) # Write the whole rgb-matrix
                         feedback = self.serial.readline() # Wait Arduino's feedback
-                        print "[Arbalink] Feedback: ", feedback
+                        #print "[Arbalink] Feedback: ", feedback
                     except SerialException, e:
                         print e
                         self.connect_until(60)
@@ -98,7 +101,7 @@ class Arbalink(Thread):
             sleep(1./self.refresh_rate)
 
 if __name__ == '__main__':
-    link = Arbalink('/dev/ttyACM1', 115200, rate=30)
+    link = Arbalink('/dev/ttyACM1', 1000000, rate=30)
     link.start()
     for i in range(64):
         link.set_model(Arbamodel(10, 15, i, 0, 0))

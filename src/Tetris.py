@@ -45,7 +45,7 @@ class Tetromino(object):
              'l': [[4, 0],
                    [4, 0],
                    [4, 4]]}
-    colors = ['white', 'cyan', 'green', 'pink', 'yellow', 'orange']
+    colors = ['black', 'cyan', 'green', 'pink', 'yellow', 'orange']
 
 
     def rotate(self):

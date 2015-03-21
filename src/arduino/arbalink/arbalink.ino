@@ -54,7 +54,7 @@
 #define HEIGHT 15
 
 // Create an ledStrip object and specify the pin it will use.
-PololuLedStrip<5> ledStrip;
+PololuLedStrip<12> ledStrip;
 
 // Create a buffer for holding the colors (3 bytes per color).
 rgb_color colors[WIDTH*HEIGHT];
@@ -82,7 +82,7 @@ int readMatrix(int len) {
 
 void setup() {
   cleanup();
-  Serial.begin(115200);
+  Serial.begin(1000000);
 }
 
 void loop() {

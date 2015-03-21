@@ -37,7 +37,7 @@ class Arbalet(object):
             self.arbasim = Arbasim(self.width, self.height, self.width*factor_sim, self.height*factor_sim)
 
         if self.hardware:
-            self.arbalink = Arbalink('/dev/ttyACM1', 115200, 30) # TODO read from a config file
+            self.arbalink = Arbalink('/dev/ttyACM0', '../config/config150.cfg', 100)
 
 
     def set_model(self, model):
