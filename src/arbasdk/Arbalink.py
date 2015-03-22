@@ -30,10 +30,11 @@ from time import sleep, time
 from json import load
 
 class Arbalink(Thread):
-    def __init__(self, device, config_filename, rate=30, autorun=True):
+    def __init__(self, list_of_devices, config_filename, rate=30, autorun=True):
         Thread.__init__(self)
         self.setDaemon(True)
-        self.device = device
+        self.devices = list_of_devices
+        self.current_device = 0
         self.serial = None
         self.model = None
         self.refresh_rate = rate
@@ -45,11 +46,13 @@ class Arbalink(Thread):
             self.start()
 
     def connect(self):
+        device = self.devices[self.current_device]
         try:
-            self.serial = Serial(self.device, self.config['speed'])
+            self.serial = Serial(device, self.config['speed'])
         except Exception, e:
-            print >> stderr, "[Arbalink] Connection to {} at speed {} failed: {}".format(self.device, self.config['speed'], e.message)
+            print >> stderr, "[Arbalink] Connection to {} at speed {} failed: {}".format(device, self.config['speed'], e.message)
             self.serial = None
+            self.current_device = (self.current_device+1) % len(self.devices)
             return False
         sleep(2)
         return True
