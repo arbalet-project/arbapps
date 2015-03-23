@@ -57,13 +57,13 @@ class Arbapp(object):
         self.arbalet.set_model(model)
 
     def run(self):
-        raise Exception("Arbapp.run() must be overidden")
+        raise NotImplementedError("Arbapp.run() must be overidden")
 
     def start(self):
         try:
             self.run()
         finally:
-            self.close()
+            self.close("Program naturally ended")
 
     def close(self, reason='unknown'):
         self.arbalet.close(reason)

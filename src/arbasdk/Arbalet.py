@@ -27,17 +27,18 @@ from . Arbasim import *
 from . Arbalink import *
 
 class Arbalet(object):
-    def __init__(self, simulation, hardware, width, height, factor_sim=30):
+    def __init__(self, simulation, hardware, width, height, diminution=1, factor_sim=30):
         self.simulation = simulation
         self.hardware = hardware
         self.width = width
         self.height = height
+        self.diminution = diminution
 
         if self.simulation:
             self.arbasim = Arbasim(self.width, self.height, self.width*factor_sim, self.height*factor_sim)
 
         if self.hardware:
-            self.arbalink = Arbalink('/dev/ttyACM0', '../config/config150.cfg', 100)
+            self.arbalink = Arbalink('../config/config150.cfg', diminution=self.diminution, rate=100)
 
 
     def set_model(self, model):

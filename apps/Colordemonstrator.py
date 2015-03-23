@@ -19,7 +19,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
-
+import sys
+sys.path.append('../src/')
 import time
 import random
 from arbasdk.Arbamodel import Arbamodel
@@ -150,6 +151,7 @@ class ColorDemo(Arbapp):
             t.join()
 
     def run(self):
+        time.sleep(2)
         #self.all_color_wheel(5)
         #for combination in list(product([0, 128, 255], repeat=3))[1:]:
         #    self.all_fade_up_down("all", 0.7, combination)

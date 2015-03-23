@@ -30,14 +30,14 @@ from time import sleep, time
 from json import load
 
 class Arbalink(Thread):
-    def __init__(self, list_of_devices, config_filename, rate=30, autorun=True):
+    def __init__(self, config_filename, rate=30, diminution=1, autorun=True):
         Thread.__init__(self)
         self.setDaemon(True)
-        self.devices = list_of_devices
         self.current_device = 0
         self.serial = None
         self.model = None
         self.refresh_rate = rate
+        self.diminution = diminution
 
         with open(config_filename, 'r') as f:
             self.config = load(f)
@@ -46,13 +46,13 @@ class Arbalink(Thread):
             self.start()
 
     def connect(self):
-        device = self.devices[self.current_device]
+        device = self.config['devices'][self.current_device]
         try:
             self.serial = Serial(device, self.config['speed'])
         except Exception, e:
             print >> stderr, "[Arbalink] Connection to {} at speed {} failed: {}".format(device, self.config['speed'], e.message)
             self.serial = None
-            self.current_device = (self.current_device+1) % len(self.devices)
+            self.current_device = (self.current_device+1) % len(self.config['devices'])
             return False
         sleep(2)
         return True
@@ -78,6 +78,12 @@ class Arbalink(Thread):
             self.serial.close()
             self.serial = None
 
+    def __limit(self, v):
+        """
+        Limitator avoiding overflows and underflows
+        """
+        return int(max(0, min(255, v)))
+
     def run(self):
         self.running = True
         while(self.running):
@@ -88,9 +94,9 @@ class Arbalink(Thread):
                         for w in range(self.model.get_width()):
                             idx = self.config['mapping'][h][w]*3 # = mapping shift by 3 colors
                             # an IndexError here on bytearray could mean that config file is wrong
-                            array[idx] = self.model.model[h][w].r
-                            array[idx+1] = self.model.model[h][w].g
-                            array[idx+2] = self.model.model[h][w].b
+                            array[idx] = self.__limit(self.model.model[h][w].r*self.diminution)
+                            array[idx+1] = self.__limit(self.model.model[h][w].g*self.diminution)
+                            array[idx+2] = self.__limit(self.model.model[h][w].b*self.diminution)
                     try:
                         #print "[Arbalink] Submitting new matrix"
                         self.serial.write(array) # Write the whole rgb-matrix
