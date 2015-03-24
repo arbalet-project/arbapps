@@ -27,6 +27,8 @@ from copy import deepcopy
 from itertools import product
 from threading import Lock
 
+__all__ = ['Arbamodel']
+
 class Arbamodel(object):
     # line, column
     def __init__(self, width, height, *color):

@@ -27,6 +27,8 @@ from Arbalet import *
 import sys
 from threading import Thread
 
+__all__ = ['Arbapp']
+
 class Keyboard(Thread):
     def __init__(self):
         self.setDaemon(True)

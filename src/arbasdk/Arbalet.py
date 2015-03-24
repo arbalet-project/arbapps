@@ -26,6 +26,8 @@ from . Arbamodel import *
 from . Arbasim import *
 from . Arbalink import *
 
+__all__ = ['Arbalet']
+
 class Arbalet(object):
     def __init__(self, simulation, hardware, width, height, diminution=1, factor_sim=30):
         self.simulation = simulation

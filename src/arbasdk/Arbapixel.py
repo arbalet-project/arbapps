@@ -23,6 +23,8 @@
 """
 from pygame.color import Color
 
+__all__ = ['Arbapixel']
+
 # This class has a hack to inherit from pygame.Color with getattr since its C
 # implementation does not allow to inherit properly
 class Arbapixel(object):

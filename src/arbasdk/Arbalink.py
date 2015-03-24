@@ -29,6 +29,8 @@ from sys import stderr
 from time import sleep, time
 from json import load
 
+__all__ = ['Arbalink']
+
 class Arbalink(Thread):
     def __init__(self, config_filename, rate=30, diminution=1, autorun=True):
         Thread.__init__(self)

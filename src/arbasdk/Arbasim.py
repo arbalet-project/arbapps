@@ -28,6 +28,8 @@ import threading
 import time
 from Grid import *
 
+__all__ = ['Arbasim']
+
 class Arbasim(threading.Thread):
     def __init__(self, arbalet_width, arbalet_height, sim_width, sim_height, rate=30, autorun=True):
         """
