@@ -23,9 +23,7 @@ import sys
 sys.path.append('../src/')
 import time
 import random
-from arbasdk.Arbamodel import Arbamodel
-from arbasdk.Arbapp import Arbapp
-from arbasdk.Arbapixel import Arbapixel
+from arbasdk import Arbamodel, Arbapp, Arbapixel
 from itertools import product
 from threading import Thread, Semaphore
 from copy import deepcopy

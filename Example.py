@@ -19,10 +19,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
-
+import sys
+sys.path.append('../src/')
 import time
-from arbasdk.Arbamodel import Arbamodel
-from arbasdk.Arbapp import Arbapp
+from arbasdk import Arbamodel, Arbapp
 
 class Example(Arbapp):
     def run(self):
