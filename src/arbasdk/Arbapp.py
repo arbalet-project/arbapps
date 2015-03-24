@@ -46,7 +46,7 @@ class Arbapp(object):
         opts = self.readopts(sys.argv)
         self.arbalet = Arbalet("simulation" in opts or "s" in opts or len(opts)==0,
                                "hardware" in opts or "a" in opts,
-                               width, height)
+                               width, height, 1)
         #self.run()
         #self.close("Program naturally ended")
 

@@ -27,8 +27,7 @@ import numpy
 from copy import deepcopy
 
 import pygame
-from arbasdk.Arbamodel import Arbamodel
-from arbasdk.Arbapp import Arbapp
+from arbasdk import Arbamodel, Arbapp
 
 class Tetromino(object):
     types = {'i' : [[1],
