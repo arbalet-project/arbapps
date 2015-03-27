@@ -78,38 +78,45 @@ class Tetris(Arbapp):
         self.speed = 2 # Speed of tetromino fall in Hertz
         self.playing = True
         self.tetromino = None
-        self.reset_commands()
         pygame.joystick.init()
 
-    def reset_commands(self):
-        self.commands = {"flip": False,
-                         "horizontal": 0,
-        }
-        self.new_event = False
-
     def process_events(self):
+        """
+        Sleep until the next step and process user events: game commands + exit
+        :return: True if user asked to abort sleeping (accelerate or quit), False otherwise
+        """
+        self.new_event = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.playing = False
+                return True
             # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN JOYBUTTONUP JOYHATMOTION
             if event.type == pygame.JOYBUTTONDOWN:
-                self.commands['flip'] = True
+                self.tetromino.rotate()
                 self.new_event = True
 
         if pygame.joystick.get_count()>0:
             joystick = pygame.joystick.Joystick(0)
             joystick.init()
-
             hat = joystick.get_hat(0)
-            self.commands['horizontal'] = hat[0]
 
-        if self.commands ['horizontal']!=0:
+        if hat[0]!=0 or hat[1]!=0:
             self.new_event = True
+
+        if self.new_event:
+            self.tetromino.update_position(0, hat[0])
+            self.old_grid_empty = deepcopy(self.grid)
+            self.draw_tetromino()
+            self.old_grid_filled = deepcopy(self.grid)
+            self.update_view()
+            self.grid = self.old_grid_empty
+
+        return hat[1]!=0   # Return True in case of speed increasing request, False otherwise
 
     def game_over(self):
         return not self.playing
 
-    def draw_tetromino(self, clear=False):
+    def draw_tetromino(self):
         #print "Pasting" if not clear else "Clearing", tetromino.type, "at place", tetromino.position
         for x, z in enumerate(self.tetromino.get_value()):
             for y, v in enumerate(z):
@@ -120,38 +127,35 @@ class Tetris(Arbapp):
                 in_world = not before_world and px<self.height
                 touchdown = not before_world and not in_world or in_world and self.grid[px][py]>0 and v
 
-                if (not clear) and touchdown:
+                if touchdown:
                     self.touchdown = True
-                    self.grid = self.old_grid
                     self.tetromino.falldown(True)
-                    self.draw_tetromino(True)
                     return
-                elif in_world and (clear or self.grid[px][py]==0): # Don't overwrite a previous tetro and
+                elif in_world and self.grid[px][py]==0: # Don't overwrite a previous tetro and
                     self.grid[px][py] = v
 
     def wait_for_timeout_or_event(self):
         t0 = time.time()
         while time.time()-t0 < 1./self.speed:
-            self.reset_commands()
-            time.sleep(0.1)
-            self.process_events()
-            if self.new_event:
-                self.tetromino.update_position(0, self.commands['horizontal'])
-                self.grid = self.old_grid
-                self.draw_tetromino()
-                self.update_view()
+            time.sleep(0.075)
+            if self.process_events():
+                return
+
 
     def new_tetromino(self):
         self.touchdown = False
         self.tetromino = Tetromino(0, self.width/2)
         while not self.touchdown:
-            self.old_grid = deepcopy(self.grid)
+            self.old_grid_empty = deepcopy(self.grid)
             self.draw_tetromino()
-            self.update_view()
-            self.wait_for_timeout_or_event()
-            if not self.touchdown:
-                self.grid = self.old_grid
+            if self.touchdown:
+                self.grid = self.old_grid_filled
+            else:
+                self.old_grid_filled = deepcopy(self.grid)
+                self.update_view()
+                self.grid = self.old_grid_empty
                 self.tetromino.falldown()
+            self.wait_for_timeout_or_event()
 
 
     def update_view(self):
