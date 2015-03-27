@@ -47,14 +47,14 @@ class Tetromino(object):
     colors = ['black', 'cyan', 'green', 'pink', 'yellow', 'orange']
 
     def update_position(self, x, y):
-        self.position[0] += x
-        self.position[1] += y
+        self.position[0] = max(min(self.position[0]+x, self.height-1), 0)
+        self.position[1] = max(min(self.position[1]+y, self.width-len(self.get_value()[0])), 0)
 
     def rotate(self):
         self.rotated = not self.rotated
 
-    def falldown(self, cancel=False):
-        self.position = [self.position[0]-1 if cancel else self.position[0]+1, self.position[1]]
+    def falldown(self):
+        self.position = [self.position[0]+1, self.position[1]]
 
     def get_value(self):
         if self.rotated:
@@ -62,10 +62,12 @@ class Tetromino(object):
         else:
             return numpy.array(self.types[self.type], dtype=int)
 
-    def __init__(self, px, py):
+    def __init__(self, px, py, height, width):
         self.type = random.choice(self.types.keys())
         self.rotated = False
         self.position = [px-len(self.get_value())+1, py]
+        self.height = height
+        self.width = width
 
 class Tetris(Arbapp):
 
@@ -103,13 +105,39 @@ class Tetris(Arbapp):
         if hat[0]!=0 or hat[1]!=0:
             self.new_event = True
 
+        #    self.old_grid_empty = deepcopy(self.grid)
+        #    self.draw_tetromino()
+        #    if self.touchdown:
+        #        self.grid = self.old_grid_filled
+        #    else:
+        #        self.old_grid_filled = deepcopy(self.grid)
+        #        self.update_view()
+        #        self.grid = self.old_grid_empty
+        #        self.tetromino.falldown()
+
         if self.new_event:
+            old_position = deepcopy(self.tetromino.position)
             self.tetromino.update_position(0, hat[0])
             self.old_grid_empty = deepcopy(self.grid)
+            print "before draw1", self.grid
             self.draw_tetromino()
-            self.old_grid_filled = deepcopy(self.grid)
-            self.update_view()
-            self.grid = self.old_grid_empty
+            print "after draw1", self.grid
+            if self.touchdown and hat[0]!=0:            # Touch left/right
+                print "touch lr", self.grid
+                self.tetromino.position = old_position  # We cancel the last move left/right
+                self.grid = self.old_grid_empty         # We remove the collisionning tetro
+                #self.draw_tetromino()                   # And redraw
+                print "after draw2missing", self.grid
+                self.touchdown = False                  # This is not a real touchdown, cancel it
+            elif self.touchdown:                        # Touch down
+                print "down", self.grid
+                self.grid = self.old_grid_filled        # We restore the last pose of the tetro before touching down
+            else:
+                print "notouch", self.grid
+                self.old_grid_filled = deepcopy(self.grid)
+                self.update_view()
+                self.grid = self.old_grid_empty
+        print "leaving", self.grid
 
         return hat[1]!=0   # Return True in case of speed increasing request, False otherwise
 
@@ -118,6 +146,7 @@ class Tetris(Arbapp):
 
     def draw_tetromino(self):
         #print "Pasting" if not clear else "Clearing", tetromino.type, "at place", tetromino.position
+        self.touchdown = False
         for x, z in enumerate(self.tetromino.get_value()):
             for y, v in enumerate(z):
                 px = x + self.tetromino.position[0] # x-position of the pixel we are about to draw
@@ -129,25 +158,26 @@ class Tetris(Arbapp):
 
                 if touchdown:
                     self.touchdown = True
-                    self.tetromino.falldown(True)
                     return
                 elif in_world and self.grid[px][py]==0: # Don't overwrite a previous tetro and
                     self.grid[px][py] = v
 
-    def wait_for_timeout_or_event(self):
+    def wait_for_timeout_or_event(self, allow_events=True):
         t0 = time.time()
         while time.time()-t0 < 1./self.speed:
-            time.sleep(0.075)
-            if self.process_events():
+            time.sleep(0.085)
+            if allow_events and self.process_events():
                 return
 
 
     def new_tetromino(self):
         self.touchdown = False
-        self.tetromino = Tetromino(0, self.width/2)
+        self.tetromino = Tetromino(0, self.width/2, self.height, self.width)
+        print "before new", self.grid
         while not self.touchdown:
             self.old_grid_empty = deepcopy(self.grid)
             self.draw_tetromino()
+            print "after draw new", self.grid
             if self.touchdown:
                 self.grid = self.old_grid_filled
             else:
@@ -155,7 +185,8 @@ class Tetris(Arbapp):
                 self.update_view()
                 self.grid = self.old_grid_empty
                 self.tetromino.falldown()
-            self.wait_for_timeout_or_event()
+            self.wait_for_timeout_or_event(not self.touchdown)  # In case of touchdown do not modify this tetro again
+                                                                # so we disable events
 
 
     def update_view(self):
@@ -168,8 +199,7 @@ class Tetris(Arbapp):
         while not self.game_over():
             if not False:#self.pressed_keys[pygame.K_ESCAPE]:
                 self.new_tetromino()
-                print "TOUCHDOWN"
-                #time.sleep(1)
+                time.sleep(0.5)
             else:
                 break
 
