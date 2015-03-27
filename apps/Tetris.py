@@ -25,7 +25,6 @@ import time
 import random
 import numpy
 from copy import deepcopy
-
 import pygame
 from arbasdk import Arbamodel, Arbapp
 
@@ -78,23 +77,44 @@ class Tetris(Arbapp):
         self.set_model(self.model)
         self.speed = 2 # Speed of tetromino fall in Hertz
         self.playing = True
-        self.commands = {"flip": False,
-                         "hozizontal": 0,
-                         "vertical":0,
-        }
-
+        self.tetromino = None
+        self.reset_commands()
         pygame.joystick.init()
 
+    def reset_commands(self):
+        self.commands = {"flip": False,
+                         "horizontal": 0,
+        }
+        self.new_event = False
+
+    def process_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.playing = False
+            # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN JOYBUTTONUP JOYHATMOTION
+            if event.type == pygame.JOYBUTTONDOWN:
+                self.commands['flip'] = True
+                self.new_event = True
+
+        if pygame.joystick.get_count()>0:
+            joystick = pygame.joystick.Joystick(0)
+            joystick.init()
+
+            hat = joystick.get_hat(0)
+            self.commands['horizontal'] = hat[0]
+
+        if self.commands ['horizontal']!=0:
+            self.new_event = True
 
     def game_over(self):
         return not self.playing
 
-    def draw_tetromino(self, tetromino, clear=False):
+    def draw_tetromino(self, clear=False):
         #print "Pasting" if not clear else "Clearing", tetromino.type, "at place", tetromino.position
-        for x, z in enumerate(tetromino.get_value()):
+        for x, z in enumerate(self.tetromino.get_value()):
             for y, v in enumerate(z):
-                px = x + tetromino.position[0] # x-position of the pixel we are about to draw
-                py = y + tetromino.position[1] # y-position of the pixel we are about to draw
+                px = x + self.tetromino.position[0] # x-position of the pixel we are about to draw
+                py = y + self.tetromino.position[1] # y-position of the pixel we are about to draw
 
                 before_world = px<0
                 in_world = not before_world and px<self.height
@@ -103,49 +123,35 @@ class Tetris(Arbapp):
                 if (not clear) and touchdown:
                     self.touchdown = True
                     self.grid = self.old_grid
-                    tetromino.falldown(True)
-                    self.draw_tetromino(tetromino, True)
+                    self.tetromino.falldown(True)
+                    self.draw_tetromino(True)
                     return
                 elif in_world and (clear or self.grid[px][py]==0): # Don't overwrite a previous tetro and
                     self.grid[px][py] = v
 
-
-    def process_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: # If user clicked close
-                self.playing = False # Flag that we are done so we exit this loop
-            print "EVENT"
-            # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN JOYBUTTONUP JOYHATMOTION
-            if event.type == pygame.JOYBUTTONDOWN:
-                print "DOWN"
-                self.commands['flip'] = True
-
-        if pygame.joystick.get_count()>0:
-            joystick = pygame.joystick.Joystick(0)
-            joystick.init()
-
-            hat = joystick.get_hat(0)
-            self.commands['horizontal'] = -abs(hat[1])
-            self.commands['vertical'] = hat[0]
-
-
+    def wait_for_timeout_or_event(self):
+        t0 = time.time()
+        while time.time()-t0 < 1./self.speed:
+            self.reset_commands()
+            time.sleep(0.1)
+            self.process_events()
+            if self.new_event:
+                self.tetromino.update_position(0, self.commands['horizontal'])
+                self.grid = self.old_grid
+                self.draw_tetromino()
+                self.update_view()
 
     def new_tetromino(self):
         self.touchdown = False
-        tetro = Tetromino(0, self.width/2)
+        self.tetromino = Tetromino(0, self.width/2)
         while not self.touchdown:
-            self.process_events()
             self.old_grid = deepcopy(self.grid)
-            self.draw_tetromino(tetro)
+            self.draw_tetromino()
             self.update_view()
-            tetro.update_position(self.commands['horizontal'], self.commands['vertical'])
-            if(self.commands['flip']):
-                tetro.rotate()
-                self.commands['flip'] = False
-            time.sleep(1./self.speed)
+            self.wait_for_timeout_or_event()
             if not self.touchdown:
                 self.grid = self.old_grid
-                tetro.falldown()
+                self.tetromino.falldown()
 
 
     def update_view(self):
@@ -159,13 +165,10 @@ class Tetris(Arbapp):
             if not False:#self.pressed_keys[pygame.K_ESCAPE]:
                 self.new_tetromino()
                 print "TOUCHDOWN"
-                time.sleep(1)
+                #time.sleep(1)
             else:
                 break
 
-
-import traceback
-# Actual call starting the program
 t = Tetris(width = 10, height = 15)
 t.start()
 
