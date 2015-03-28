@@ -80,6 +80,7 @@ class Tetris(Arbapp):
         self.set_model(self.model)
         self.speed = 2 # Speed of tetromino fall in Hertz
         self.last_event = 0
+        self.score = 0
         self.playing = True
         self.tetromino = None
         pygame.joystick.init()
@@ -96,10 +97,8 @@ class Tetris(Arbapp):
                 return True
             # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN JOYBUTTONUP JOYHATMOTION
             if event.type == pygame.JOYBUTTONDOWN:
-                print "ROTATE"
                 self.tetromino.rotate()
                 self.new_event = True
-                print "################################################################################################"
 
         if pygame.joystick.get_count()>0:
             joystick = pygame.joystick.Joystick(0)
@@ -135,7 +134,6 @@ class Tetris(Arbapp):
         return not self.playing
 
     def draw_tetromino(self):
-        #print "Pasting" if not clear else "Clearing", tetromino.type, "at place", tetromino.position
         self.touchdown = False
         for x, z in enumerate(self.tetromino.get_value()):
             for y, v in enumerate(z):
@@ -164,26 +162,22 @@ class Tetris(Arbapp):
         Browse the grid and check for full lines. If lines are found they are deleted.
         :return: The number of deleted lines
         """
-
         def __delete_line(line):
-            print "deleting", line
             for l in range(line, 1, -1):
                 for w in range(self.width):
                     self.grid[l][w] = self.grid[l-1][w]
-                print 'self.grid[', l, '][w] = self.grid[', l-1, '][w]'
 
         lines = []
         for h in range(self.height):
-            print "h", h
             full = True
             for w in range(self.width):
-                print "w", w
                 if self.grid[h][w]==0:
-                    print "not full"
                     full = False
                     break
             if full:
                 __delete_line(h)
+                lines.append(h)
+        return len(lines)
 
 
     def new_tetromino(self):
@@ -219,11 +213,12 @@ class Tetris(Arbapp):
         while self.playing:
             if self.new_tetromino()==1:
                 print "GAME OVER"
+                print "You scored", self.score
                 break
             else:
                 time.sleep(0.5)
-                print self.grid
-                self.check_and_delete_full_lines()
+                lines = self.check_and_delete_full_lines()
+                self.score += lines*lines
 
 
 t = Tetris(width = 10, height = 15)
