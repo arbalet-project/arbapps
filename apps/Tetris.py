@@ -78,7 +78,7 @@ class Tetris(Arbapp):
         self.old_grid = deepcopy(self.grid)
         self.model = Arbamodel(width, height)
         self.set_model(self.model)
-        self.speed = 0.1 # Speed of tetromino fall in Hertz
+        self.speed = 2 # Speed of tetromino fall in Hertz
         self.last_event = 0
         self.playing = True
         self.tetromino = None
@@ -159,10 +159,41 @@ class Tetris(Arbapp):
             if allow_events and self.process_events():
                 return
 
+    def check_and_delete_full_lines(self):
+        """
+        Browse the grid and check for full lines. If lines are found they are deleted.
+        :return: The number of deleted lines
+        """
+
+        def __delete_line(line):
+            print "deleting", line
+            for l in range(line, 1, -1):
+                for w in range(self.width):
+                    self.grid[l][w] = self.grid[l-1][w]
+                print 'self.grid[', l, '][w] = self.grid[', l-1, '][w]'
+
+        lines = []
+        for h in range(self.height):
+            print "h", h
+            full = True
+            for w in range(self.width):
+                print "w", w
+                if self.grid[h][w]==0:
+                    print "not full"
+                    full = False
+                    break
+            if full:
+                __delete_line(h)
+
 
     def new_tetromino(self):
+        """
+        Brings a new tetromino in the scene and make it falling until touchdown
+        :return: The number of steps before touchdown (1 step only = gameover)
+        """
         self.touchdown = False
         self.tetromino = Tetromino(0, self.width/2, self.height, self.width)
+        steps = 0
         while not self.touchdown:
             self.old_grid_empty = deepcopy(self.grid)
             self.draw_tetromino()
@@ -175,6 +206,8 @@ class Tetris(Arbapp):
                 self.tetromino.falldown()
             self.wait_for_timeout_or_event(not self.touchdown)  # In case of touchdown do not modify this tetro again
                                                                 # so we disable events
+            steps += 1
+        return steps
 
 
     def update_view(self):
@@ -183,13 +216,15 @@ class Tetris(Arbapp):
                 self.model.set_pixel(h, w, Tetromino.colors[self.grid[h][w]])
 
     def run(self):
-
-        while not self.game_over():
-            if not False:#self.pressed_keys[pygame.K_ESCAPE]:
-                self.new_tetromino()
-                time.sleep(0.5)
-            else:
+        while self.playing:
+            if self.new_tetromino()==1:
+                print "GAME OVER"
                 break
+            else:
+                time.sleep(0.5)
+                print self.grid
+                self.check_and_delete_full_lines()
+
 
 t = Tetris(width = 10, height = 15)
 t.start()
