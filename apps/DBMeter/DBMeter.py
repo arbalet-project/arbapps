@@ -31,7 +31,7 @@ import pygame, pyaudio, audioop, math, wave, time
 class DBMeter(Arbapp):
     def __init__(self, height, width, file, with_sound=True, invert=False):
         Arbapp.__init__(self, width, height)
-        self.chunk = 1024
+        self.chunk = 4*1024
         self.with_sound = with_sound
         self.model = Arbamodel(width, height, 'black')
         self.set_model(self.model)
@@ -48,14 +48,14 @@ class DBMeter(Arbapp):
         self.levels = []
 
         ##### Fourier related attributes
-        self.num_bands = self.height
+        self.num_bands = 12 #self.height
         self.range_db = self.width
-        self.fouriers_per_second = 12 # Frames per second
+        self.fouriers_per_second = 24 # Frames per second
         self.fourier_spread = 1.0/self.fouriers_per_second
         self.fourier_width = self.fourier_spread
         self.fourier_width_index = self.fourier_width * float(self.file.getframerate())
         self.sample_size = self.fourier_width_index
-        self.sample_size = 600 # TODO HACK, sample size too high!!
+        #self.sample_size = 600 # TODO HACK, sample size too high!!
 
         ##### Color rendering
         self.colors = ['yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow',
@@ -89,7 +89,6 @@ class DBMeter(Arbapp):
             hiFreq = int((self.file.getframerate()/2) / float(2 ** ((self.num_bands-1) - band)))
             lowBound = int(self.freqToIndex(lowFreq))
             hiBound = int(self.freqToIndex(hiFreq))
-            print "low/high", lowBound, hiBound
             for j in range(lowBound, hiBound):
                 avg += fft_array[j]
             avg /= (hiBound - lowBound + 1)
@@ -112,15 +111,15 @@ class DBMeter(Arbapp):
 
     def draw_bars(self):
         for w in range(self.width):
-            for h in range(self.height):
-                self.model.set_pixel(h, w, self.colors[w] if w < int(self.averages[h]*self.width/5000) else 'black')
+            for h in range(self.num_bands):
+                self.model.set_pixel(h, w, self.colors[w] if w < int(self.averages[h]*self.width/1000) else 'black')
 
     def run(self):
         try:
             data = self.file.readframes(self.chunk)
             last_update = time.time()
             while data != '':
-                if time.time()-last_update > 1./self.fft_display_rate:
+                if True: #time.time()-last_update > 1./self.fft_display_rate:
                     mono_data = audioop.tomono(data, self.file.getsampwidth(), 0.5, 0.5)
                     local_max_level = audioop.max(mono_data, self.file.getsampwidth())
                     local_dB = int(20*(math.log10(local_max_level/self.max_level)))
@@ -145,7 +144,10 @@ class DBMeter(Arbapp):
 
 
 if __name__=='__main__':
-    dbm = DBMeter(15, 10, 'Nytrogen_-_Nytrogen_-_Jupiter.wav', True)
+    dbm = DBMeter(15, 10, 'Spectrum.wav', True)
+    #dbm = DBMeter(15, 10, 'Love_you.wav', True)
+    #dbm = DBMeter(15, 10, 'Nytrogen_-_Nytrogen_-_Jupiter.wav', True)
+    #dbm = DBMeter(15, 10, 'Lion.wav', True)
     #dbm = DBMeter(15, 10, 'Silence.wav', False)
 
     dbm.start()
