@@ -25,7 +25,7 @@ sys.path.append('../../src/')
 import numpy
 from pylab import *
 from arbasdk import Arbamodel, Arbapp
-import pygame, pyaudio, audioop, math, wave
+import pygame, pyaudio, audioop, math, wave, time
 
 
 class DBMeter(Arbapp):
@@ -33,6 +33,8 @@ class DBMeter(Arbapp):
         Arbapp.__init__(self, width, height)
         self.chunk = 1024
         self.with_sound = with_sound
+        self.model = Arbamodel(width, height, 'black')
+        self.set_model(self.model)
 
         self.file = wave.open(file, 'rb')
         if self.with_sound:
@@ -58,6 +60,7 @@ class DBMeter(Arbapp):
         ##### Color rendering
         self.colors = ['yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow',
                        'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow',] # We should have as colors as bands # TODo: auto-colors
+        self.fft_display_rate = 24  # Rate of Fourier transforms rendering in Hz
 
     ############################################# Fourier-related methods #############################################
     def fft(self, sample):
@@ -107,16 +110,28 @@ class DBMeter(Arbapp):
         return index
     ###################################################################################################################
 
+    def draw_bars(self):
+        for w in range(self.width):
+            for h in range(self.height):
+                self.model.set_pixel(h, w, self.colors[w] if w < int(self.averages[h]*self.width/5000) else 'black')
+
     def run(self):
         try:
             data = self.file.readframes(self.chunk)
+            last_update = time.time()
             while data != '':
-                mono_data = audioop.tomono(data, self.file.getsampwidth(), 0.5, 0.5)
-                local_max_level = audioop.max(mono_data, self.file.getsampwidth())
-                local_dB = int(20*(math.log10(local_max_level/self.max_level)))
+                if time.time()-last_update > 1./self.fft_display_rate:
+                    mono_data = audioop.tomono(data, self.file.getsampwidth(), 0.5, 0.5)
+                    local_max_level = audioop.max(mono_data, self.file.getsampwidth())
+                    local_dB = int(20*(math.log10(local_max_level/self.max_level)))
+                    self.levels.append(local_dB)
+                    self.fft(mono_data)
+                    self.draw_bars()
 
-                self.levels.append(local_dB)
-                self.fft(mono_data)
+                    if not self.with_sound:
+                        plot(self.averages)
+                        show()
+                    last_update = time.time()
 
                 if self.with_sound:
                     self.stream.write(data)
@@ -127,12 +142,10 @@ class DBMeter(Arbapp):
                 self.stream.close()
                 self.pyaudio.terminate()
 
-        if not self.with_sound:
-            plot(self.levels)
-            show()
+
 
 if __name__=='__main__':
-    dbm = DBMeter(15, 10, 'Nytrogen_-_Nytrogen_-_Jupiter.wav', False)
+    dbm = DBMeter(15, 10, 'Nytrogen_-_Nytrogen_-_Jupiter.wav', True)
     #dbm = DBMeter(15, 10, 'Silence.wav', False)
 
     dbm.start()
