@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 """
     Arbalet - ARduino-BAsed LEd Table
-    Decibel-Meter for Audio files
-    Spectrum analysis based on https://github.com/n00bsys0p/python-visualiser
+    Spectrum Analyzer for Audio files
 
     Copyright (C) 2015 Yoan Mollard <yoan@konqifr.fr>
 
@@ -29,9 +28,10 @@ import pygame, pyaudio, audioop, math, wave, time
 
 
 class DBMeter(Arbapp):
-    def __init__(self, height, width, file, with_sound=True, invert=False):
+    def __init__(self, height, width, file, with_sound=True, vertical=True):
         Arbapp.__init__(self, width, height)
         self.chunk = 4*1024
+        self.vertical = vertical
         self.with_sound = with_sound
         self.model = Arbamodel(width, height, 'black')
         self.set_model(self.model)
@@ -48,14 +48,10 @@ class DBMeter(Arbapp):
         self.levels = []
 
         ##### Fourier related attributes
-        self.num_bands = 12 #self.height
-        self.range_db = self.width
-        self.fouriers_per_second = 24 # Frames per second
-        self.fourier_spread = 1.0/self.fouriers_per_second
-        self.fourier_width = self.fourier_spread
-        self.fourier_width_index = self.fourier_width * float(self.file.getframerate())
-        self.sample_size = self.fourier_width_index
-        #self.sample_size = 600 # TODO HACK, sample size too high!!
+        if self.vertical:
+            self.num_bands = self.width
+        else:
+            self.num_bands = 11 # TODO 12 bands and more generate <10Hz bands
 
         ##### Color rendering
         self.colors = ['yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow',
@@ -72,47 +68,33 @@ class DBMeter(Arbapp):
             return struct.unpack('<h', string)[0] # Convert little-endian char into int
 
         sample_range = map(str_to_int, list(chunks(sample, self.file.getsampwidth())))
-        fft_data = abs(numpy.fft.fft(sample_range))
-        # Normalise the data a second time, to make numbers sensible
-        fft_data *= ((2**.5)/self.chunk)
-        self.averages = self.average_fft_bands(fft_data)
+        fft_data = abs(numpy.fft.rfft(sample_range)) # real fft gives samplewidth/2 bands
+        fft_freq = numpy.fft.rfftfreq(len(sample_range))
+        freq_hz = [abs(fft_freq[i])*self.file.getframerate() for i, fft in enumerate(fft_data)]
 
-    # Gives the average FFT band (y-axis of vu-meter)
-    def average_fft_bands(self, fft_array):
-        fft_averages = []
-        for band in range(0, self.num_bands):
-            avg = 0.0
-            if band == 0:
-                lowFreq = int(0)
-            else:
-                lowFreq = int(int(self.file.getframerate()/2) / float(2 ** (self.num_bands - band)))
-            hiFreq = int((self.file.getframerate()/2) / float(2 ** ((self.num_bands-1) - band)))
-            lowBound = int(self.freqToIndex(lowFreq))
-            hiBound = int(self.freqToIndex(hiFreq))
-            for j in range(lowBound, hiBound):
-                avg += fft_array[j]
-            avg /= (hiBound - lowBound + 1)
-            fft_averages.append(avg)
-        return fft_averages
+        db_scale = [self.file.getframerate()*2**(b-self.num_bands) for b in range(self.num_bands)]
+        fft_freq_scaled = [0.]*len(db_scale)
 
-    def getBandWidth(self):
-        return (2.0/self.sample_size) * (self.file.getframerate()/2.0)
+        ref_index = 0
+        for i, f in enumerate(fft_data):
+            if freq_hz[i]>db_scale[ref_index]:
+                ref_index += 1
+            fft_freq_scaled[ref_index] += f
 
-    def freqToIndex(self, f):
-        # If f (frequency is lower than the bandwidth of spectrum[0]
-        if f < self.getBandWidth()/2:
-            return 0
-        if f > (self.file.getframerate()/2) - (self.getBandWidth()/2):
-            return self.sample_size -1
-        fraction = float(f)/float(self.file.getframerate())
-        index = round(self.sample_size * fraction)
-        return index
+        #numpy.set_printoptions(threshold=numpy.nan)
+        #print fft_freq_scaled
+        self.averages = fft_freq_scaled
     ###################################################################################################################
 
     def draw_bars(self):
-        for w in range(self.width):
-            for h in range(self.num_bands):
-                self.model.set_pixel(h, w, self.colors[w] if w < int(self.averages[h]*self.width/1000) else 'black')
+        if self.vertical:
+            for h in range(self.height):
+                for w in range(self.num_bands):
+                    self.model.set_pixel(h, w, self.colors[h] if h < int(self.averages[w]/10000000) else 'black')
+        else:
+            for w in range(self.width):
+                for h in range(self.num_bands):
+                    self.model.set_pixel(h, w, self.colors[w] if w < int(self.averages[h]/10000000) else 'black')
 
     def run(self):
         try:
@@ -127,11 +109,6 @@ class DBMeter(Arbapp):
                     self.fft(mono_data)
                     self.draw_bars()
 
-                    if not self.with_sound:
-                        plot(self.averages)
-                        show()
-                    last_update = time.time()
-
                 if self.with_sound:
                     self.stream.write(data)
                 data = self.file.readframes(self.chunk)
@@ -140,13 +117,17 @@ class DBMeter(Arbapp):
                 self.stream.stop_stream()
                 self.stream.close()
                 self.pyaudio.terminate()
+            else:
+                show()
 
 
 
 if __name__=='__main__':
-    dbm = DBMeter(15, 10, 'Spectrum.wav', True)
+
+
+    #dbm = DBMeter(15, 10, 'Spectrum.wav', True)
     #dbm = DBMeter(15, 10, 'Love_you.wav', True)
-    #dbm = DBMeter(15, 10, 'Nytrogen_-_Nytrogen_-_Jupiter.wav', True)
+    dbm = DBMeter(15, 10, 'Nytrogen_-_Nytrogen_-_Jupiter.wav', True)
     #dbm = DBMeter(15, 10, 'Lion.wav', True)
     #dbm = DBMeter(15, 10, 'Silence.wav', False)
 
