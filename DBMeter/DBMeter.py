@@ -22,9 +22,8 @@
 import sys, struct
 sys.path.append('../../src/')
 import numpy
-from pylab import *
-from arbasdk import Arbamodel, Arbapp
-import pygame, pyaudio, audioop, math, wave, time
+from arbasdk import Arbamodel, Arbapp, hsv
+import pygame, pyaudio, audioop, wave, time
 
 
 class DBMeter(Arbapp):
@@ -44,19 +43,14 @@ class DBMeter(Arbapp):
                                             rate=self.file.getframerate(),
                                             output=True)
 
-        self.max_level = float(2**(8*self.file.getsampwidth()-1))
-        self.levels = []
-
         ##### Fourier related attributes
         if self.vertical:
             self.num_bands = self.width
         else:
-            self.num_bands = 11 # TODO 12 bands and more generate <10Hz bands
+            self.num_bands = self.height # TODO 12 bands and more generate <10Hz bands
 
         ##### Color rendering
-        self.colors = ['yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow',
-                       'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow',] # We should have as colors as bands # TODo: auto-colors
-        self.fft_display_rate = 24  # Rate of Fourier transforms rendering in Hz
+        self.colors = [hsv(c, 100, 100) for c in range(0, 360, int(360./self.num_bands))]
 
     ############################################# Fourier-related methods #############################################
     def fft(self, sample):
@@ -90,24 +84,19 @@ class DBMeter(Arbapp):
         if self.vertical:
             for h in range(self.height):
                 for w in range(self.num_bands):
-                    self.model.set_pixel(h, w, self.colors[h] if h < int(self.averages[w]/10000000) else 'black')
+                    self.model.set_pixel(h, w, self.colors[w] if h < int(self.averages[w]/10000000) else 'black')
         else:
             for w in range(self.width):
                 for h in range(self.num_bands):
-                    self.model.set_pixel(h, w, self.colors[w] if w < int(self.averages[h]/10000000) else 'black')
+                    self.model.set_pixel(h, w, self.colors[h] if w < int(self.averages[h]/10000000) else 'black')
 
     def run(self):
         try:
             data = self.file.readframes(self.chunk)
-            last_update = time.time()
             while data != '':
-                if True: #time.time()-last_update > 1./self.fft_display_rate:
-                    mono_data = audioop.tomono(data, self.file.getsampwidth(), 0.5, 0.5)
-                    local_max_level = audioop.max(mono_data, self.file.getsampwidth())
-                    local_dB = int(20*(math.log10(local_max_level/self.max_level)))
-                    self.levels.append(local_dB)
-                    self.fft(mono_data)
-                    self.draw_bars()
+                mono_data = audioop.tomono(data, self.file.getsampwidth(), 0.5, 0.5)
+                self.fft(mono_data)
+                self.draw_bars()
 
                 if self.with_sound:
                     self.stream.write(data)
@@ -117,8 +106,6 @@ class DBMeter(Arbapp):
                 self.stream.stop_stream()
                 self.stream.close()
                 self.pyaudio.terminate()
-            else:
-                show()
 
 
 
@@ -128,6 +115,7 @@ if __name__=='__main__':
     #dbm = DBMeter(15, 10, 'Spectrum.wav', True)
     #dbm = DBMeter(15, 10, 'Love_you.wav', True)
     dbm = DBMeter(15, 10, 'Nytrogen_-_Nytrogen_-_Jupiter.wav', True)
+    #dbm = DBMeter(15, 10, 'survive.wav', True)
     #dbm = DBMeter(15, 10, 'Lion.wav', True)
     #dbm = DBMeter(15, 10, 'Silence.wav', False)
 
