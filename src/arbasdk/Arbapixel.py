@@ -23,7 +23,13 @@
 """
 from pygame.color import Color
 
-__all__ = ['Arbapixel']
+__all__ = ['Arbapixel', 'hsv']
+
+def hsv(h, s, v, a=100):
+    # ranges H = [0, 360], S = [0, 100], V = [0, 100], A = [0, 100]
+    c = Color('black')
+    c.hsva = (h, s, v, a)
+    return (c.r, c.g, c.b, c.a)
 
 # This class has a hack to inherit from pygame.Color with getattr since its C
 # implementation does not allow to inherit properly

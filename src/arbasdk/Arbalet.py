@@ -40,7 +40,7 @@ class Arbalet(object):
             self.arbasim = Arbasim(self.width, self.height, self.width*factor_sim, self.height*factor_sim)
 
         if self.hardware:
-            self.arbalink = Arbalink('../config/config150.cfg', diminution=self.diminution, rate=100)
+            self.arbalink = Arbalink('../../config/config150.cfg', diminution=self.diminution, rate=100)
 
 
     def set_model(self, model):

@@ -1,5 +1,5 @@
 from Arbamodel import Arbamodel
-from Arbapixel import Arbapixel
+from Arbapixel import Arbapixel, hsv
 from Arbalink import Arbalink
 from Arbalet import Arbalet
 from Arbasim import Arbasim
