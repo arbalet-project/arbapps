@@ -22,8 +22,9 @@
 import sys, struct
 sys.path.append('../../src/')
 import numpy
-from arbasdk import Arbamodel, Arbapp, hsv
+from arbasdk import Arbamodel, Arbapixel, Arbapp, hsv
 from threading import Thread
+from copy import copy
 import pyaudio, audioop, wave, time
 
 class Renderer(Thread):
@@ -38,31 +39,46 @@ class Renderer(Thread):
         self.model = model
         self.height = height
         self.width = width
-        self.averages = None
+        self.averages = None     # FFT bands
         self.num_bands = width if vertical else height
         self.vertical = vertical
         self.colors = [hsv(c, 100, 100) for c in range(0, 360, int(360./self.num_bands))]
+        self.amplitude_factor = 10000000 # Sum of amplitudes [tricky to compute and cannot be real-time]
 
     def update_bands(self, averages):
         """
         This function is called when a new FFT is available and sent to the render thanks to the latter
         TODO: thread-safe
         """
-        self.averages = averages
+        self.averages = map(int, averages)
+
+    def stop(self):
+        self.running = False
 
     def draw_bars(self):
         if self.averages:
+            self.old_model = copy(self.model)
             if self.vertical:
                 for h in range(self.height):
+                    amph = h*self.amplitude_factor
                     for w in range(self.num_bands):
-                        self.model.set_pixel(h, w, self.colors[w] if h < int(self.averages[w]/10000000) else 'black')
+                        if amph < self.averages[w]:
+                            color = self.colors[w]
+                        elif self.old_model: # animation with light decreasing
+                            old = self.old_model.get_pixel(h, w).hsva
+                            color = hsv(old[0], old[1], old[2]*0.95)
+                        else:
+                            color = 'black'
+                        self.model.set_pixel(h, w, color)
             else:
+                raise Exception("update")
                 for w in range(self.width):
                     for h in range(self.num_bands):
                         self.model.set_pixel(h, w, self.colors[h] if w < int(self.averages[h]/10000000) else 'black')
 
     def run(self):
-        while True:
+        self.running = True
+        while self.running:
             self.draw_bars()
             time.sleep(1./self.rate)
 
@@ -134,6 +150,7 @@ class DBMeter(Arbapp):
                     self.stream.write(data)
                 data = self.file.readframes(self.chunk)
         finally:
+            self.renderer.stop()
             if self.with_sound:
                 self.stream.stop_stream()
                 self.stream.close()
@@ -147,8 +164,8 @@ if __name__=='__main__':
     #dbm = DBMeter(15, 10, 'Spectrum.wav', True)
     #dbm = DBMeter(15, 10, 'Love_you.wav', True)
     #dbm = DBMeter(15, 10, 'Nytrogen_-_Nytrogen_-_Jupiter.wav', True)
-    dbm = DBMeter(15, 10, 'survive.wav', True)
-    #dbm = DBMeter(15, 10, 'Lion.wav', True)
+    #dbm = DBMeter(15, 10, 'survive.wav', True)
+    dbm = DBMeter(15, 10, 'Lion.wav', True)
     #dbm = DBMeter(15, 10, 'Silence.wav', False)
 
     dbm.start()

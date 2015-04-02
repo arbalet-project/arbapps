@@ -28,7 +28,7 @@ __all__ = ['Arbapixel', 'hsv']
 def hsv(h, s, v, a=100):
     # ranges H = [0, 360], S = [0, 100], V = [0, 100], A = [0, 100]
     c = Color('black')
-    c.hsva = (h, s, v, a)
+    c.hsva = map(int, (h, s, v, a))
     return (c.r, c.g, c.b, c.a)
 
 # This class has a hack to inherit from pygame.Color with getattr since its C
@@ -51,6 +51,13 @@ class Arbapixel(object):
         Limitator avoiding overflows and underflows
         """
         return int(max(0, min(255, v)))
+
+    @property
+    def hsv(self):
+        """
+        :return: The HSVA representation of this color
+        """
+        return self.__pygame_color.hsva
 
     def __set__(self, instance, value):
         self.__set_pygame_color(value)
