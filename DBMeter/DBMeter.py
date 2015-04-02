@@ -3,6 +3,12 @@
     Arbalet - ARduino-BAsed LEd Table
     Spectrum Analyzer for Audio files
 
+    This Spectrum analyzer has 2 classes:
+    * DBMeter: reading a wave file, computing the Discrete Fourier Transform
+      (DFT, FFT) for each chunk of file, and playing the chunk of sound
+    * Renderer: coloring the table with respect to the FFT
+    It works in vertical and horizontal, splitting the range of frequencies consequently
+
     Copyright (C) 2015 Yoan Mollard <yoan@konqifr.fr>
 
     This program is free software; you can redistribute it and/or modify
@@ -55,26 +61,29 @@ class Renderer(Thread):
     def stop(self):
         self.running = False
 
+    def draw_bars_hv(self, num_bands, num_bins, vertical):
+        for bin in range(num_bins):
+            ampli_b = bin*self.amplitude_factor
+            for band in range(num_bands):
+                if ampli_b < self.averages[band]:
+                    color = self.colors[band]
+                elif self.old_model: # animation with light decreasing
+                    old = self.old_model.get_pixel(bin if vertical else band, band if vertical else bin).hsva
+                    color = hsv(old[0], old[1], old[2]*0.95)
+                else:
+                    color = 'black'
+                self.model.set_pixel(bin if vertical else band, band if vertical else bin, color)
+
     def draw_bars(self):
+        """
+        Draw the bins using FFT averages according to the orientation of the grid (vertical, horizontal)
+        """
         if self.averages:
             self.old_model = copy(self.model)
             if self.vertical:
-                for h in range(self.height):
-                    amph = h*self.amplitude_factor
-                    for w in range(self.num_bands):
-                        if amph < self.averages[w]:
-                            color = self.colors[w]
-                        elif self.old_model: # animation with light decreasing
-                            old = self.old_model.get_pixel(h, w).hsva
-                            color = hsv(old[0], old[1], old[2]*0.95)
-                        else:
-                            color = 'black'
-                        self.model.set_pixel(h, w, color)
+                self.draw_bars_hv(self.width, self.height, True)
             else:
-                raise Exception("update")
-                for w in range(self.width):
-                    for h in range(self.num_bands):
-                        self.model.set_pixel(h, w, self.colors[h] if w < int(self.averages[h]/10000000) else 'black')
+                self.draw_bars_hv(self.height, self.width, False)
 
     def run(self):
         self.running = True
@@ -110,6 +119,9 @@ class DBMeter(Arbapp):
             self.num_bands = self.width
         else:
             self.num_bands = self.height # TODO 12 bands and more generate <10Hz bands
+        self.db_scale = [self.file.getframerate()*2**(b-self.num_bands) for b in range(self.num_bands)] # Scale of frequencies
+        print "Scale of frequencies:", self.db_scale
+
     ############################################# Fourier-related methods #############################################
     def fft(self, sample):
         def chunks(l, n):
@@ -124,12 +136,11 @@ class DBMeter(Arbapp):
         fft_freq = numpy.fft.rfftfreq(len(sample_range))
         freq_hz = [abs(fft_freq[i])*self.file.getframerate() for i, fft in enumerate(fft_data)]
 
-        db_scale = [self.file.getframerate()*2**(b-self.num_bands) for b in range(self.num_bands)]
-        fft_freq_scaled = [0.]*len(db_scale)
+        fft_freq_scaled = [0.]*len(self.db_scale)
 
         ref_index = 0
         for i, f in enumerate(fft_data):
-            if freq_hz[i]>db_scale[ref_index]:
+            if freq_hz[i]>self.db_scale[ref_index]:
                 ref_index += 1
             fft_freq_scaled[ref_index] += f
 
@@ -165,7 +176,7 @@ if __name__=='__main__':
     #dbm = DBMeter(15, 10, 'Love_you.wav', True)
     #dbm = DBMeter(15, 10, 'Nytrogen_-_Nytrogen_-_Jupiter.wav', True)
     #dbm = DBMeter(15, 10, 'survive.wav', True)
-    dbm = DBMeter(15, 10, 'Lion.wav', True)
+    dbm = DBMeter(15, 10, 'Lion.wav', True, False)
     #dbm = DBMeter(15, 10, 'Silence.wav', False)
 
     dbm.start()
