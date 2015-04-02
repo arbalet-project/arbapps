@@ -25,8 +25,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
-import sys, struct
-sys.path.append('../../src/')
+import sys, os, struct
+sys.path.append(os.path.dirname(__file__)+'/../../src/')
 import numpy
 from arbasdk import Arbamodel, Arbapixel, Arbapp, hsv
 from threading import Thread
@@ -170,14 +170,14 @@ class DBMeter(Arbapp):
 
 
 if __name__=='__main__':
+    abs_dir = os.path.dirname(__file__)
 
-
-    #dbm = DBMeter(15, 10, 'Spectrum.wav', True)
-    #dbm = DBMeter(15, 10, 'Love_you.wav', True)
-    #dbm = DBMeter(15, 10, 'Nytrogen_-_Nytrogen_-_Jupiter.wav', True)
-    #dbm = DBMeter(15, 10, 'survive.wav', True)
-    dbm = DBMeter(15, 10, 'Lion.wav', True, False)
-    #dbm = DBMeter(15, 10, 'Silence.wav', False)
+    #dbm = DBMeter(15, 10, abs_dir+'/Spectrum.wav', True)
+    #dbm = DBMeter(15, 10, abs_dir+'/Love_you.wav', True)
+    #dbm = DBMeter(15, 10, abs_dir+'/Nytrogen_-_Nytrogen_-_Jupiter.wav', True)
+    #dbm = DBMeter(15, 10, abs_dir+'/survive.wav', True)
+    dbm = DBMeter(15, 10, abs_dir+'/Lion.wav', True)
+    #dbm = DBMeter(15, 10, abs_dir+'/Silence.wav', False)
 
     dbm.start()
 
