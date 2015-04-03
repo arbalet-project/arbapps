@@ -28,8 +28,9 @@
 import sys, os, struct
 sys.path.append(os.path.dirname(__file__)+'/../../src/')
 import numpy
-from arbasdk import Arbamodel, Arbapixel, Arbapp, hsv
+from arbasdk import Arbamodel, Arbapp, hsv
 from threading import Thread
+from random import shuffle
 from copy import copy
 import pyaudio, audioop, wave, time
 
@@ -49,7 +50,11 @@ class Renderer(Thread):
         self.num_bands = width if vertical else height
         self.vertical = vertical
         self.colors = [hsv(c, 100, 100) for c in range(0, 360, int(360./self.num_bands))]
-        self.amplitude_factor = 10000000 # Sum of amplitudes [tricky to compute and cannot be real-time]
+        self.amplitude_factor = 7000000 # Sum of amplitudes [tricky to compute and cannot be real-time]
+        self.running = True
+
+    def __del__(self):
+        self.pyaudio.terminate()
 
     def update_bands(self, averages):
         """
@@ -86,49 +91,32 @@ class Renderer(Thread):
                 self.draw_bars_hv(self.height, self.width, False)
 
     def run(self):
-        self.running = True
         while self.running:
             self.draw_bars()
             time.sleep(1./self.rate)
-
 
 class DBMeter(Arbapp):
     """
     This is the main entry point of the spectrum analyser, it reads the file, computes the FFT and plays the sound
     """
-    def __init__(self, height, width, file, with_sound=True, vertical=True):
+    def __init__(self, height, width, files, vertical=True):
         Arbapp.__init__(self, width, height)
         self.chunk = 4*1024
-        self.with_sound = with_sound
-        self.file = wave.open(file, 'rb')
         self.vertical = vertical
-        if self.with_sound:
-            self.pyaudio = pyaudio.PyAudio()
-            self.stream = self.pyaudio.open(format=self.pyaudio.get_format_from_width(self.file.getsampwidth()),
-                                            channels=self.file.getnchannels(),
-                                            rate=self.file.getframerate(),
-                                            output=True)
-        ##### Init and start the renderer
-        model = Arbamodel(width, height, 'black')
-        self.set_model(model)
-        self.renderer = Renderer(100, model, height, width, vertical)
-        self.renderer.start()
+        self.files = files
+        self.renderer = None
+        self.file = None
+        self.pyaudio = pyaudio.PyAudio()
 
-        ##### Fourier related attributes
-        if self.vertical:
-            self.num_bands = self.width
-        else:
-            self.num_bands = self.height # TODO 12 bands and more generate <10Hz bands
-
-        ##### Here we generate a suitable log-scale
-        self.min = 110
+        ##### Fourier related attributes, we generate a suitable log-scale
+        self.num_bands = self.width if self.vertical else self.height
+        self.min = 50
         self.max = 22050
         #self.db_scale = [self.file.getframerate()*2**(b-self.num_bands) for b in range(self.num_bands)]
         #self.db_scale = [self.min+self.max*2**(b-self.num_bands+1) for b in range(self.num_bands)]
         self.db_scale = [self.max*(numpy.exp(-numpy.log(float(self.min)/self.max)/self.num_bands))**(b-self.num_bands) for b in range(1, self.num_bands+1)]
         print "Scale of maximum frequencies:", self.db_scale
 
-    ############################################# Fourier-related methods #############################################
     def fft(self, sample):
         def chunks(l, n):
             for i in xrange(0, len(l), n):
@@ -141,21 +129,20 @@ class DBMeter(Arbapp):
         fft_data = abs(numpy.fft.rfft(sample_range)) # real fft gives samplewidth/2 bands
         fft_freq = numpy.fft.rfftfreq(len(sample_range))
         freq_hz = [abs(fft_freq[i])*self.file.getframerate() for i, fft in enumerate(fft_data)]
-
         fft_freq_scaled = [0.]*len(self.db_scale)
-
         ref_index = 0
         for i, f in enumerate(fft_data):
             if freq_hz[i]>self.db_scale[ref_index]:
                 ref_index += 1
             fft_freq_scaled[ref_index] += f
-
-        #numpy.set_printoptions(threshold=numpy.nan)
-        #print fft_freq_scaled
         self.averages = fft_freq_scaled
-    ###################################################################################################################
 
-    def run(self):
+    def play_file(self, f):
+        self.file = wave.open(f, 'rb')
+        self.stream = self.pyaudio.open(format=self.pyaudio.get_format_from_width(self.file.getsampwidth()),
+                                channels=self.file.getnchannels(),
+                                rate=self.file.getframerate(),
+                                output=True)
         try:
             data = self.file.readframes(self.chunk)
             while data != '':
@@ -163,27 +150,32 @@ class DBMeter(Arbapp):
                 self.fft(mono_data)
                 self.renderer.update_bands(self.averages)
 
-                if self.with_sound:
-                    self.stream.write(data)
+                self.stream.write(data)
                 data = self.file.readframes(self.chunk)
         finally:
-            self.renderer.stop()
-            if self.with_sound:
-                self.stream.stop_stream()
-                self.stream.close()
-                self.pyaudio.terminate()
+            self.stream.stop_stream()
+            self.stream.close()
 
-
+    def run(self):
+        ##### Init and start the renderer
+        model = Arbamodel(width, height, 'black')
+        self.renderer = Renderer(100, model, height, width, vertical)
+        self.renderer.start()
+        dbm.set_model(model)
+        for f in self.files:
+            self.play_file(f)
 
 if __name__=='__main__':
-    abs_dir = os.path.dirname(__file__)
-
-    #dbm = DBMeter(15, 10, abs_dir+'/Spectrum.wav', True, False)
-    #dbm = DBMeter(15, 10, abs_dir+'/Love_you.wav', True, False)
-    #dbm = DBMeter(15, 10, abs_dir+'/Nytrogen_-_Nytrogen_-_Jupiter.wav', True, False)
-    #dbm = DBMeter(15, 10, abs_dir+'/survive.wav', True, False)
-    dbm = DBMeter(15, 10, abs_dir+'/Lion.wav', True, False)
-    #dbm = DBMeter(15, 10, abs_dir+'/Silence.wav', False, False)
-
-    dbm.start()
-
+    files = []
+    for arg in sys.argv:
+        file = arg if arg.lower().endswith('.wav') else None
+        if file: files.append(file)
+    if len(files)==0:
+        print "Please specify WAVE files in argument"
+    else:
+        width = 10
+        height = 15
+        vertical = False
+        shuffle(files)
+        dbm = DBMeter(15, 10, files, vertical)
+        dbm.start()
