@@ -119,8 +119,14 @@ class DBMeter(Arbapp):
             self.num_bands = self.width
         else:
             self.num_bands = self.height # TODO 12 bands and more generate <10Hz bands
-        self.db_scale = [self.file.getframerate()*2**(b-self.num_bands) for b in range(self.num_bands)] # Scale of frequencies
-        print "Scale of frequencies:", self.db_scale
+
+        ##### Here we generate a suitable log-scale
+        self.min = 110
+        self.max = 22050
+        #self.db_scale = [self.file.getframerate()*2**(b-self.num_bands) for b in range(self.num_bands)]
+        #self.db_scale = [self.min+self.max*2**(b-self.num_bands+1) for b in range(self.num_bands)]
+        self.db_scale = [self.max*(numpy.exp(-numpy.log(float(self.min)/self.max)/self.num_bands))**(b-self.num_bands) for b in range(1, self.num_bands+1)]
+        print "Scale of maximum frequencies:", self.db_scale
 
     ############################################# Fourier-related methods #############################################
     def fft(self, sample):
@@ -172,12 +178,12 @@ class DBMeter(Arbapp):
 if __name__=='__main__':
     abs_dir = os.path.dirname(__file__)
 
-    #dbm = DBMeter(15, 10, abs_dir+'/Spectrum.wav', True)
-    #dbm = DBMeter(15, 10, abs_dir+'/Love_you.wav', True)
-    #dbm = DBMeter(15, 10, abs_dir+'/Nytrogen_-_Nytrogen_-_Jupiter.wav', True)
-    #dbm = DBMeter(15, 10, abs_dir+'/survive.wav', True)
-    dbm = DBMeter(15, 10, abs_dir+'/Lion.wav', True)
-    #dbm = DBMeter(15, 10, abs_dir+'/Silence.wav', False)
+    #dbm = DBMeter(15, 10, abs_dir+'/Spectrum.wav', True, False)
+    #dbm = DBMeter(15, 10, abs_dir+'/Love_you.wav', True, False)
+    #dbm = DBMeter(15, 10, abs_dir+'/Nytrogen_-_Nytrogen_-_Jupiter.wav', True, False)
+    #dbm = DBMeter(15, 10, abs_dir+'/survive.wav', True, False)
+    dbm = DBMeter(15, 10, abs_dir+'/Lion.wav', True, False)
+    #dbm = DBMeter(15, 10, abs_dir+'/Silence.wav', False, False)
 
     dbm.start()
 
