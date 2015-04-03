@@ -70,9 +70,9 @@ class Arbasim(threading.Thread):
         if autorun:
             self.start()
 
-    def close(self, reason=None):
+    def close(self, reason='unknown'):
         self.sim_state = "exiting"
-        logging.info("Simulator exiting, reason: {}", reason if reason!=None else 'unknown')
+        logging.info("Simulator exiting, reason: "+reason)
         self.running = False
 
     def set_model(self, arbamodel):
@@ -110,3 +110,4 @@ class Arbasim(threading.Thread):
 
             pygame.display.update()
             time.sleep(1./self.refresh_rate)
+        pygame.quit()

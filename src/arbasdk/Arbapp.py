@@ -29,14 +29,6 @@ from threading import Thread
 
 __all__ = ['Arbapp']
 
-class Keyboard(Thread):
-    def __init__(self):
-        self.setDaemon(True)
-
-    def run(self):
-        self.pressed_keys  = pygame.key.get_pressed()
-
-
 class Arbapp(object):
 
     # Authorized arguments

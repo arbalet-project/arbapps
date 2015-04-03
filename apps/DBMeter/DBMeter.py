@@ -26,7 +26,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 import sys, os, struct
-sys.path.append(os.path.dirname(__file__)+'/../../src/')
+sys.path.append(os.path.realpath(os.path.dirname(__file__))+'/../../src/')
 import numpy
 from arbasdk import Arbamodel, Arbapp, hsv
 from threading import Thread
