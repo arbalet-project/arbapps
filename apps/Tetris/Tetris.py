@@ -41,9 +41,9 @@ class Tetromino(object):
                    [3, 0]],
              'o': [[4, 4],
                    [4, 4]],
-             'l': [[4, 0],
-                   [4, 0],
-                   [4, 4]]}
+             'l': [[5, 0],
+                   [5, 0],
+                   [5, 5]]}
     colors = ['black', 'cyan', 'green', 'pink', 'yellow', 'orange']
 
     def __init__(self, px, py, height, width):
