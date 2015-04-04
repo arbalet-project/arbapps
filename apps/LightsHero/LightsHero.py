@@ -3,6 +3,15 @@
     Arbalet - ARduino-BAsed LEd Table
     Lights Hero - Guitar Hero/Frets-on-fire like game
 
+    In this app, a lane is one of the 5 colored lanes (vertical), a line
+    corresponds to a specific timestamp, an intersection between a line and
+    a lane is a cell that can have different states: background, marker,
+    active, bump.
+
+    Class SongReader reads a song in the fretsonfire format line-by-line.
+    Class LightsHero is the main controller
+    Class Renderer renders the grid on the table
+
     Copyright (C) 2015 Yoan Mollard <yoan@konqifr.fr>
 
     This program is free software; you can redistribute it and/or modify
@@ -25,14 +34,16 @@ import time
 from copy import deepcopy
 import random
 from threading import Thread
+from SongReader import SongReader
 import pygame
 from arbasdk import Arbamodel, Arbapp, Arbapixel
+
 
 class Renderer(Thread):
     """
     This thread renders the game on Arbalet
     """
-    def __init__(self, rate, model, grid, table_height, num_lines, table_width):
+    def __init__(self, rate, model, grid, table_height, num_lanes, table_width):
         Thread.__init__(self)
         self.setDaemon(True)
         self.rate = rate
@@ -40,9 +51,9 @@ class Renderer(Thread):
         self.grid = grid
         self.height = table_height
         self.width = table_width
-        self.num_lines = num_lines
+        self.num_lanes = num_lanes
         self.colors = ['darkgreen', 'darkred', 'gold', 'navy', 'purple']
-        self.intensity = {'background': 0.01, 'marker': 0.05, 'active': 0.5, 'new': 1.0}
+        self.intensity = {'background': 0.01, 'marker': 0.05, 'active': 0.2, 'bump': 1.0}
         self.running = True
 
 
@@ -50,11 +61,11 @@ class Renderer(Thread):
         self.running = False
 
     def update_view(self):
-        for line in range(self.num_lines):
-            for chunk_line in range(self.width/self.num_lines):
-                w = line*self.width/self.num_lines + chunk_line
+        for lane in range(self.num_lanes):
+            for chunk_lane in range(self.width/self.num_lanes):
+                w = lane*self.width/self.num_lanes + chunk_lane
                 for h in range(self.height):
-                    self.model.set_pixel(h, w, Arbapixel(self.colors[line])*self.intensity[self.grid[h][line]])
+                    self.model.set_pixel(h, w, Arbapixel(self.colors[lane])*self.intensity[self.grid[h][lane]])
 
     def run(self):
         while self.running:
@@ -62,13 +73,14 @@ class Renderer(Thread):
             time.sleep(1./self.rate)
 
 class LightsHero(Arbapp):
-    def __init__(self, width, height, num_lines):
+    def __init__(self, width, height, num_lanes, path, level):
         Arbapp.__init__(self, width, height)
-        self.num_lines = num_lines
-        self.grid = [['background']*num_lines for h in range(height)]
+        self.num_lanes = num_lanes
+        self.grid = [['background']*num_lanes for h in range(height)]
         model = Arbamodel(width, height, 'black')
         self.set_model(model)
-        self.renderer = Renderer(30, model, self.grid, height, num_lines, width)
+        self.renderer = Renderer(30, model, self.grid, height, num_lanes, width)
+        self.reader = SongReader(path, num_lanes, level)
         self.score = 0
         self.speed = 10. # Speed of game in Hertz
         self.playing = True
@@ -77,16 +89,20 @@ class LightsHero(Arbapp):
         self.renderer.start()
 
     def next_line(self):
-        for h in range(self.height):
-            for line in range(self.num_lines):
-                self.grid[h][line] = random.choice(['background', 'background', 'background', 'active', 'active', 'marker', 'marker', 'new'])
+        # Delete the last but one line (very last line is reserved for buttons)
+        for l in range(self.height-1, 0, -1):
+            for w in range(self.num_lanes):
+                self.grid[l][w] = self.grid[l-1][w]
+
+        new_line = self.reader.read()
+        for lane in range(self.num_lanes):
+            self.grid[0][lane] = new_line[lane]
 
     def run(self):
         while self.playing:
             self.next_line()
-            time.sleep(1./self.speed)
+            time.sleep(0.1)
         self.renderer.stop()
 
-t = LightsHero(width = 10, height = 15, num_lines=5)
+t = LightsHero(width = 10, height = 15, num_lanes=5, path='./songs/Feelings', level=('difficult'))
 t.start()
-
