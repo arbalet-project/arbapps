@@ -35,6 +35,7 @@ from copy import deepcopy
 import random
 from threading import Thread
 from SongReader import SongReader
+from SoundManager import SoundManager
 import pygame
 from arbasdk import Arbamodel, Arbapp, Arbapixel
 
@@ -65,7 +66,11 @@ class Renderer(Thread):
             for chunk_lane in range(self.width/self.num_lanes):
                 w = lane*self.width/self.num_lanes + chunk_lane
                 for h in range(self.height):
-                    self.model.set_pixel(h, w, Arbapixel(self.colors[lane])*self.intensity[self.grid[h][lane]])
+                    if self.grid[h][lane]=='bump':
+                        color = Arbapixel(50, 50, 50) + Arbapixel(self.colors[lane])
+                    else:
+                        color = Arbapixel(self.colors[lane])*self.intensity[self.grid[h][lane]]
+                    self.model.set_pixel(h, w, color)
 
     def run(self):
         while self.running:
@@ -73,16 +78,17 @@ class Renderer(Thread):
             time.sleep(1./self.rate)
 
 class LightsHero(Arbapp):
-    def __init__(self, width, height, num_lanes, path, level):
+    def __init__(self, width, height, num_lanes, path, level, speed):
         Arbapp.__init__(self, width, height)
         self.num_lanes = num_lanes
+        self.score = 0
+        self.speed = speed
         self.grid = [['background']*num_lanes for h in range(height)]
         model = Arbamodel(width, height, 'black')
         self.set_model(model)
         self.renderer = Renderer(30, model, self.grid, height, num_lanes, width)
         self.reader = SongReader(path, num_lanes, level)
-        self.score = 0
-        self.speed = 10. # Speed of game in Hertz
+        self.sound = SoundManager(path, (self.height+2)/self.speed)
         self.playing = True
         pygame.init()
         pygame.joystick.init()
@@ -99,10 +105,11 @@ class LightsHero(Arbapp):
             self.grid[0][lane] = new_line[lane]
 
     def run(self):
+        self.sound.start()
         while self.playing:
             self.next_line()
-            time.sleep(0.1)
+            time.sleep(1./self.speed)
         self.renderer.stop()
 
-t = LightsHero(width = 10, height = 15, num_lanes=5, path='./songs/Feelings', level=('difficult'))
+t = LightsHero(width = 10, height = 15, num_lanes=5, path='./songs/Feelings', level=('difficult'), speed=10)
 t.start()
