@@ -44,72 +44,93 @@ class Renderer(Thread):
     """
     This thread renders the game on Arbalet
     """
-    def __init__(self, rate, model, grid, table_height, num_lanes, table_width):
+    def __init__(self, rate, model, grid, bottom_bar, table_height, num_lanes, table_width):
         Thread.__init__(self)
         self.setDaemon(True)
         self.rate = rate
         self.model = model
         self.grid = grid
+        self.bar = bottom_bar
         self.height = table_height
         self.width = table_width
         self.num_lanes = num_lanes
         self.colors = ['darkgreen', 'darkred', 'gold', 'navy', 'purple']
-        self.intensity = {'background': 0.01, 'marker': 0.05, 'active': 0.2, 'bump': 1.0}
+        self.intensity = {'background': 0.01, 'marker': 0.05, 'active': 0.9, 'bump': 1.0} # TODO bump sometimes raises KeyError
         self.running = True
-
 
     def stop(self):
         self.running = False
 
-    def update_view(self):
+    def update_view(self, flash_color):
+        # Big area of coming notes
         for lane in range(self.num_lanes):
             for chunk_lane in range(self.width/self.num_lanes):
                 w = lane*self.width/self.num_lanes + chunk_lane
-                for h in range(self.height):
+                for h in range(self.height-1): # -1 in order not to update the bottom bar
                     if self.grid[h][lane]=='bump':
-                        color = Arbapixel(50, 50, 50) + Arbapixel(self.colors[lane])
+                        color = Arbapixel(100, 100, 100) + Arbapixel(self.colors[lane])
                     else:
                         color = Arbapixel(self.colors[lane])*self.intensity[self.grid[h][lane]]
                     self.model.set_pixel(h, w, color)
 
+        # Bottom bar of present notes
+        for lane in range(self.num_lanes):
+            color = self.colors[lane] if flash_color or not self.bar[lane] else 'white' # To make the note "burning" we alternate white/color
+            for chunk_lane in range(self.width/self.num_lanes):
+                w = lane*self.width/self.num_lanes + chunk_lane
+                self.model.set_pixel(self.height-1, w, color)
+
+
     def run(self):
+        flash_color = False # Boolean giving a "burning" impression
         while self.running:
-            self.update_view()
+            self.update_view(flash_color)
             time.sleep(1./self.rate)
+            flash_color = not flash_color
 
 class LightsHero(Arbapp):
     def __init__(self, width, height, num_lanes, path, level, speed):
         Arbapp.__init__(self, width, height)
         self.num_lanes = num_lanes
         self.score = 0
-        self.speed = speed
-        self.grid = [['background']*num_lanes for h in range(height)]
+        self.speed = float(speed)
+        self.grid = [['background']*num_lanes for h in range(height)] # The coming notes (last line included even if it will overwritten by the bottom bar)
+        self.bar = [False]*num_lanes # The bottom bar, False means "idle", True means "being hit"
         model = Arbamodel(width, height, 'black')
         self.set_model(model)
-        self.renderer = Renderer(30, model, self.grid, height, num_lanes, width)
+        self.renderer = Renderer(40, model, self.grid, self.bar, height, num_lanes, width)
         self.reader = SongReader(path, num_lanes, level)
-        self.sound = SoundManager(path, (self.height+2)/self.speed)
+        self.sound = SoundManager(path, self.height/self.speed)
         self.playing = True
         pygame.init()
         pygame.joystick.init()
         self.renderer.start()
 
     def next_line(self):
-        # Delete the last but one line (very last line is reserved for buttons)
+        # Delete the last line leaving the grid
+        # Note : The bottom bar will overwrite the last line but the latter needs to be kept to draw the bottom bar
         for l in range(self.height-1, 0, -1):
             for w in range(self.num_lanes):
                 self.grid[l][w] = self.grid[l-1][w]
 
+        # Ask for a new line to the song reader and fill the top of the grid with it
         new_line = self.reader.read()
         for lane in range(self.num_lanes):
             self.grid[0][lane] = new_line[lane]
+
+    def correct_hit(self):
+        """
+        Return True if user has hit the good key within the permitted time
+        """
+        raise NotImplementedError("")
 
     def run(self):
         self.sound.start()
         while self.playing:
             self.next_line()
+
             time.sleep(1./self.speed)
         self.renderer.stop()
 
-t = LightsHero(width = 10, height = 15, num_lanes=5, path='./songs/Feelings', level=('difficult'), speed=10)
+t = LightsHero(width = 10, height = 15, num_lanes=5, path='./songs/Feelings', level='expert', speed=15)
 t.start()
