@@ -27,6 +27,7 @@ class SongReader():
         """
         self.num_lanes = num_lanes
         self.level = level
+        self.eof = False
 
         # Config parser
         parser = ConfigParser.ConfigParser()
@@ -57,8 +58,7 @@ class SongReader():
 
     def read(self):
         """
-
-        :return: None if EOF or EndOfTrackEvent has been reached
+        :return: The next line (5 lanes) to be displayed
         """
         if not self.start:
             self.start = time.time()
@@ -87,8 +87,9 @@ class SongReader():
                     else:
                         line[lane] = 'background'
                         filled[lane] = True
-                else:
-                    pass#print type(event)
+                elif isinstance(event, midi.EndOfTrackEvent):
+                    self.eof = True
+                    break
             else:
                 # The next event will occur later, leave the loop
                 break

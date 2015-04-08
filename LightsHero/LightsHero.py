@@ -56,8 +56,8 @@ class Renderer(Thread):
         self.height = table_height
         self.width = table_width
         self.num_lanes = num_lanes
-        self.colors = ['darkgreen', 'darkred', 'gold', 'navy', 'purple']
-        self.intensity = {'background': 0.01, 'marker': 0.05, 'active': 0.9}
+        self.colors = ['darkgreen', 'darkred', 'orange', 'navy', 'deeppink']
+        self.intensity = {'background': 0.05, 'marker': 0.05, 'active': 0.9}
         self.running = True
 
     def stop(self):
@@ -104,7 +104,6 @@ class LightsHero(Arbapp):
         self.num_lanes = num_lanes
         self.score = 0
         self.speed = float(speed)
-        self.playing = True
         self.grid = [['background']*num_lanes for h in range(height)] # The coming notes (last line included even if it will overwritten by the bottom bar)
         self.grid_lock = Lock()
         self.bar = ['idle']*num_lanes # The bottom bar, idle = not pressed, hit = pressed during a note, pressed = pressed outside a note
@@ -113,7 +112,7 @@ class LightsHero(Arbapp):
         self.set_model(model)
 
         # Threads creation and starting
-        self.renderer = Renderer(40, model, self.grid, self.grid_lock, self.bar, height, num_lanes, width)
+        self.renderer = Renderer(50, model, self.grid, self.grid_lock, self.bar, height, num_lanes, width)
         self.reader = SongReader(path, num_lanes, level)
         self.sound = SoundManager(path, self.height/self.speed)
         self.hits = UserHits()
@@ -121,10 +120,10 @@ class LightsHero(Arbapp):
         self.hits.start()
 
     def next_line(self):
-        # Delete the last line leaving the grid
-        # Note : The bottom bar will overwrite the last line but the latter needs to be kept to draw the bottom bar
         self.grid_lock.acquire()
         try:
+            # Delete the last line leaving the grid
+            # Note : The bottom bar will overwrite the last line but the latter needs to be kept to draw the bottom bar
             for l in range(self.height-1, 0, -1):
                 for w in range(self.num_lanes):
                     self.grid[l][w] = self.grid[l-1][w]
@@ -155,18 +154,15 @@ class LightsHero(Arbapp):
         finally:
             self.grid_lock.release()
 
-    def correct_hit(self):
-        """
-        Return True if user has hit the good key within the permitted time
-        """
-        raise NotImplementedError("")
-
     def run(self):
         self.sound.start()
-        while self.playing:
+        countdown = self.height # Countdown triggered after Midi's EOF
+        while countdown>0:
             self.next_line()
             self.user_hits()
             time.sleep(1./self.speed)
+            if self.reader.eof:
+                countdown -= 1
         self.renderer.stop()
         self.hits.stop()
 
