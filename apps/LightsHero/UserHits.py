@@ -1,6 +1,5 @@
-from pygame import event, time, key, KEYDOWN, KEYUP, K_F1, K_F2, K_F3, K_F4, K_F5, QUIT
+from pygame import time, key, K_F1, K_F2, K_F3, K_F4, K_F5
 from threading import Thread
-from time import sleep
 
 class UserHits(Thread):
     hit_window = {'easy': 0.2, 'medium': 0.18, 'difficult': 0.16, 'expert': 0.14 }
