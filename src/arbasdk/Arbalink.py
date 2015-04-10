@@ -32,13 +32,12 @@ from json import load
 __all__ = ['Arbalink']
 
 class Arbalink(Thread):
-    def __init__(self, config_filename, rate=30, diminution=1, autorun=True):
+    def __init__(self, config_filename, diminution=1, autorun=True):
         Thread.__init__(self)
         self.setDaemon(True)
         self.current_device = 0
         self.serial = None
         self.model = None
-        self.refresh_rate = rate
         self.diminution = diminution
 
         with open(config_filename, 'r') as f:
@@ -109,12 +108,5 @@ class Arbalink(Thread):
                         self.connect_until(60)
             else:
                 self.connect()
-            sleep(1./self.refresh_rate)
+            sleep(1./self.config['refresh_rate'])
 
-if __name__ == '__main__':
-    link = Arbalink('/dev/ttyACM1', 1000000, rate=30)
-    link.start()
-    for i in range(64):
-        link.set_model(Arbamodel(10, 15, i, 0, 0))
-        sleep(0.2)
-    link.close()

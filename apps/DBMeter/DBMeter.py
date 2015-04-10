@@ -159,7 +159,7 @@ class DBMeter(Arbapp):
     def run(self):
         ##### Init and start the renderer
         model = Arbamodel(width, height, 'black')
-        self.renderer = Renderer(100, model, height, width, vertical)
+        self.renderer = Renderer(30, model, height, width, vertical)
         self.renderer.start()
         dbm.set_model(model)
         for f in self.files:

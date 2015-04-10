@@ -34,12 +34,12 @@ class ColorDemo(Arbapp):
         Arbapp.__init__(self, width, height)
         self.model = Arbamodel(self.width, self.height)
         self.set_model(self.model)
-        self.max_rate = 100  # Max refreshing rate in Hz
+        self.max_rate = 15  # Max refreshing rate in Hz
         self.semaphore = Semaphore(self.width*self.height)  # Thread synchronization
 
     def group_fade_colors(self, group_name, colors, duration, synchronized=None):
         num_steps = min(int(round(self.max_rate*duration, 0)), 256)
-        #print num_steps, "steps for", duration, "sec"
+        print num_steps, "steps for", duration, "sec"
         pairs = zip(colors, colors[1:])
         for color1, color2 in pairs:
             if synchronized:
