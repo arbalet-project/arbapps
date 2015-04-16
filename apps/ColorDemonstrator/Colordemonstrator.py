@@ -24,80 +24,60 @@ sys.path.append(os.path.realpath(os.path.dirname(__file__))+'/../../src/')
 import time
 import random
 from arbasdk import Arbamodel, Arbapp, Arbapixel
-from itertools import product
-from threading import Thread, Semaphore
-from copy import deepcopy
+from threading import Thread
 
-class ColorDemo(Arbapp):
+class LivingPixel(Thread):
+    def __init__(self, h, w, model, colors, max_rate, duration):
+        Thread.__init__(self)
+        self.h = h
+        self.w = w
+        self.model = model
+        self.max_rate = max_rate
+        self.duration = duration
+        self.colors = colors
+        self.running = True
 
-    def __init__(self, width, height, max_rate):
-        Arbapp.__init__(self, width, height)
-        self.model = Arbamodel(self.width, self.height)
-        self.set_model(self.model)
-        self.max_rate = max_rate  # Max refreshing rate in Hz
-        self.semaphore = Semaphore(self.width*self.height)  # Thread synchronization
-
-    def group_fade_colors(self, h, w, colors, duration, synchronized=None):
+    def fade_colors(self, h, w, duration):
         num_steps = int(self.max_rate*duration)
-        pairs = zip(colors, colors[1:])
+        pairs = zip(self.colors, self.colors[1:])
         for color1, color2 in pairs:
             for v in range(num_steps):
                 col = Arbapixel(color1)*((num_steps-v)/float(num_steps)) + Arbapixel(color2)*(v/float(num_steps))
                 self.model.set_pixel(h, w, col)
                 time.sleep(duration/float(num_steps))
+                if not self.running: return
 
-    def group_fade_colors_loop(self, h, w, colors, duration_transition, overall_duration, synchronized=None):
-        if colors[:-1]!=colors[0]:
-            colors = deepcopy(colors)
-            colors.append(colors[0])
-        t0 = time.time()
-        while time.time()-t0 < overall_duration:
-            self.group_fade_colors(h, w, colors, duration_transition, synchronized)
-
-
-
-    def all_color_wheel(self, overall_time, fading=True):
-        # 6 transitions + 2 fades in overall_time seconds
-        num_transitions = 8 if fading else 6
-        if fading:
-            self.group_fade_up(float(overall_time)/num_transitions, "red")
-        color = Arbapixel("red")
-        self.model.set_all(color)
-        wheel = [(0, 1, 0), (-1, 0, 0), (0, 0, 1), (0, -1, 0), (1, 0, 0), (0, 0, -1)]
-        for w in wheel:
-            for i in range(255):
-                color.set_color(color.r + w[0], color.g + w[1], color.b + w[2])
-                self.model.set_all(color)
-                time.sleep(float(overall_time)/num_transitions/256.)
-        if fading:
-            self.group_fade_down(float(overall_time)/num_transitions, "red")
-
-    def living_pixels(self, colors, synchronized=None):
-        threads = []
-        for w in range(self.width):
-            for h in range(self.height):
-                speed = random.randrange(350, 700)/100.
-                t = Thread(None, self.group_fade_colors_loop, None, (h, w, colors, speed, 60, synchronized))
-                threads.append(t)
-        for t in threads:
-            t.start()
-        for t in threads:
-            t.join()
-        t.s
+    def stop(self):
+        self.running = False
 
     def run(self):
-        time.sleep(2)
-        #self.all_color_wheel(5)
-        #for combination in list(product([0, 128, 255], repeat=3))[1:]:
-        #    self.all_fade_up_down("all", 0.7, combination)
-        self.living_pixels(['slateblue', 'gold', 'deeppink', 'peru', 'yellowgreen'])
-        time.sleep(1)
+        while self.running:
+            self.fade_colors(self.h, self.w, self.duration)
 
-# Actual call starting the program
-def main():
-    e = ColorDemo(width = 10, height = 15, max_rate=15)
-    e.run()
-    e.close("end")
+class ColorDemo(Arbapp):
+    def __init__(self, width, height, colors, dur_min, dur_max, max_rate = 10):
+        Arbapp.__init__(self, width, height)
+        self.model = Arbamodel(self.width, self.height)
+        self.set_model(self.model)
+        self.max_rate = max_rate  # Max refreshing rate in Hz
+        self.durations = [dur_min, dur_max]
+        self.threads = []
+        if colors[:-1]!=colors[0]:
+            colors.append(colors[0])
+        self.colors = colors
 
-import cProfile
-cProfile.run('main()')
+    def run(self):
+        for w in range(self.width):
+            for h in range(self.height):
+                duration = random.randrange(self.durations[0]*10, self.durations[1]*10)/10.
+                self.threads.append(LivingPixel(h, w, self.model, self.colors, self.max_rate, duration))
+        for t in self.threads:
+            t.start()
+        raw_input('Press enter to kill Color Demonstrator')
+        for t in self.threads:
+            t.running = False
+
+e = ColorDemo(width = 10, height = 15, colors=['navy', 'gold', 'deeppink', 'yellowgreen', 'purple'],
+              dur_min=10, dur_max=60)
+e.run()
+e.close("end")
