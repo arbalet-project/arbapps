@@ -127,7 +127,10 @@ class DBMeter(Arbapp):
 
         sample_range = map(str_to_int, list(chunks(sample, self.file.getsampwidth())))
         fft_data = abs(numpy.fft.rfft(sample_range)) # real fft gives samplewidth/2 bands
-        fft_freq = numpy.fft.rfftfreq(len(sample_range))
+        try:
+            fft_freq = numpy.fft.rfftfreq(len(sample_range))
+        except AttributeError:   # numpy<1.8
+            fft_freq = [0.5/len(fft_data)*f for f in range(len(fft_data))]
         freq_hz = [abs(fft_freq[i])*self.file.getframerate() for i, fft in enumerate(fft_data)]
         fft_freq_scaled = [0.]*len(self.db_scale)
         ref_index = 0
