@@ -22,15 +22,15 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-from . Arbamodel import *
 from . Arbasim import *
 from . Arbalink import *
-import os
+from os import path
+import arbasdk
 
 __all__ = ['Arbalet']
 
 class Arbalet(object):
-    def __init__(self, simulation, hardware, width, height, diminution=1, factor_sim=30):
+    def __init__(self, simulation, hardware, width, height, diminution=1, factor_sim=30, config='config150.cfg'):
         self.simulation = simulation
         self.hardware = hardware
         self.width = width
@@ -41,7 +41,7 @@ class Arbalet(object):
             self.arbasim = Arbasim(self.width, self.height, self.width*factor_sim, self.height*factor_sim)
 
         if self.hardware:
-            self.arbalink = Arbalink(os.path.dirname(__file__)+'/../../config/config150.cfg', diminution=self.diminution)
+            self.arbalink = Arbalink(path.join(path.dirname(arbasdk.__file__), '..', 'config', config), diminution=self.diminution)
 
 
     def set_model(self, model):
