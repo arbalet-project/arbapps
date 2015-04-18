@@ -25,8 +25,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
-import sys, os, struct
-sys.path.append(os.path.realpath(os.path.dirname(__file__))+'/../../src/')
+import sys, struct
 import numpy
 from arbasdk import Arbamodel, Arbapp, hsv
 from threading import Thread
@@ -128,7 +127,8 @@ class DBMeter(Arbapp):
         sample_range = map(str_to_int, list(chunks(sample, self.file.getsampwidth())))
         fft_data = abs(numpy.fft.rfft(sample_range)) # real fft gives samplewidth/2 bands
         fft_freq = numpy.fft.rfftfreq(len(sample_range))
-        freq_hz = [abs(fft_freq[i])*self.file.getframerate() for i, fft in enumerate(fft_data)]
+        print len(fft_freq), len(fft_data)
+	freq_hz = [abs(fft_freq[i])*self.file.getframerate() for i, fft in enumerate(fft_data)]
         fft_freq_scaled = [0.]*len(self.db_scale)
         ref_index = 0
         for i, f in enumerate(fft_data):
