@@ -44,7 +44,7 @@ class Tetromino(object):
              'l': [[5, 0],
                    [5, 0],
                    [5, 5]]}
-    colors = ['black', 'cyan', 'green', 'pink', 'yellow', 'orange']
+    colors = ['black', 'cyan', 'green', 'deeppink', 'yellow', 'orangered']
 
     def __init__(self, px, py, height, width):
         self.type = random.choice(self.types.keys())
