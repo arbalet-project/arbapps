@@ -28,10 +28,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
-import sys, os
-sys.path.append(os.path.realpath(os.path.dirname(__file__))+'/../../src/')
 import time
-from copy import deepcopy
 import random
 from threading import Thread, Lock
 from SongReader import SongReader
