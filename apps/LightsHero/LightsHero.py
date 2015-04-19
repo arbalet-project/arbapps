@@ -54,7 +54,7 @@ class Renderer(Thread):
         self.width = table_width
         self.num_lanes = num_lanes
         self.colors = ['darkgreen', 'darkred', 'orange', 'navy', 'deeppink']
-        self.intensity = {'background': 0.05, 'marker': 0.05, 'active': 0.9}
+        self.intensity = {'background': 0.05, 'marker': 0.03, 'active': 0.9}
         self.running = True
 
     def stop(self):
@@ -110,8 +110,8 @@ class LightsHero(Arbapp):
 
         # Threads creation and starting
         self.renderer = Renderer(50, model, self.grid, self.grid_lock, self.bar, height, num_lanes, width)
-        self.reader = SongReader(path, num_lanes, level)
-        self.sound = SoundManager(path, self.height/self.speed)
+        self.reader = SongReader(path, num_lanes, level, speed)
+        self.sound = SoundManager(path, (self.height-2)/self.speed)
         self.hits = UserHits()
         self.renderer.start()
         self.hits.start()
