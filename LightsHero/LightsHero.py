@@ -35,7 +35,7 @@ from SongReader import SongReader
 from SoundManager import SoundManager
 from UserHits import UserHits
 import pygame
-from arbasdk import Arbamodel, Arbapp, Arbapixel
+from arbasdk import Arbapp, Arbapixel
 
 
 class Renderer(Thread):
@@ -105,11 +105,9 @@ class LightsHero(Arbapp):
         self.grid_lock = Lock()
         self.bar = ['idle']*num_lanes # The bottom bar, idle = not pressed, hit = pressed during a note, pressed = pressed outside a note
         pygame.init()
-        model = Arbamodel(width, height, 'black')
-        self.set_model(model)
 
         # Threads creation and starting
-        self.renderer = Renderer(50, model, self.grid, self.grid_lock, self.bar, height, num_lanes, width)
+        self.renderer = Renderer(50, self.model, self.grid, self.grid_lock, self.bar, height, num_lanes, width)
         self.reader = SongReader(path, num_lanes, level, speed)
         self.sound = SoundManager(path, (self.height-2)/self.speed)
         self.hits = UserHits()

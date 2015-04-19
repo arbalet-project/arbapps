@@ -25,13 +25,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
-import sys, struct
-import numpy
-from arbasdk import Arbamodel, Arbapp, hsv
+import struct, argparse, numpy, pyaudio, audioop, wave, time
+from arbasdk import Arbapp, hsv
 from threading import Thread
-from random import shuffle
 from copy import copy
-import pyaudio, audioop, wave, time
 
 class Renderer(Thread):
     """
@@ -40,7 +37,6 @@ class Renderer(Thread):
     """
     def __init__(self, rate, model, height, width, vertical=True):
         Thread.__init__(self)
-        self.setDaemon(True)
         self.rate = rate
         self.model = model
         self.height = height
@@ -52,18 +48,11 @@ class Renderer(Thread):
         self.amplitude_factor = 7000000 # Sum of amplitudes [tricky to compute and cannot be real-time]
         self.running = True
 
-    def __del__(self):
-        self.pyaudio.terminate()
-
-    def update_bands(self, averages):
-        """
-        This function is called when a new FFT is available and sent to the render thanks to the latter
-        TODO: thread-safe
-        """
-        self.averages = map(int, averages)
-
     def stop(self):
         self.running = False
+
+    def update_bands(self, averages):
+        self.averages = map(int, averages)
 
     def draw_bars_hv(self, num_bands, num_bins, vertical):
         for bin in range(num_bins):
@@ -98,11 +87,11 @@ class DBMeter(Arbapp):
     """
     This is the main entry point of the spectrum analyser, it reads the file, computes the FFT and plays the sound
     """
-    def __init__(self, height, width, files, vertical=True):
-        Arbapp.__init__(self, width, height)
+    def __init__(self, height, width, argparser, vertical=True):
+        Arbapp.__init__(self, width, height, argparser)
         self.chunk = 4*1024
         self.vertical = vertical
-        self.files = files
+        self.parser = argparser
         self.renderer = None
         self.file = None
         self.pyaudio = pyaudio.PyAudio()
@@ -114,7 +103,7 @@ class DBMeter(Arbapp):
         #self.db_scale = [self.file.getframerate()*2**(b-self.num_bands) for b in range(self.num_bands)]
         #self.db_scale = [self.min+self.max*2**(b-self.num_bands+1) for b in range(self.num_bands)]
         self.db_scale = [self.max*(numpy.exp(-numpy.log(float(self.min)/self.max)/self.num_bands))**(b-self.num_bands) for b in range(1, self.num_bands+1)]
-        print "Scale of maximum frequencies:", self.db_scale
+        print "Scale of maximum frequencies:", map(int, self.db_scale)
 
     def fft(self, sample):
         def chunks(l, n):
@@ -160,24 +149,18 @@ class DBMeter(Arbapp):
 
     def run(self):
         ##### Init and start the renderer
-        model = Arbamodel(width, height, 'black')
-        self.renderer = Renderer(30, model, height, width, vertical)
+        self.renderer = Renderer(30, self.model, self.height, self.width, self.vertical)
         self.renderer.start()
-        dbm.set_model(model)
-        for f in self.files:
+        for f in self.args.input:
             self.play_file(f)
+        self.renderer.stop()
 
 if __name__=='__main__':
-    files = []
-    for arg in sys.argv:
-        file = arg if arg.lower().endswith('.wav') else None
-        if file: files.append(file)
-    if len(files)==0:
-        print "Please specify WAVE files in argument"
-    else:
-        width = 10
-        height = 15
-        vertical = False
-        shuffle(files)
-        dbm = DBMeter(15, 10, files, vertical)
-        dbm.start()
+    parser = argparse.ArgumentParser(description='Spectrum analyzer of WAVE files')
+    parser.add_argument('-i', '--input',
+                        type=str,
+                        required=True,
+                        nargs='+',
+                        help='Wave file(s) to play')
+    dbm = DBMeter(15, 10, parser, vertical=False)
+    dbm.start()
