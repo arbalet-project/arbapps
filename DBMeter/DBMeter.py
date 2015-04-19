@@ -37,6 +37,7 @@ class Renderer(Thread):
     """
     def __init__(self, rate, model, height, width, vertical=True):
         Thread.__init__(self)
+        self.setDaemon(True)
         self.rate = rate
         self.model = model
         self.height = height
