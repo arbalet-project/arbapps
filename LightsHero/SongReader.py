@@ -19,7 +19,7 @@ class SongReader():
     mapping = {'difficult' : [84, 85, 86, 87, 88], # mapping level-> [midi pitch for each lane]
                'expert': [96, 97, 98, 99, 100] }
 
-    def __init__(self, path, num_lanes, level):
+    def __init__(self, path, num_lanes, level, speed):
         """
         :param path: Path of the folder of the song (should contain song.ini and notes.mid)
         :param num_lanes: deprecated? Format supports only 5 lanes
@@ -27,6 +27,7 @@ class SongReader():
         """
         self.num_lanes = num_lanes
         self.level = level
+        self.speed = speed
         self.eof = False
 
         # Config parser
@@ -49,6 +50,7 @@ class SongReader():
 
         self.old_line = None
         self.start = None # Stores when the song started playing
+        self.line_id = 0
 
     def now(self):
         """
@@ -102,6 +104,11 @@ class SongReader():
                     filled[lane] = True
         self.old_line = copy(line)
 
-        # TODO draw measures or background for lanes not filled
+        for lane in range(self.num_lanes):
+            if not filled[lane] and self.line_id%int(4./3*self.speed)==0:
+                line[lane] = 'marker'
+                filled[lane] = True
+
+        self.line_id += 1
         return line
 
