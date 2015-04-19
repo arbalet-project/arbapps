@@ -24,28 +24,43 @@
 """
 
 from Arbalet import *
-import sys
-from threading import Thread
+import argparse
 
 __all__ = ['Arbapp']
 
 class Arbapp(object):
 
-    # Authorized arguments
-    authorized_opts = ["simulation", "hardware", "s", "a"]
-
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        opts = self.readopts(sys.argv)
-        self.arbalet = Arbalet("simulation" in opts or "s" in opts or len(opts)==0,
-                               "hardware" in opts or "a" in opts,
-                               width, height, 1)
-        #self.run()
-        #self.close("Program naturally ended")
+        default_config = 'config150.cfg'
 
-    def readopts(self, argv):
-        return [x.lstrip('-') for x in argv if x.lstrip('-') in self.authorized_opts]
+        parser = argparse.ArgumentParser(description='This script runs on Arbalet and allows the following arguments:')
+        parser.add_argument('-w', '--hardware',
+                            type=bool,
+                            default=False,
+                            help='True if the program must connect directly to Arbalet hardware')
+        parser.add_argument('-s', '--simulation',
+                            type=bool,
+                            default=True,
+                            help='True if the program must be simulated on the workstation in a 2D window')
+        parser.add_argument('-c', '--config',
+                            type=str,
+                            default=default_config,
+                            help='Name of the config file describing the table (.cfg file)')
+        parser.add_argument('-b', '--brightness',
+                            type=float,
+                            default=1,
+                            help='Brightness, intensity of hardware LEDs between 0.0 (all LEDs off) and 1.0 (all LEDs at full brightness)')
+        parser.add_argument('-f', '--factor_sim',
+                            type=int,
+                            default=40,
+                            help='Size of the simulated pixels')
+        self.args = parser.parse_args()
+
+        self.arbalet = Arbalet(self.args.simulation,
+                               self.args.hardware, width, height,
+                               self.args.brightness, self.args.factor_sim, self.args.config)
 
     def set_model(self, model):
         self.arbalet.set_model(model)
@@ -56,7 +71,9 @@ class Arbapp(object):
     def start(self):
         try:
             self.run()
-        finally:
+        except:
+            self.close("Program raised exception")
+        else:
             self.close("Program naturally ended")
 
     def close(self, reason='unknown'):
