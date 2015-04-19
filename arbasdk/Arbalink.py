@@ -122,5 +122,3 @@ class Arbalink(Thread):
                 self.connect_until(60)
             else:
                 sleep(1./self.config['refresh_rate'])
-        print "Arbalink stop"
-
