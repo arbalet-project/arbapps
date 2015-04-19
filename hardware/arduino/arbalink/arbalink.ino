@@ -94,6 +94,6 @@ void loop() {
         colors[pixel] = (rgb_color){ matrix[3*pixel], matrix[3*pixel+1], matrix[3*pixel+2] };
       }
     }
-    Serial.println(num);
+    //Serial.println(num);
     ledStrip.write(colors, WIDTH*HEIGHT);
 }

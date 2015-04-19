@@ -23,30 +23,48 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-from Arbalet import *
+from Arbalet import Arbalet
+from Arbamodel import Arbamodel
 import argparse
 
 __all__ = ['Arbapp']
 
 class Arbapp(object):
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, argparser=None):
         self.width = width
         self.height = height
-        default_config = 'config150.cfg'
+        self.default_config = 'config150.cfg'
 
-        parser = argparse.ArgumentParser(description='This script runs on Arbalet and allows the following arguments:')
+        self.read_args(argparser)
+
+        self.arbalet = Arbalet(not self.args.no_simulation, self.args.hardware, width, height,
+                               self.args.brightness, self.args.factor_sim, self.args.config)
+
+        self.model = Arbamodel(width, height, 'black')
+        self.set_model(self.model)
+        self.hardware, self.simulation = False, True
+
+
+    def read_args(self, argparser):
+        if argparser:
+            parser = argparser
+        else:
+            parser = argparse.ArgumentParser(description='This script runs on Arbalet and allows the following arguments:')
+
         parser.add_argument('-w', '--hardware',
-                            type=bool,
+                            action='store_const',
+                            const=True,
                             default=False,
-                            help='True if the program must connect directly to Arbalet hardware')
-        parser.add_argument('-s', '--simulation',
-                            type=bool,
-                            default=True,
-                            help='True if the program must be simulated on the workstation in a 2D window')
+                            help='The program must connect directly to Arbalet hardware')
+        parser.add_argument('-s', '--no-simulation',
+                            action='store_const',
+                            const=True,
+                            default=False,
+                            help='The program must not be simulated on the workstation in a 2D window')
         parser.add_argument('-c', '--config',
                             type=str,
-                            default=default_config,
+                            default=self.default_config,
                             help='Name of the config file describing the table (.cfg file)')
         parser.add_argument('-b', '--brightness',
                             type=float,
@@ -57,10 +75,6 @@ class Arbapp(object):
                             default=40,
                             help='Size of the simulated pixels')
         self.args = parser.parse_args()
-
-        self.arbalet = Arbalet(self.args.simulation,
-                               self.args.hardware, width, height,
-                               self.args.brightness, self.args.factor_sim, self.args.config)
 
     def set_model(self, model):
         self.arbalet.set_model(model)

@@ -21,7 +21,7 @@
 """
 import time
 import random
-from arbasdk import Arbamodel, Arbapp, Arbapixel
+from arbasdk import Arbapp, Arbapixel
 from threading import Thread
 
 class LivingPixel(Thread):
@@ -55,8 +55,6 @@ class LivingPixel(Thread):
 class ColorDemo(Arbapp):
     def __init__(self, width, height, colors, dur_min, dur_max, max_rate = 10):
         Arbapp.__init__(self, width, height)
-        self.model = Arbamodel(self.width, self.height)
-        self.set_model(self.model)
         self.max_rate = max_rate  # Max refreshing rate in Hz
         self.durations = [dur_min, dur_max]
         self.threads = []

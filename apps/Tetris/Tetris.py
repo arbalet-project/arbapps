@@ -26,7 +26,7 @@ import random
 import numpy
 from copy import deepcopy
 import pygame
-from arbasdk import Arbamodel, Arbapp
+from arbasdk import Arbapp
 
 class Tetromino(object):
     types = {'i' : [[1],
@@ -76,8 +76,6 @@ class Tetris(Arbapp):
         Arbapp.__init__(self, width, height)
         self.grid = numpy.zeros([height, width], dtype=int)
         self.old_grid = deepcopy(self.grid)
-        self.model = Arbamodel(width, height)
-        self.set_model(self.model)
         self.speed = 2 # Speed of tetromino fall in Hertz
         self.last_event = 0
         self.score = 0
@@ -105,12 +103,11 @@ class Tetris(Arbapp):
             joystick = pygame.joystick.Joystick(0)
             joystick.init()
             hat = joystick.get_hat(0)
-
-        if (hat[0]!=0 or hat[1]!=0 or self.new_event) and time.time()-self.last_event>0.08:
-            self.new_event = True
-            self.last_event = time.time()
-        else:
-            self.new_event = False
+            if (hat[0]!=0 or hat[1]!=0 or self.new_event) and time.time()-self.last_event>0.08:
+                self.new_event = True
+                self.last_event = time.time()
+            else:
+                self.new_event = False
 
         if self.new_event:
 
