@@ -23,10 +23,15 @@ import time
 import random
 from arbasdk import Arbapp, Arbapixel
 
-def gen_swipe_async(n_frames, colors):
+def gen_swipe_async(n_frames, n_frames_fade, n_frames_rand, colors):
+    # This loop fades up and is also the random seed
+    for f in range(n_frames_rand):
+        yield Arbapixel(colors[0])*(float(f)/n_frames_rand)
+
     color_generator = [[float(x)/n_frames for x in range(n_frames, -1, -1)],           # Descending phase
                        [float(x)/n_frames for x in range(n_frames)]]                   # Ascending phase
 
+    # Infinite loop on color sequence
     pairs = zip(colors, colors[1:])
     while True:
         for color1, color2 in pairs:
@@ -34,7 +39,8 @@ def gen_swipe_async(n_frames, colors):
                 col = Arbapixel(color1)*color_generator[0][s] + Arbapixel(color2)*color_generator[1][s]
                 yield col
 
-def gen_random_flashing(n_frames, colors):
+def gen_random_flashing(n_frames, n_frames_fade, n_frames_rand, colors):
+    n_frames += n_frames_rand
     n_frames -= n_frames%2  # We need an even number of frames since we are going to divide them by two
     base_exp = [1.1**(p-n_frames/2+1) for p in range(n_frames/2)]  # The first n_frames/2 are an exponential ascending phase
     reverse_base = [base_exp[i] for i in range(n_frames/2-1, -1, -1)]  # The last n_frames/2 are an exponential descending phase
@@ -42,10 +48,16 @@ def gen_random_flashing(n_frames, colors):
     blue_generator = [1.0-i for i in white_generator]
     color_generator = [blue_generator, white_generator]
 
+    # Fade up
+    for f in range(n_frames_fade):
+        yield Arbapixel(colors[0])*(float(f)/n_frames_fade)
+
+    start = n_frames/2
     while True:
-        for s in range(n_frames):
+        for s in range(start, n_frames):
             col = Arbapixel(colors[0])*color_generator[0][s] + Arbapixel(colors[1])*color_generator[1][s]
             yield col
+        start = 0
 
 class ColorDemo(Arbapp):
     generators = [gen_random_flashing, gen_swipe_async, ]
@@ -65,7 +77,7 @@ class ColorDemo(Arbapp):
         for h in range(self.height):
             for w in range(self.width):
                 duration = random.randrange(self.durations[0], self.durations[1])
-                generators[h][w] = self.generator(duration, self.colors)
+                generators[h][w] = self.generator(self.durations[0], self.rate, duration, self.colors)
 
         # Browse all pixel generators at each time
         while True:
@@ -80,8 +92,8 @@ class ColorDemo(Arbapp):
             time.sleep(1./self.rate)
 
 
-#e = ColorDemo(width = 10, height = 15, colors=['gold', 'orange', 'darkorange', 'red'], rate=20, dur_min=1, dur_max=10, generator_id=1)
-e = ColorDemo(width = 10, height = 15, colors=['darkblue', 'white'], rate=20, dur_min=10, dur_max=60, generator_id=0)
+e = ColorDemo(width = 10, height = 15, colors=['gold', 'darkorange', 'darkred', 'deeppink', 'purple', 'darkblue', 'turquoise', 'darkgreen', 'yellowgreen'], rate=20, dur_min=10, dur_max=20, generator_id=1)
+#e = ColorDemo(width = 10, height = 15, colors=['darkblue', 'white'], rate=20, dur_min=10, dur_max=60, generator_id=0)
 
 e.run()
 e.close("end")
