@@ -4,7 +4,7 @@
     Spectrum Analyzer for Audio files
 
     This Spectrum analyzer has 2 classes:
-    * DBMeter: reading a wave file, computing the Discrete Fourier Transform
+    * SpectrumAnalyser: reading a wave file, computing the Discrete Fourier Transform
       (DFT, FFT) for each chunk of file, and playing the chunk of sound
     * Renderer: coloring the table with respect to the FFT
     It works in vertical and horizontal, splitting the range of frequencies consequently
@@ -46,7 +46,7 @@ class Renderer(Thread):
         self.num_bands = width if vertical else height
         self.vertical = vertical
         self.colors = [hsv(c, 100, 100) for c in range(0, 360, int(360./self.num_bands))]
-        self.amplitude_factor = 7000000 # Sum of amplitudes [tricky to compute and cannot be real-time]
+        self.amplitude_factor = 3500000 # Sum of amplitudes [tricky to compute and cannot be real-time] TODO
         self.running = True
 
     def stop(self):
@@ -63,7 +63,7 @@ class Renderer(Thread):
                     color = self.colors[band]
                 elif self.old_model: # animation with light decreasing
                     old = self.old_model.get_pixel(bin if vertical else band, band if vertical else bin).hsva
-                    color = hsv(old[0], old[1], old[2]*0.95)
+                    color = hsv(old[0], old[1], old[2]*0.8)
                 else:
                     color = 'black'
                 self.model.set_pixel(bin if vertical else band, band if vertical else bin, color)
@@ -84,13 +84,13 @@ class Renderer(Thread):
             self.draw_bars()
             time.sleep(1./self.rate)
 
-class DBMeter(Arbapp):
+class SpectrumAnalyser(Arbapp):
     """
     This is the main entry point of the spectrum analyser, it reads the file, computes the FFT and plays the sound
     """
     def __init__(self, height, width, argparser, vertical=True):
         Arbapp.__init__(self, width, height, argparser)
-        self.chunk = 4*1024
+        self.chunk = 2*1024
         self.vertical = vertical
         self.parser = argparser
         self.renderer = None
@@ -107,6 +107,9 @@ class DBMeter(Arbapp):
         print "Scale of maximum frequencies:", map(int, self.db_scale)
 
     def fft(self, sample):
+        """
+        Compute the FFT on this sample and update the self.averages FFT result
+        """
         def chunks(l, n):
             for i in xrange(0, len(l), n):
                 yield l[i:i+n]
@@ -149,7 +152,6 @@ class DBMeter(Arbapp):
             self.stream.close()
 
     def run(self):
-        ##### Init and start the renderer
         self.renderer = Renderer(30, self.model, self.height, self.width, self.vertical)
         self.renderer.start()
         for f in self.args.input:
@@ -163,5 +165,4 @@ if __name__=='__main__':
                         required=True,
                         nargs='+',
                         help='Wave file(s) to play')
-    dbm = DBMeter(15, 10, parser, vertical=False)
-    dbm.start()
+    SpectrumAnalyser(15, 10, parser, vertical=False).start()
