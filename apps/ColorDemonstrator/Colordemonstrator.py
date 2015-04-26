@@ -66,7 +66,7 @@ class ColorDemo(Arbapp):
         Arbapp.__init__(self, width, height)
         self.durations = [int(dur_min*rate), int(dur_max*rate)]
         self.rate = rate
-        if colors[:-1]!=colors[0]:
+        if colors[-1]!=colors[0]:
             colors.append(colors[0])
         self.colors = colors
         self.generator = self.generators[generator_id]
