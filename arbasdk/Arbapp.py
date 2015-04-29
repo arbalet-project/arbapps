@@ -38,8 +38,8 @@ class Arbapp(object):
 
         self.read_args(argparser)
 
-        self.arbalet = Arbalet(not self.args.no_simulation, self.args.hardware, width, height,
-                               self.args.brightness, self.args.factor_sim, self.args.config)
+        self.arbalet = Arbalet(not self.args.no_gui, self.args.hardware, width, height,
+                               self.args.server, self.args.brightness, self.args.factor_sim, self.args.config)
 
         self.model = Arbamodel(width, height, 'black')
         self.set_model(self.model)
@@ -57,11 +57,15 @@ class Arbapp(object):
                             const=True,
                             default=False,
                             help='The program must connect directly to Arbalet hardware')
-        parser.add_argument('-s', '--no-simulation',
+        parser.add_argument('-ng', '--no-gui',
                             action='store_const',
                             const=True,
                             default=False,
                             help='The program must not be simulated on the workstation in a 2D window')
+        parser.add_argument('-s', '--server',
+                            type=str,
+                            default='',
+                            help='Address and port of the Arbaserver sharing hardware (ex: myserver.local:33400, 192.168.0.15, ...)')
         parser.add_argument('-c', '--config',
                             type=str,
                             default=self.default_config,
@@ -87,6 +91,7 @@ class Arbapp(object):
             self.run()
         except:
             self.close("Program raised exception")
+            raise
         else:
             self.close("Program naturally ended")
 

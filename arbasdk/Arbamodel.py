@@ -22,7 +22,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-from Arbapixel import *
+from Arbapixel import Arbapixel
 from copy import deepcopy
 from itertools import product
 from threading import Lock
@@ -185,7 +185,7 @@ class Arbamodel(object):
         return model
 
     def __repr__(self):
-        return self.model
+        return self.__str__()
 
     def __str__(self):
         return str(self.model)
@@ -196,6 +196,19 @@ class Arbamodel(object):
             for h in range(self.height):
                 model.model[h][w] = self.model[h][w]*m
         return model
+
+    def to_json(self):
+        return [[p.to_json() for p in self.model[num_row]] for num_row, row in enumerate(self.model)]
+
+    def from_json(self, json_model):
+        height = len(json_model)
+        width = len(json_model[0]) if height>0 else 0
+        if height!=self.get_height() or width!=self.get_width():
+            raise ValueError("Data received have size [{}, {}] while model expects [{}, {}]".format(height, width, self.get_height(), self.get_width()))
+        for w in range(width):             # TODO Find sth more efficient that constructing objects and browsing lists so much
+            for h in range(height):
+                self.set_pixel(h, w, *json_model[h][w])
+
 
 if __name__ == '__main__':
     m = Arbamodel(10, 10, 'black')

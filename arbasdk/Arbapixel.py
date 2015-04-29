@@ -81,7 +81,7 @@ class Arbapixel(object):
                          self.__limit(self.a-other.a))
 
     def __repr__(self):
-        return self.__pygame_color.__repr__()
+        return self.__str__()
 
     def __str__(self):
         return self.__pygame_color.__str__()
@@ -97,6 +97,12 @@ class Arbapixel(object):
 
     def set_color(self, *color):
         self.__set_pygame_color(*color)
+
+    def to_json(self):
+        return [self.r, self.g, self.b, self.a]
+
+
+
 
 if __name__ == '__main__':
     black1 = Arbapixel('red')
