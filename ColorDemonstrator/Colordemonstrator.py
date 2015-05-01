@@ -147,5 +147,5 @@ e = ColorDemo(width = 10, height = 15, colors=['gold', 'darkorange', 'darkred', 
 
 #e = ColorDemo(width = 10, height = 15, colors=['darkblue', 'white'], rate=20, dur_min=10, dur_max=60, generator_id=0)
 
-e.run()
+e.start()
 e.close("end")
