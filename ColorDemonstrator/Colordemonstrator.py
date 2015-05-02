@@ -60,7 +60,8 @@ def gen_sweep_rand(n_frames, n_frames_fade, n_frames_rand, colors):
     :param n_frames_rand: Random seed, extra duration added to n_frames to get the total duration
     :param colors: list of colors whose order will be randomized (no side effect)
     """
-    start = 0 #random.randint(0, n_frames-1)  # TODO debug, we should start a a certain PAIR instead
+    pairs = list(enumerate(zip(colors, colors[1:])))
+    start = random.randint(0, len(pairs)-1)
 
     color_generator = [[float(x)/n_frames for x in range(n_frames, -1, -1)],           # Descending phase
                        [float(x)/n_frames for x in range(n_frames)]]                   # Ascending phase
@@ -70,12 +71,12 @@ def gen_sweep_rand(n_frames, n_frames_fade, n_frames_rand, colors):
         yield Arbapixel(colors[0])*(color_generator[1][start]*(float(f)/n_frames_fade))
 
     # Infinite loop on color sequence
-    pairs = zip(colors, colors[1:])
     while True:
-        for color1, color2 in pairs:
+        for c in range(start, len(pairs)):
             for s in range(n_frames):
-                col = Arbapixel(color1)*color_generator[0][s] + Arbapixel(color2)*color_generator[1][s]
+                col = Arbapixel(pairs[c][1][0])*color_generator[0][s] + Arbapixel(pairs[c][1][1])*color_generator[1][s]
                 yield col
+        start = 0
 
 def gen_random_flashing(n_frames, n_frames_fade, n_frames_rand, colors):
     """
@@ -110,7 +111,7 @@ def gen_random_flashing(n_frames, n_frames_fade, n_frames_rand, colors):
 class ColorDemo(Arbapp):
     generators = [gen_random_flashing, gen_sweep_async, gen_sweep_rand, ]
 
-    def __init__(self, width, height, colors, rate, dur_min, dur_max, generator_id):
+    def __init__(self, width, height, colors, rate, generator_id, dur_min, dur_max=99999):
         Arbapp.__init__(self, width, height)
         self.durations = [int(dur_min*rate), int(dur_max*rate)]
         self.rate = rate
@@ -140,10 +141,10 @@ class ColorDemo(Arbapp):
             time.sleep(1./self.rate)
 
 
-e = ColorDemo(width = 10, height = 15, colors=['gold', 'darkorange', 'darkred', 'deeppink', 'purple', 'darkblue', 'turquoise', 'darkgreen', 'yellowgreen'], rate=20, dur_min=10, dur_max=15, generator_id=1)
+#e = ColorDemo(width = 10, height = 15, colors=['gold', 'darkorange', 'darkred', 'deeppink', 'purple', 'darkblue', 'turquoise', 'darkgreen', 'yellowgreen'], rate=20, dur_min=10, dur_max=15, generator_id=1)
 
 # African style
-#e = ColorDemo(width = 10, height = 15, colors=[(39,26, 19), (172, 69, 11), (232, 139, 36)], rate=20, dur_min=5, dur_max=15, generator_id=2)
+e = ColorDemo(width = 10, height = 15, colors=[(39, 26, 19), (49, 32, 23), (100, 66, 48), (172, 69, 11), (232, 139, 36)], rate=20, dur_min=30, generator_id=2)
 
 #e = ColorDemo(width = 10, height = 15, colors=['darkblue', 'white'], rate=20, dur_min=10, dur_max=60, generator_id=0)
 
