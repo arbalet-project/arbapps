@@ -31,17 +31,17 @@ __all__ = ['Arbapp']
 
 class Arbapp(object):
 
-    def __init__(self, width, height, argparser=None):
-        self.width = width
-        self.height = height
-        self.default_config = 'config150.cfg'
-
+    def __init__(self, argparser=None):
+        self._default_config = 'config150.cfg'
         self.read_args(argparser)
 
-        self.arbalet = Arbalet(not self.args.no_gui, self.args.hardware, width, height,
-                               self.args.server, self.args.brightness, self.args.factor_sim, self.args.config)
+        self.arbalet = Arbalet(not self.args.no_gui, self.args.hardware, self.args.server, self.args.brightness,
+                               self.args.factor_sim, self.args.config)
 
-        self.model = Arbamodel(width, height, 'black')
+        self.width = self.arbalet.width
+        self.height = self.arbalet.height
+
+        self.model = Arbamodel(self.width, self.height, 'black')
         self.set_model(self.model)
         self.hardware, self.simulation = False, True
 
@@ -68,7 +68,7 @@ class Arbapp(object):
                             help='Address and port of the Arbaserver sharing hardware (ex: myserver.local:33400, 192.168.0.15, ...)')
         parser.add_argument('-c', '--config',
                             type=str,
-                            default=self.default_config,
+                            default=self._default_config,
                             help='Name of the config file describing the table (.cfg file)')
         parser.add_argument('-b', '--brightness',
                             type=float,

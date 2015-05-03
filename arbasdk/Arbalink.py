@@ -23,15 +23,14 @@
 """
 
 from threading import Thread, Lock
-from serial import Serial, SerialException
+from serial import Serial
 from sys import stderr
 from time import sleep, time
-from json import load
 
 __all__ = ['Arbalink']
 
 class Arbalink(Thread):
-    def __init__(self, config_filename, diminution=1, autorun=True):
+    def __init__(self, config, diminution=1, autorun=True):
         Thread.__init__(self)
         self.setDaemon(True)
         self.current_device = 0
@@ -40,9 +39,7 @@ class Arbalink(Thread):
         self.model = None
         self.diminution = diminution
         self.running = True
-
-        with open(config_filename, 'r') as f:
-            self.config = load(f)
+        self.config = config
 
         if autorun:
             self.start()

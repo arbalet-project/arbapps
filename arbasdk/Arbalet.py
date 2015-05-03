@@ -26,24 +26,30 @@ from . Arbasim import Arbasim
 from . Arbalink import Arbalink
 from . Arbaclient import Arbaclient
 from os import path
+from json import load
 import arbasdk
 
 __all__ = ['Arbalet']
 
 class Arbalet(object):
-    def __init__(self, simulation, hardware, width, height, server='', diminution=1, factor_sim=30, config='config150.cfg'):
+    def __init__(self, simulation, hardware, server='', diminution=1, factor_sim=30, config='config150.cfg'):
         self.simulation = simulation
         self.hardware = hardware
-        self.width = width
-        self.height = height
         self.diminution = diminution
         self.server = server
+
+        config = path.join(path.dirname(arbasdk.__file__), '..', 'config', config)
+        with open(config, 'r') as f:
+            self.config = load(f)
+
+        self.height = len(self.config['mapping'])
+        self.width = len(self.config['mapping'][0]) if self.height>0 else 0
 
         if self.simulation:
             self.arbasim = Arbasim(self.width, self.height, self.width*factor_sim, self.height*factor_sim)
 
         if self.hardware:
-            self.arbalink = Arbalink(path.join(path.dirname(arbasdk.__file__), '..', 'config', config), diminution=self.diminution)
+            self.arbalink = Arbalink(self.config, diminution=self.diminution)
 
         if len(self.server)>0:
             server = self.server.split(':')
