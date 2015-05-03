@@ -47,8 +47,7 @@ class Arbalink(Thread):
     def connect(self):
         success = False
         device = self.config['devices'][self.current_device]
-        self.serial_lock.acquire()
-        try:
+        with self.serial_lock:
             try:
                 self.serial = Serial(device, self.config['speed'], timeout=0)
             except Exception, e:
@@ -57,8 +56,6 @@ class Arbalink(Thread):
                 self.current_device = (self.current_device+1) % len(self.config['devices'])
             else:
                 success = True
-        finally:
-            self.serial_lock.release()
         if success:
             sleep(2)
         return success
@@ -80,13 +77,10 @@ class Arbalink(Thread):
 
     def close(self, reason='unknown'):
         self.running = False
-        self.serial_lock.acquire()
-        try:
+        with self.serial_lock:
             if self.serial:
                 self.serial.close()
                 self.serial = None
-        finally:
-            self.serial_lock.release()
 
     def run(self):
         def __limit(v):
@@ -94,8 +88,7 @@ class Arbalink(Thread):
 
         while(self.running):
             reconnect = True
-            self.serial_lock.acquire()
-            try:
+            with self.serial_lock:
                 if self.serial and self.serial.isOpen():
                     if self.model:
                         array = bytearray(' '*(self.model.get_height()*self.model.get_width()*3))
@@ -113,8 +106,6 @@ class Arbalink(Thread):
                             pass
                         else:
                             reconnect = False
-            finally:
-                self.serial_lock.release()
             if reconnect:
                 self.connect_until(60)
             else:
