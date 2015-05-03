@@ -30,8 +30,13 @@ import argparse
 __all__ = ['Arbapp']
 
 class Arbapp(object):
+    app_declared = False  # True when an Arbapp has been instanciated
 
     def __init__(self, argparser=None):
+        if Arbapp.app_declared:
+            raise RuntimeError('Arbapp can be instanciated only once')
+
+        Arbapp.app_declared = True
         self._default_config = 'config150.cfg'
         self.read_args(argparser)
 
