@@ -61,8 +61,7 @@ class Renderer(Thread):
         self.running = False
 
     def update_view(self, flash_color):
-        self.grid_lock.acquire()
-        try:
+        with self.grid_lock:
             # Big area of coming notes
             for lane in range(self.num_lanes):
                 for chunk_lane in range(self.width/self.num_lanes):
@@ -84,8 +83,7 @@ class Renderer(Thread):
                 for chunk_lane in range(self.width/self.num_lanes):
                     w = lane*self.width/self.num_lanes + chunk_lane
                     self.model.set_pixel(self.height-1, w, color)
-        finally:
-            self.grid_lock.release()
+
 
 
     def run(self):
@@ -115,8 +113,7 @@ class LightsHero(Arbapp):
         self.hits.start()
 
     def next_line(self):
-        self.grid_lock.acquire()
-        try:
+        with self.grid_lock:
             # Delete the last line leaving the grid
             # Note : The bottom bar will overwrite the last line but the latter needs to be kept to draw the bottom bar
             for l in range(self.height-1, 0, -1):
@@ -127,15 +124,13 @@ class LightsHero(Arbapp):
             new_line = self.reader.read()
             for lane in range(self.num_lanes):
                 self.grid[0][lane] = new_line[lane]
-        finally:
-            self.grid_lock.release()
+
 
     def user_hits(self):
         """
         Read user inputs and update the bottom bar consequently
         """
-        self.grid_lock.acquire()
-        try:
+        with self.grid_lock:
             for lane in range(self.num_lanes):
                 must_press = self.grid[self.height-1][lane] == 'active' or self.grid[self.height-1][lane] == 'bump'
                 pressed = self.hits.get_pressed(lane)
@@ -146,8 +141,6 @@ class LightsHero(Arbapp):
                 else:
                     status = 'idle'
                 self.bar[lane] = status
-        finally:
-            self.grid_lock.release()
 
     def run(self):
         self.sound.start()
