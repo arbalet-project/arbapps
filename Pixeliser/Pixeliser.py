@@ -26,8 +26,8 @@ import time, cv2, argparse
 from arbasdk import Arbapp
 
 class Pixeliser(Arbapp):
-    def __init__(self, height, width, argparser):
-        Arbapp.__init__(self, width, height, argparser)
+    def __init__(self, argparser):
+        Arbapp.__init__(self, argparser)
         self.video_reader = None
 
     def play_file(self, f):
@@ -64,4 +64,4 @@ if __name__=='__main__':
                         nargs='+',
                         help='Video file(s) to pixelise')
     
-    Pixeliser(15, 10, parser).start()
+    Pixeliser(parser).start()

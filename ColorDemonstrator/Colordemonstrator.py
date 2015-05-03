@@ -111,8 +111,8 @@ def gen_random_flashing(n_frames, n_frames_fade, n_frames_rand, colors):
 class ColorDemo(Arbapp):
     generators = [gen_random_flashing, gen_sweep_async, gen_sweep_rand, ]
 
-    def __init__(self, width, height, colors, rate, generator_id, dur_min, dur_max=99999):
-        Arbapp.__init__(self, width, height)
+    def __init__(self,colors, rate, generator_id, dur_min, dur_max=99999):
+        Arbapp.__init__(self)
         self.durations = [int(dur_min*rate), int(dur_max*rate)]
         self.rate = rate
         if colors[-1]!=colors[0]:
@@ -141,12 +141,12 @@ class ColorDemo(Arbapp):
             time.sleep(1./self.rate)
 
 
-#e = ColorDemo(width = 10, height = 15, colors=['gold', 'darkorange', 'darkred', 'deeppink', 'purple', 'darkblue', 'turquoise', 'darkgreen', 'yellowgreen'], rate=20, dur_min=10, dur_max=15, generator_id=1)
+#e = ColorDemo(colors=['gold', 'darkorange', 'darkred', 'deeppink', 'purple', 'darkblue', 'turquoise', 'darkgreen', 'yellowgreen'], rate=20, dur_min=10, dur_max=15, generator_id=1)
 
 # African style
-e = ColorDemo(width = 10, height = 15, colors=[(39, 26, 19), (49, 32, 23), (100, 66, 48), (172, 69, 11), (232, 139, 36)], rate=20, dur_min=30, generator_id=2)
+e = ColorDemo(colors=[(39, 26, 19), (49, 32, 23), (100, 66, 48), (172, 69, 11), (232, 139, 36)], rate=20, dur_min=30, generator_id=2)
 
-#e = ColorDemo(width = 10, height = 15, colors=['darkblue', 'white'], rate=20, dur_min=10, dur_max=60, generator_id=0)
+#e = ColorDemo(colors=['darkblue', 'white'], rate=20, dur_min=10, dur_max=60, generator_id=0)
 
 e.start()
 e.close("end")
