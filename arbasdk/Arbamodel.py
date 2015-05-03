@@ -52,19 +52,13 @@ class Arbamodel(object):
         return self.height
 
     def get_pixel(self, h, w):
-        self.model_lock.acquire()
-        try:
+        with self.model_lock:
             p = self.model[h][w]
-        finally:
-            self.model_lock.release()
         return p
 
     def set_pixel(self, h, w, *color):
-        self.model_lock.acquire()
-        try:
+        with self.model_lock:
             self.model[h][w] = Arbapixel(*color)
-        finally:
-            self.model_lock.release()
         self.delete_from_group([(h, w)])
 
     def group_pixels(self, pixels, group_name, *color):
@@ -72,64 +66,39 @@ class Arbamodel(object):
             (isinstance(pixels[0], list) or isinstance(pixels[0], tuple) and len(pixels[0])==2):
             raise Exception("[Arbamodel.create_groupe] Unexpected parameter type {}, must be a list of coordinates".format(type(pixels)))
         try:
-            self.groups_lock.acquire()
-            try:
+            with self.groups_lock:
                 h, w = list(self.groups[group_name])[0]
-            finally:
-                self.groups_lock.release()
         except KeyError:
             pixel = Arbapixel(*color)
         else:
-            self.model_lock.acquire()
-            try:
+            with self.model_lock:
                 pixel = self.model[h][w]
-            finally:
-                self.model_lock.release()
-        self.model_lock.acquire()
-        try:
+        with self.model_lock:
             for h,w in pixels:
                 self.model[h][w] = pixel
-        finally:
-            self.model_lock.release()
 
         # Remove pixels from a former group
         self.delete_from_group(pixels)
-        self.groups_lock.acquire()
-        try:
+        with self.groups_lock:
             if not self.groups.has_key(group_name):
                 self.groups[group_name] = set()
             self.groups[group_name] = self.groups[group_name].union(map(tuple, pixels))
             for h, w in pixels:
                 self.reverse_groups[h][w] = group_name
-        finally:
-            self.groups_lock.release()
 
     def set_group(self, group_name, *color):
         if (not self.groups.has_key(group_name)) and group_name=="all":
             self.group_pixels(self.get_all_combinations(), "all", *color)
         h, w = next(iter(self.groups[group_name])) # raises a StopIteration if group is empty
-        self.model_lock.acquire()
-        try:
+        with self.model_lock:
             self.model[h][w].set_color(*color)
-        finally:
-            self.model_lock.release()
-
-    def get_group_pixel(self, group_name):
-        self.groups_lock.acquire()
-        try:
-            h, w = next(iter(self.groups[group_name]))
-            p = self.model[h][w]
-        finally:
-            self.groups_lock.release()
-        return
 
     def delete_from_group(self, pixels):
         if not (isinstance(pixels, list) or isinstance(pixels, tuple)) and len(pixels)>0 and \
         (isinstance(pixels[0], list) or isinstance(pixels[0], tuple) and len(pixels[0])==2):
             raise Exception("[Arbamodel.delete_from_group] Unexpected parameter type {}, must be a list of coordinates".format(type(pixels)))
 
-        self.groups_lock.acquire()
-        try:
+        with self.groups_lock:
             for h, w in pixels:
                 if self.reverse_groups[h][w]:
                     group_name = self.reverse_groups[h][w]
@@ -139,13 +108,9 @@ class Arbamodel(object):
                     if len(self.groups[group_name])==0:
                         self.groups.pop(group_name)
                     # Copy a new instance of this pixel, apart from the group
-                    self.model_lock.acquire()
-                    try:
+                    with self.model_lock:
                         self.model[h][w] = deepcopy(self.model[h][w])
-                    finally:
-                        self.model_lock.release()
-        finally:
-            self.groups_lock.release()
+
 
     def get_groups(self):
         return self.groups
@@ -157,11 +122,9 @@ class Arbamodel(object):
         if not self.groups.has_key('all'):
             self.group_pixels(list(product(range(self.height), range(self.width))), "all", *color)
         else:
-            self.model_lock.acquire()
-            try:
+            with self.model_lock:
                 self.model[0][0].set_color(*color)
-            finally:
-                self.model_lock.release()
+
 
     def __add__(self, other):
         model = Arbamodel(self.width, self.height)
