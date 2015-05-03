@@ -81,11 +81,8 @@ class Arbasim(threading.Thread):
         :param arbamodel:
         :return:
         """
-        self.lock_model.acquire()
-        try:
+        with self.lock_model:
             self.arbamodel = arbamodel
-        finally:
-            self.lock_model.release()
         self.sim_state = "running" if arbamodel!=None else "idle"
 
     def run(self):
@@ -102,7 +99,9 @@ class Arbasim(threading.Thread):
 
 
             # Render grid and pixels
-            self.grid.render(self.screen, self.arbamodel)
+            with self.lock_model:
+                self.grid.render(self.screen, self.arbamodel)
+
             caption = "[{}] Caption...".format(self.sim_state)
             rendered_caption = self.font.render(caption, 1, (255, 255, 255))
             location_caption = pygame.Rect((10,10), (300,20))
