@@ -14,7 +14,7 @@ setup(
     author_email="contact@konqi.fr",
     long_description=open('README.md').read(),
 
-    install_requires= ["pygame", "pyserial", ],
+    install_requires= ["pygame", "pyserial", "bottle"],
     include_package_data=True,
     zip_safe=False,  # contains data files
 
