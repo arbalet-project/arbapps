@@ -71,10 +71,9 @@ class Tetromino(object):
 
 
 class Tetris(Arbapp):
-
-    def __init__(self, width, height):
-        Arbapp.__init__(self, width, height)
-        self.grid = numpy.zeros([height, width], dtype=int)
+    def __init__(self):
+        Arbapp.__init__(self)
+        self.grid = numpy.zeros([self.height, self.width], dtype=int)
         self.old_grid = deepcopy(self.grid)
         self.speed = 2 # Speed of tetromino fall in Hertz
         self.last_event = 0
@@ -219,6 +218,6 @@ class Tetris(Arbapp):
                 self.score += lines*lines
 
 
-t = Tetris(width = 10, height = 15)
+t = Tetris()
 t.start()
 

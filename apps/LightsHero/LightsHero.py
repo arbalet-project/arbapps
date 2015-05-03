@@ -96,18 +96,18 @@ class Renderer(Thread):
             flash_color = not flash_color
 
 class LightsHero(Arbapp):
-    def __init__(self, width, height, num_lanes, path, level, speed):
-        Arbapp.__init__(self, width, height)
+    def __init__(self, num_lanes, path, level, speed):
+        Arbapp.__init__(self)
         self.num_lanes = num_lanes
         self.score = 0
         self.speed = float(speed)
-        self.grid = [['background']*num_lanes for h in range(height)] # The coming notes (last line included even if it will overwritten by the bottom bar)
+        self.grid = [['background']*num_lanes for h in range(self.height)] # The coming notes (last line included even if it will overwritten by the bottom bar)
         self.grid_lock = Lock()
         self.bar = ['idle']*num_lanes # The bottom bar, idle = not pressed, hit = pressed during a note, pressed = pressed outside a note
         pygame.init()
 
         # Threads creation and starting
-        self.renderer = Renderer(50, self.model, self.grid, self.grid_lock, self.bar, height, num_lanes, width)
+        self.renderer = Renderer(50, self.model, self.grid, self.grid_lock, self.bar, self.height, num_lanes, self.width)
         self.reader = SongReader(path, num_lanes, level, speed)
         self.sound = SoundManager(path, (self.height-2)/self.speed)
         self.hits = UserHits()
@@ -161,5 +161,5 @@ class LightsHero(Arbapp):
         self.renderer.stop()
         self.hits.stop()
 
-t = LightsHero(width = 10, height = 15, num_lanes=5, path='./songs/Feelings', level='expert', speed=15)
+t = LightsHero(num_lanes=5, path='./songs/Feelings', level='expert', speed=15)
 t.start()

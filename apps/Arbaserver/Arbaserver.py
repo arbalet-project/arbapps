@@ -26,8 +26,8 @@ from arbasdk import Arbapp
 import zmq, argparse
 
 class Arbaserver(Arbapp):
-    def __init__(self, height, width, argparser):
-        Arbapp.__init__(self, width, height, argparser)
+    def __init__(self, argparser):
+        Arbapp.__init__(self, argparser)
         self.port = str(self.args.port)
         self.context = zmq.Context()
         self.connection = None
@@ -58,5 +58,5 @@ if __name__=='__main__':
     parser.add_argument('-p', '--port',
                         default=33400,
                         help='Listening port [default is 33400]')
-    s = Arbaserver(15, 10, parser)
+    s = Arbaserver(parser)
     s.start()

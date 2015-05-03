@@ -4,8 +4,8 @@ from arbasdk import Arbapp
 
 
 class SnapServer(Arbapp):
-    def __init__(self, port, width, height, argparser=None):
-        Arbapp.__init__(self, width, height, argparser)
+    def __init__(self, port, argparser=None):
+        Arbapp.__init__(self, argparser)
         self.bottle = Bottle()
         self.port = int(port)
         self.route()
@@ -21,4 +21,4 @@ class SnapServer(Arbapp):
         self.bottle.run(host='localhost', port=self.port)
 
 if __name__=='__main__':
-    SnapServer(33450, 10, 15).run()
+    SnapServer(33450).run()

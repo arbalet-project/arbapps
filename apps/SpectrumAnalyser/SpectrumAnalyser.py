@@ -88,8 +88,8 @@ class SpectrumAnalyser(Arbapp):
     """
     This is the main entry point of the spectrum analyser, it reads the file, computes the FFT and plays the sound
     """
-    def __init__(self, height, width, argparser, vertical=True):
-        Arbapp.__init__(self, width, height, argparser)
+    def __init__(self, argparser, vertical=True):
+        Arbapp.__init__(self, argparser)
         self.chunk = 2*1024
         self.vertical = vertical
         self.parser = argparser
@@ -165,4 +165,4 @@ if __name__=='__main__':
                         required=True,
                         nargs='+',
                         help='Wave file(s) to play')
-    SpectrumAnalyser(15, 10, parser, vertical=False).start()
+    SpectrumAnalyser(parser, vertical=False).start()
