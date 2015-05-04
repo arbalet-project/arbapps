@@ -69,6 +69,8 @@ class Arbapp(object):
                             help='The program must not be simulated on the workstation in a 2D window')
         parser.add_argument('-s', '--server',
                             type=str,
+                            nargs='?',
+                            const='127.0.0.1',
                             default='',
                             help='Address and port of the Arbaserver sharing hardware (ex: myserver.local:33400, 192.168.0.15, ...)')
         parser.add_argument('-c', '--config',
