@@ -22,6 +22,7 @@
 import time
 import random
 from arbasdk import Arbapp, Arbapixel
+import argparse
 
 def gen_sweep_async(n_frames, n_frames_fade, n_frames_rand, colors):
     # TODO randomization to change to avoid overlapping of farthest colors
@@ -111,14 +112,15 @@ def gen_random_flashing(n_frames, n_frames_fade, n_frames_rand, colors):
 class ColorDemo(Arbapp):
     generators = [gen_random_flashing, gen_sweep_async, gen_sweep_rand, ]
 
-    def __init__(self,colors, rate, generator_id, dur_min, dur_max=99999):
-        Arbapp.__init__(self)
-        self.durations = [int(dur_min*rate), int(dur_max*rate)]
-        self.rate = rate
-        if colors[-1]!=colors[0]:
-            colors.append(colors[0])
-        self.colors = colors
-        self.generator = self.generators[generator_id]
+    def __init__(self, parser, animations):
+        Arbapp.__init__(self, parser)
+        config = animations[self.args.type]
+        self.durations = [int(config['dur_min']*config['rate']), int(config['dur_max']*config['rate'])]
+        self.rate = config['rate']
+        if config['colors'][-1]!=config['colors'][0]:
+            config['colors'].append(config['colors'][0])
+        self.colors = config['colors']
+        self.generator = self.generators[config['generator_id']]
 
     def run(self):
         # Construct all pixel generators
@@ -140,13 +142,36 @@ class ColorDemo(Arbapp):
                         self.model.set_pixel(h, w, color)
             time.sleep(1./self.rate)
 
+if __name__=='__main__':
+    # Below is declared the dictionary of available effects
+    # Effects are generated thanks to Python generators: https://wiki.python.org/moin/Generators
+    # At a certain framerate the chosen generator will provide a new color, whether it has changed or not
+    # A generator is finite, it has a life, that can be different for each pixel
+    #
+    # - rate is the frame rate in Hz
+    # - dur_min is the minimum duration life in seconds (duration of the faster pixel)
+    # - dur_max is tha maximum duration life in seconds (duration of the slower pixel)
+    # the duration of a pixel life is picked randomly between dur_min and dur_max
+    # the small dur_max - dur_min is, the more synchronized all the pixels are
+    # - colors is the vector of colors to swipe in the given duration
+    
+    animations = {'swipe': { 'rate': 20, 'dur_min': 10, 'dur_max': 15, 'generator_id': 1,
+                             'colors': ['gold', 'darkorange', 'darkred', 'deeppink',
+                                        'purple', 'darkblue', 'turquoise', 'darkgreen', 'yellowgreen'] },
 
-#e = ColorDemo(colors=['gold', 'darkorange', 'darkred', 'deeppink', 'purple', 'darkblue', 'turquoise', 'darkgreen', 'yellowgreen'], rate=20, dur_min=10, dur_max=15, generator_id=1)
+                  'african': { 'rate': 20, 'dur_min': 10, 'dur_max':15, 'generator_id': 2,
+                               'colors':[(39, 26, 19), (49, 32, 23), (100, 66, 48), (172, 69, 11), (232, 139, 36)] },
 
-# African style
-e = ColorDemo(colors=[(39, 26, 19), (49, 32, 23), (100, 66, 48), (172, 69, 11), (232, 139, 36)], rate=20, dur_min=30, generator_id=2)
+                  'flashes': { 'rate': 20, 'dur_min': 10, 'dur_max': 60, 'generator_id': 0,
+                               'colors':['darkblue', 'white'] }, }
 
-#e = ColorDemo(colors=['darkblue', 'white'], rate=20, dur_min=10, dur_max=60, generator_id=0)
+    parser = argparse.ArgumentParser(description='Color demonstrator with nice effects and animations for demos (and pleasure!)'
+                                                 'To be enriched with newer animations!')
+    parser.add_argument('-t', '--type',
+                        default='swipe',
+                        choices=animations.keys(),
+                        help='Type of effect')
 
-e.start()
-e.close("end")
+    e = ColorDemo(parser, animations)
+    e.start()
+    e.close("end")
