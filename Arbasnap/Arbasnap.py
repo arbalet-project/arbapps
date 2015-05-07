@@ -12,9 +12,14 @@ class SnapServer(Arbapp):
 
     def route(self):
         self.bottle.route('/set_pixel/<h>/<w>/<color>', callback=self.set_pixel)
+        self.bottle.route('/set_pixel_rgb/<h>/<w>/<r>/<g>/<b>', callback=self.set_pixel_rgb)
 
     def set_pixel(self, h, w, color):
-        self.model.set_pixel(int(h), int(w), color)
+        self.model.set_pixel(int(h)-1, int(w)-1, color)
+        return ''
+
+    def set_pixel_rgb(self, h, w, r, g, b):
+        self.model.set_pixel(int(h)-1, int(w)-1, int(float(r)), int(float(g)), int(float(b)))
         return ''
 
     def run(self):
