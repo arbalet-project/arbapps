@@ -27,18 +27,30 @@ from . Arbalink import Arbalink
 from . Arbaclient import Arbaclient
 from os import path
 from json import load
+from ConfigParser import RawConfigParser
 import arbasdk
 
 __all__ = ['Arbalet']
 
 class Arbalet(object):
-    def __init__(self, simulation, hardware, server='', diminution=1, factor_sim=30, config='config150.cfg'):
+    def __init__(self, simulation, hardware, server='', diminution=1, factor_sim=30, config=''):
         self.simulation = simulation
         self.hardware = hardware
         self.diminution = diminution
         self.server = server
 
-        config = path.join(path.dirname(arbasdk.__file__), '..', 'config', config)
+        if config=='':
+            cfg_path = path.join(path.dirname(arbasdk.__file__), '..', 'config', 'default.cfg')
+            cfg_parser = RawConfigParser()
+            cfg_parser.read(cfg_path)
+            config = cfg_parser.get('DEFAULT', 'config')
+            print "[Warning] No config file given and no default.cfg found in your arbasdk/config folder"
+
+        if not path.isfile(config):
+            config = path.join(path.dirname(arbasdk.__file__), '..', 'config', config)
+        if not path.isfile(config):
+            raise Exception("Config file '{}' not found".format(config))
+
         with open(config, 'r') as f:
             self.config = load(f)
 

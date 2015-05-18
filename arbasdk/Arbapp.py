@@ -37,7 +37,6 @@ class Arbapp(object):
             raise RuntimeError('Arbapp can be instanciated only once')
 
         Arbapp.app_declared = True
-        self._default_config = 'config150.cfg'
         self.read_args(argparser)
 
         self.arbalet = Arbalet(not self.args.no_gui, self.args.hardware, self.args.server, self.args.brightness,
@@ -75,8 +74,8 @@ class Arbapp(object):
                             help='Address and port of the Arbaserver sharing hardware (ex: myserver.local:33400, 192.168.0.15, ...)')
         parser.add_argument('-c', '--config',
                             type=str,
-                            default=self._default_config,
-                            help='Name of the config file describing the table (.cfg file)')
+                            default='',
+                            help='Name of the config file describing the table (.json file), if missing the default config in arbasdk/default.cfg will be selected')
         parser.add_argument('-b', '--brightness',
                             type=float,
                             default=1,
