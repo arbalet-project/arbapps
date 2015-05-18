@@ -33,7 +33,7 @@ import arbasdk
 __all__ = ['Arbalet']
 
 class Arbalet(object):
-    def __init__(self, simulation, hardware, server='', diminution=1, factor_sim=30, config=''):
+    def __init__(self, simulation=True, hardware=False, server='', diminution=1, factor_sim=30, config=''):
         self.simulation = simulation
         self.hardware = hardware
         self.diminution = diminution
@@ -44,7 +44,6 @@ class Arbalet(object):
             cfg_parser = RawConfigParser()
             cfg_parser.read(cfg_path)
             config = cfg_parser.get('DEFAULT', 'config')
-            print "[Warning] No config file given and no default.cfg found in your arbasdk/config folder"
 
         if not path.isfile(config):
             config = path.join(path.dirname(arbasdk.__file__), '..', 'config', config)
