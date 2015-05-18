@@ -25,7 +25,7 @@
 
 from Arbalet import Arbalet
 from Arbamodel import Arbamodel
-import argparse
+import argparse, __builtin__
 
 __all__ = ['Arbapp']
 
@@ -49,8 +49,14 @@ class Arbapp(object):
         self.set_model(self.model)
         self.hardware, self.simulation = False, True
 
+    def is_interactive(self):
+        """
+        :return: True if the code is running interactively with IPYTHON, False otherwise
+        """
+        return '__IPYTHON__' in vars(__builtin__)
 
     def read_args(self, argparser):
+
         if argparser:
             parser = argparser
         else:
@@ -84,7 +90,9 @@ class Arbapp(object):
                             type=int,
                             default=40,
                             help='Size of the simulated pixels')
-        self.args = parser.parse_args()
+
+        # We parse args normally if running in non-interactive mode, otherwise we ignore args to avoid conflicts with ipython
+        self.args = parser.parse_args([] if self.is_interactive() else None)
 
     def set_model(self, model):
         self.arbalet.set_model(model)
