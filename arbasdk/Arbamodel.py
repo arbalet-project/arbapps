@@ -31,7 +31,7 @@ __all__ = ['Arbamodel']
 
 class Arbamodel(object):
     # line, column
-    def __init__(self, width, height, *color):
+    def __init__(self, height, width, *color):
         self.height = height
         self.width = width
 
@@ -127,7 +127,7 @@ class Arbamodel(object):
 
 
     def __add__(self, other):
-        model = Arbamodel(self.width, self.height)
+        model = Arbamodel(self.height, self.width)
         for w in range(self.width):
             for h in range(self.height):
                 model.model[h][w] = self.model[h][w] + other.state[h][w]
@@ -141,7 +141,7 @@ class Arbamodel(object):
         return True
 
     def __sub__(self, other):
-        model = Arbamodel(self.width, self.height)
+        model = Arbamodel(self.height, self.width)
         for w in range(self.width):
             for h in range(self.height):
                 model.model[h][w] = self.model[h][w] - other.state[h][w]
@@ -154,7 +154,7 @@ class Arbamodel(object):
         return str(self.model)
 
     def __mul__(self, m):
-        model = Arbamodel()
+        model = Arbamodel(self.height, self.width)
         for w in range(self.width):
             for h in range(self.height):
                 model.model[h][w] = self.model[h][w]*m

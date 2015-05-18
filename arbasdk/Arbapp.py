@@ -45,7 +45,7 @@ class Arbapp(object):
         self.width = self.arbalet.width
         self.height = self.arbalet.height
 
-        self.model = Arbamodel(self.width, self.height, 'black')
+        self.model = Arbamodel(self.height, self.width, 'black')
         self.set_model(self.model)
         self.hardware, self.simulation = False, True
 

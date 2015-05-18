@@ -57,7 +57,7 @@ class Arbalet(object):
         self.width = len(self.config['mapping'][0]) if self.height>0 else 0
 
         if self.simulation:
-            self.arbasim = Arbasim(self.width, self.height, self.width*factor_sim, self.height*factor_sim)
+            self.arbasim = Arbasim(self.height, self.width, self.height*factor_sim, self.width*factor_sim)
 
         if self.hardware:
             self.arbalink = Arbalink(self.config, diminution=self.diminution)

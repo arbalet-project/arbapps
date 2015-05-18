@@ -31,7 +31,7 @@ from Grid import *
 __all__ = ['Arbasim']
 
 class Arbasim(threading.Thread):
-    def __init__(self, arbalet_width, arbalet_height, sim_width, sim_height, rate=30, autorun=True):
+    def __init__(self, arbalet_height, arbalet_width, sim_height, sim_width, rate=30, autorun=True):
         """
         Arbasim constructor: launches the simulation
         Simulate a "arbalet_width x arbalet_height px" table rendered in a "sim_width x sim_height" window
