@@ -119,12 +119,9 @@ class Arbamodel(object):
         return map(tuple, product(range(self.height), range(self.width)))
 
     def set_all(self, *color):
-        if not self.groups.has_key('all'):
-            self.group_pixels(list(product(range(self.height), range(self.width))), "all", *color)
-        else:
-            with self.model_lock:
-                self.model[0][0].set_color(*color)
-
+        for w in range(self.width):
+            for h in range(self.height):
+                self.model[h][w].set_color(*color)
 
     def __add__(self, other):
         model = Arbamodel(self.height, self.width)
