@@ -33,14 +33,14 @@ class Arbaserver(Arbapp):
         self.connection = None
 
     def bind(self):
-        self.connection = self.context.socket(zmq.PULL)
+        self.connection = self.context.socket(zmq.SUB)
         connect_to = "tcp://127.0.0.1:"+self.port
         self.connection.bind(connect_to)
+        self.connection.setsockopt_string(zmq.SUBSCRIBE, ''.decode('ascii')) # Accepts all incoming messages
 
     def work(self):
         json_model = self.connection.recv_json()
         self.model.from_json(json_model)
-        print "Model set"
 
     def run(self):
         print "Waiting for connection..."

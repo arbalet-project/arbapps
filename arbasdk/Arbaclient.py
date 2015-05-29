@@ -47,7 +47,7 @@ class Arbaclient(Thread):
 
     def connect(self):
         if not self.sender:
-            self.sender = self.context.socket(zmq.PUSH)
+            self.sender = self.context.socket(zmq.PUB)
             self.sender.connect("tcp://{}:{}".format(self.server, self.port))
 
     def send_model(self):
