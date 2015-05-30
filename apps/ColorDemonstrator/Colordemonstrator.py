@@ -68,8 +68,9 @@ def gen_sweep_rand(n_frames, n_frames_fade, n_frames_rand, colors):
                        [float(x)/n_frames for x in range(n_frames)]]                   # Ascending phase
 
     # This loop fades up
+    fade_color = Arbapixel(pairs[start][1][0])*color_generator[0][n_frames/2] + Arbapixel(pairs[start][1][1])*color_generator[1][n_frames/2]
     for f in range(n_frames_fade):
-        yield Arbapixel(colors[0])*(color_generator[1][start]*(float(f)/n_frames_fade))
+        yield fade_color*(float(f)/n_frames_fade)
 
     # Infinite loop on color sequence
     while True:
