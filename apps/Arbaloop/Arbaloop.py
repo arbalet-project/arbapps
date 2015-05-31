@@ -59,18 +59,17 @@ class Arbaloop(Arbapp):
                 with open(self.args.sequence) as sequence:
                     self.execute_sequence(load(sequence))
 
-    def wait(self, timeout=-1, interruptible=False):
+    def wait(self, timeout=-1, interruptible=False, process=None):
         if interruptible:
             start = time()
-            while timeout < 0 or time()-start < timeout:
+            # We loop while the process is not termianted, the timeout is not expired, and user has not asked 'next' with the joystick
+            while (timeout < 0 or time()-start < timeout) and (process==None or process.poll()==None):
                 e = event.poll()
                 if e.type == JOYBUTTONDOWN:
                     return 'joystick'
                 else:
                     sleep(0.01)
-        elif timeout>0:
-            sleep(timeout)
-        return 'timeout'
+        return 'timeout' if (process==None or process.poll()==None) else 'terminated'
 
     def execute_sequence(self, sequence):
         def purify_args(args):
@@ -90,9 +89,10 @@ class Arbaloop(Arbapp):
                 args[0] = join(cwd, args[0])
                 process = Popen(purify_args(args), cwd=cwd)
                 print "Starting "+str(args)
-                self.wait(command['timeout'], command['interruptible']) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
-                process.terminate()
-                process.wait() # should poll() and kill() if it does not close?
+                reason = self.wait(command['timeout'], command['interruptible'], process) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
+                if reason!='terminated':
+                    process.terminate()
+                    process.wait() # should poll() and kill() if it does not close?
             if not sequence['infinite']:
                 break
 
