@@ -30,7 +30,8 @@ from time import sleep, time
 from pygame import event, init, joystick, JOYBUTTONDOWN
 import argparse
 
-
+# TODO must Arbaloop inherit from Arbapp?
+# It should ignore -ng -w and redirect them to the children
 
 class Arbaloop(Arbapp):
     def __init__(self, argparser):
@@ -99,6 +100,7 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser(description='Application sequencer. Runs and closes Arbalet apps according to a sequence file')
     parser.add_argument('-q', '--sequence',
                         type=str,
-                        required=True,
+                        const='sequences/default.json',
+                        nargs='?',
                         help='Configuration file describing the sequence of apps to launch')
     Arbaloop(parser).start()
