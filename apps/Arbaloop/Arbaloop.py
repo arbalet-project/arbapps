@@ -62,13 +62,13 @@ class Arbaloop(Arbapp):
     def wait(self, timeout=-1, interruptible=False, process=None):
         start = time()
         # We loop while the process is not termianted, the timeout is not expired, and user has not asked 'next' with the joystick
-        while (timeout < 0 or time()-start < timeout) and (process==None or process.poll()==None):
-            e = event.poll()
-            if interruptible and e.type == JOYBUTTONDOWN:
-                return 'joystick'
-            else:
-                sleep(0.01)
-        return 'timeout' if (process==None or process.poll()==None) else 'terminated'
+        while (timeout < 0 or time()-start < timeout) and (process is None or process.poll() is None):
+            for e in event.get():
+                if interruptible and e.type == JOYBUTTONDOWN:
+                    return 'joystick'
+                else:
+                    sleep(0.01)
+        return 'timeout' if (process is None or process.poll() is None) else 'terminated'
 
     def execute_sequence(self, sequence):
         def purify_args(args):
@@ -100,7 +100,7 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser(description='Application sequencer. Runs and closes Arbalet apps according to a sequence file')
     parser.add_argument('-q', '--sequence',
                         type=str,
-                        const='sequences/default.json',
+                        default='sequences/default.json',
                         nargs='?',
                         help='Configuration file describing the sequence of apps to launch')
     Arbaloop(parser).start()
