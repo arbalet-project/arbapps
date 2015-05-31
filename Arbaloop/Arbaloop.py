@@ -60,15 +60,14 @@ class Arbaloop(Arbapp):
                     self.execute_sequence(load(sequence))
 
     def wait(self, timeout=-1, interruptible=False, process=None):
-        if interruptible:
-            start = time()
-            # We loop while the process is not termianted, the timeout is not expired, and user has not asked 'next' with the joystick
-            while (timeout < 0 or time()-start < timeout) and (process==None or process.poll()==None):
-                e = event.poll()
-                if e.type == JOYBUTTONDOWN:
-                    return 'joystick'
-                else:
-                    sleep(0.01)
+        start = time()
+        # We loop while the process is not termianted, the timeout is not expired, and user has not asked 'next' with the joystick
+        while (timeout < 0 or time()-start < timeout) and (process==None or process.poll()==None):
+            e = event.poll()
+            if interruptible and e.type == JOYBUTTONDOWN:
+                return 'joystick'
+            else:
+                sleep(0.01)
         return 'timeout' if (process==None or process.poll()==None) else 'terminated'
 
     def execute_sequence(self, sequence):
@@ -90,6 +89,7 @@ class Arbaloop(Arbapp):
                 process = Popen(purify_args(args), cwd=cwd)
                 print "Starting "+str(args)
                 reason = self.wait(command['timeout'], command['interruptible'], process) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
+                print "End:", reason
                 if reason!='terminated':
                     process.terminate()
                     process.wait() # should poll() and kill() if it does not close?
