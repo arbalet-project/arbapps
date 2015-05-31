@@ -26,15 +26,29 @@ from os.path import isfile, join, realpath, dirname
 from json import load
 from subprocess import Popen
 from shlex import split
-from time import sleep
+from time import sleep, time
+from pygame import event, init, joystick, JOYBUTTONDOWN
 import argparse
 
-# TODO must Arbaloop inherit from Arbapp?
-# It should ignore -ng -w and redirect them to the children
+
 
 class Arbaloop(Arbapp):
     def __init__(self, argparser):
         Arbapp.__init__(self, argparser)
+        init()
+        joystick.init()
+        self.joysticks = []
+
+        # Joysticks initialization
+        for i in range(joystick.get_count()):
+            joy = joystick.Joystick(i)
+            joy.init()
+            if joy.get_numbuttons()>0:
+                self.joysticks.append(joy)
+            else:
+                joy.quit()
+
+        print len(self.joysticks), 'joystick(s) with buttons found!'
 
     def run(self):
         if len(self.args.sequence)>0:
@@ -43,6 +57,19 @@ class Arbaloop(Arbapp):
             else:
                 with open(self.args.sequence) as sequence:
                     self.execute_sequence(load(sequence))
+
+    def wait(self, timeout=-1, interruptible=False):
+        if interruptible:
+            start = time()
+            while timeout < 0 or time()-start < timeout:
+                e = event.poll()
+                if e.type == JOYBUTTONDOWN:
+                    return 'joystick'
+                else:
+                    sleep(0.01)
+        elif timeout>0:
+            sleep(timeout)
+        return 'timeout'
 
     def execute_sequence(self, sequence):
         def purify_args(args):
@@ -62,7 +89,7 @@ class Arbaloop(Arbapp):
                 args[0] = join(cwd, args[0])
                 process = Popen(purify_args(args), cwd=cwd)
                 print "Starting "+str(args)
-                sleep(command['timeout']) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
+                self.wait(command['timeout'], command['interruptible']) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
                 process.terminate()
                 process.wait() # should poll() and kill() if it does not close?
             if not sequence['infinite']:
