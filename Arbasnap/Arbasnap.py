@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+"""
+    Arbalet - ARduino-BAsed LEd Table
+    Bridge for the Snap! visual programming language
+
+    Provides a visual programming language to Arbalet for children or beginners
+
+    Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
+    License: GPL version 3 http://www.gnu.org/licenses/gpl.html
+"""
 from bottle import Bottle
 from arbasdk import Arbapp
 
