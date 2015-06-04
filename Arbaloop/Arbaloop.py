@@ -22,10 +22,11 @@ import argparse
 
 class Arbaloop(Arbapp):
     def __init__(self, argparser):
-        Arbapp.__init__(self, argparser)
+        Arbapp.__init__(self, argparser, True) # starting mock mode, init flags (-w and -ng) will be redirected to the server
         init()
         joystick.init()
         self.joysticks = []
+        self.server_process = None
 
         # Joysticks initialization
         for i in range(joystick.get_count()):
@@ -43,8 +44,19 @@ class Arbaloop(Arbapp):
             if not isfile(self.args.sequence):
                 print "Sequence file '{}' not found".format(self.args.sequence)
             else:
-                with open(self.args.sequence) as sequence:
-                    self.execute_sequence(load(sequence))
+                # launch the server
+                self.start_server(self.args.hardware, self.args.no_gui)
+                # read the sequence
+                with open(self.args.sequence) as fsequence:
+                    sequence = load(fsequence)
+                # and launch every app in the sequence as a client
+                try:
+                    self.execute_sequence(sequence)
+                except:
+                    if self.server_process:
+                        self.server_process.terminate()
+                        self.server_process.wait()
+                    raise
 
     def wait(self, timeout=-1, interruptible=False, process=None):
         start = time()
@@ -56,6 +68,16 @@ class Arbaloop(Arbapp):
                 else:
                     sleep(0.01)
         return 'timeout' if (process is None or process.poll() is None) else 'terminated'
+
+    def start_server(self, hardware, no_gui):
+        cwd = join(realpath(dirname(__file__)), '..', 'Arbaserver')
+        command = join(cwd, 'Arbaserver.py')
+        if hardware:
+            command += ' -w'
+        if no_gui:
+            command += ' -ng'
+        print "Starting server with: " + command
+        self.server_process = Popen(command.split(), cwd=cwd)
 
     def execute_sequence(self, sequence):
         def purify_args(args):
