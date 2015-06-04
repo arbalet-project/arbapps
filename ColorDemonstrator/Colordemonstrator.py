@@ -55,7 +55,7 @@ def gen_sweep_rand(n_frames, n_frames_fade, n_frames_rand, colors):
                        [float(x)/n_frames for x in range(n_frames)]]                   # Ascending phase
 
     # This loop fades up
-    fade_color = Arbapixel(pairs[start][1][0])*color_generator[0][n_frames/2] + Arbapixel(pairs[start][1][1])*color_generator[1][n_frames/2]
+    fade_color = Arbapixel(pairs[start][1][0])*color_generator[0][0] + Arbapixel(pairs[start][1][1])*color_generator[1][0]
     for f in range(n_frames_fade):
         yield fade_color*(float(f)/n_frames_fade)
 
@@ -151,7 +151,11 @@ if __name__=='__main__':
                                'colors':[(39, 26, 19), (49, 32, 23), (100, 66, 48), (172, 69, 11), (232, 139, 36)] },
 
                   'flashes': { 'rate': 20, 'dur_min': 10, 'dur_max': 60, 'generator_id': 0,
-                               'colors':['darkblue', 'white'] }, }
+                               'colors':['darkblue', 'white'] },
+
+                  'gender': { 'rate': 20, 'dur_min': 1, 'dur_max': 10, 'generator_id': 2,
+                               'colors':['darkblue', 'deeppink'] },
+                  }
 
     parser = argparse.ArgumentParser(description='Color demonstrator with nice effects and animations for demos (and pleasure!)'
                                                  'To be enriched with newer animations!')
