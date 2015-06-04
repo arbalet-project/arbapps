@@ -153,8 +153,14 @@ if __name__=='__main__':
                   'flashes': { 'rate': 20, 'dur_min': 10, 'dur_max': 60, 'generator_id': 0,
                                'colors':['darkblue', 'white'] },
 
-                  'gender': { 'rate': 20, 'dur_min': 1, 'dur_max': 10, 'generator_id': 2,
+                  'gender': { 'rate': 20, 'dur_min': 5, 'dur_max': 15, 'generator_id': 2,
                                'colors':['darkblue', 'deeppink'] },
+
+                  'teddy':  { 'rate': 20, 'dur_min': 5, 'dur_max': 20, 'generator_id': 2,
+                               'colors':['turquoise', (49, 32, 23)] },
+
+                  'summer':  { 'rate': 20, 'dur_min': 10, 'dur_max': 30, 'generator_id': 2,
+                               'colors':['gold', 'red'] },
                   }
 
     parser = argparse.ArgumentParser(description='Color demonstrator with nice effects and animations for demos (and pleasure!)'
