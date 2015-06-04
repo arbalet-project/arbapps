@@ -41,15 +41,15 @@ def gen_sweep_async(n_frames, n_frames_fade, n_frames_rand, colors):
 def gen_sweep_rand(n_frames, n_frames_fade, n_frames_rand, colors):
     """
     This generator generates sweeping colors with a unique duration between colors for all pixels
-    Randomization is implemented through the order of color browsing
     This generator can be used when all colors go well together, there is no external random seed
     :param n_frames: Duration between two consecutive colors
     :param n_frames_fade: Duration of fade
     :param n_frames_rand: Random seed, extra duration added to n_frames to get the total duration
-    :param colors: list of colors whose order will be randomized (no side effect)
+    :param colors: list of colors
     """
     pairs = list(enumerate(zip(colors, colors[1:])))
     start = random.randint(0, len(pairs)-1)
+    n_frames += n_frames_rand
 
     color_generator = [[float(x)/n_frames for x in range(n_frames, -1, -1)],           # Descending phase
                        [float(x)/n_frames for x in range(n_frames)]]                   # Ascending phase
