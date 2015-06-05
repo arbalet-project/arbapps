@@ -6,9 +6,8 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-import time
 import random
-from arbasdk import Arbapp, Arbapixel
+from arbasdk import Arbapp, Arbapixel, Rate
 import argparse
 
 def gen_sweep_async(n_frames, n_frames_fade, n_frames_rand, colors):
@@ -104,7 +103,7 @@ class ColorDemo(Arbapp):
         Arbapp.__init__(self, parser)
         config = animations[self.args.type]
         self.durations = [int(config['dur_min']*config['rate']), int(config['dur_max']*config['rate'])]
-        self.rate = config['rate']
+        self.rate = Rate(config['rate'])
         if config['colors'][-1]!=config['colors'][0]:
             config['colors'].append(config['colors'][0])
         self.colors = config['colors']
@@ -116,7 +115,7 @@ class ColorDemo(Arbapp):
         for h in range(self.height):
             for w in range(self.width):
                 duration = random.randrange(0, self.durations[1]-self.durations[0])
-                generators[h][w] = self.generator(self.durations[0], self.rate, duration, self.colors)
+                generators[h][w] = self.generator(self.durations[0], int(2./self.rate.sleep_dur), duration, self.colors)
 
         # Browse all pixel generators at each time
         while True:
@@ -128,7 +127,7 @@ class ColorDemo(Arbapp):
                         pass
                     else:
                         self.model.set_pixel(h, w, color)
-            time.sleep(1./self.rate)
+            self.rate.sleep()
 
 if __name__=='__main__':
     # Below is declared the dictionary of available effects
