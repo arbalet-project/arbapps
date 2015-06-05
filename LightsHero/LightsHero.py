@@ -15,14 +15,13 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-import time
 import random
 from threading import Thread, Lock
 from SongReader import SongReader
 from SoundManager import SoundManager
 from UserHits import UserHits
 import pygame
-from arbasdk import Arbapp, Arbapixel
+from arbasdk import Arbapp, Arbapixel, Rate
 
 
 class Renderer(Thread):
@@ -32,7 +31,7 @@ class Renderer(Thread):
     def __init__(self, rate, model, grid, grid_lock, bottom_bar, table_height, num_lanes, table_width):
         Thread.__init__(self)
         self.setDaemon(True)
-        self.rate = rate
+        self.rate = Rate(rate)
         self.model = model
         self.grid = grid
         self.grid_lock = grid_lock
@@ -77,7 +76,7 @@ class Renderer(Thread):
         flash_color = False # Boolean giving a "burning" impression
         while self.running:
             self.update_view(flash_color)
-            time.sleep(1./self.rate)
+            self.rate.sleep()
             flash_color = not flash_color
 
 class LightsHero(Arbapp):
@@ -86,6 +85,7 @@ class LightsHero(Arbapp):
         self.num_lanes = num_lanes
         self.score = 0
         self.speed = float(speed)
+        self.rate = Rate(self.speed)
         self.grid = [['background']*num_lanes for h in range(self.height)] # The coming notes (last line included even if it will overwritten by the bottom bar)
         self.grid_lock = Lock()
         self.bar = ['idle']*num_lanes # The bottom bar, idle = not pressed, hit = pressed during a note, pressed = pressed outside a note
@@ -135,7 +135,7 @@ class LightsHero(Arbapp):
         while countdown>0:
             self.next_line()
             self.user_hits()
-            time.sleep(1./self.speed)
+            self.rate.sleep()
             if self.reader.eof:
                 countdown -= 1
         self.renderer.stop()
