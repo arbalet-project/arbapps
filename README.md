@@ -6,6 +6,8 @@ Arbalet is intended to be easily reproducible, highly customizable, and programm
 
 Wanna get more information and pictures? Please consult the [Arbalet wiki](https://github.com/arbalet-project/arbadoc/wiki)
 
+![General view of the table with lights effects](https://github.com/arbalet-project/arbadoc/blob/master/pics/beer_and_flashes.jpg?raw=1)
+
 ## Arbapps
 *Arbapps* (Arbalet applications) is your workspace for all Arbalet applications. This repository already contains a set of basic applications written in Python, feel free to fork it, improve them and add your custom programs.
 
