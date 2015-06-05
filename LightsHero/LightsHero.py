@@ -54,7 +54,7 @@ class Renderer(Thread):
                     w = lane*self.width/self.num_lanes + chunk_lane
                     for h in range(self.height-1): # -1 in order not to update the bottom bar
                         if self.grid[h][lane]=='bump':
-                            color = Arbapixel(100, 100, 100) + Arbapixel(self.colors[lane])
+                            color = Arbapixel((100, 100, 100)) + Arbapixel(self.colors[lane])
                         else:
                             color = Arbapixel(self.colors[lane])*self.intensity[self.grid[h][lane]]
                         self.model.set_pixel(h, w, color)
