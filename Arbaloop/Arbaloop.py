@@ -70,8 +70,7 @@ class Arbaloop(Arbapp):
             for e in event.get():
                 if interruptible and e.type == JOYBUTTONDOWN:
                     return 'joystick'
-                else:
-                    sleep(0.01)
+            sleep(0.01)
         return 'timeout' if (process is None or process.poll() is None) else 'terminated'
 
     def start_server(self, hardware, no_gui):
@@ -100,7 +99,6 @@ class Arbaloop(Arbapp):
                 args = split(command['command'])
                 cwd = join(realpath(dirname(__file__)), '..', command['dir'])
                 args[0] = join(cwd, args[0])
-                print "WD", cwd
                 process = Popen(purify_args(args), cwd=cwd)
                 print "Starting "+str(args)
                 reason = self.wait(command['timeout'], command['interruptible'], process) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
@@ -109,7 +107,6 @@ class Arbaloop(Arbapp):
                     process.terminate()  # SIGTERM
                     process.send_signal(SIGINT)
                     process.wait() # should poll() and kill() if it does not close?
-                    print 3
             if not sequence['infinite']:
                 break
 

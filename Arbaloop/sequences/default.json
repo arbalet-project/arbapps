@@ -8,6 +8,7 @@
         {"dir":"LightsHero", "command": "LightsHero.py", "timeout": -1, "interruptible": true},
         {"dir":"ColorDemonstrator", "command": "Colordemonstrator.py -t african", "timeout": 60, "interruptible": true},
         {"dir":"Pixeliser", "command": "Pixeliser.py -i files/Cold_lights.mp4", "timeout": -1, "interruptible": true},
+        {"dir":"SpectrumAnalyser", "command": "SpectrumAnalyser.py -i files/Uprising.wav", "timeout": -1, "interruptible": true},
         {"dir":"Pixeliser", "command": "Pixeliser.py -i files/Warm_lights.mp4", "timeout": -1, "interruptible": true}
     ]
 }
