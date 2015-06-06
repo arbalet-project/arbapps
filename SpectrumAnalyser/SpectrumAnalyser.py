@@ -12,42 +12,34 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-import struct, argparse, numpy, pyaudio, audioop, wave, time
+import struct, argparse, numpy, pyaudio, audioop, wave
 from arbasdk import Arbapp, hsv
-from threading import Thread
 from copy import copy
 
-class Renderer(Thread):
+class Renderer():
     """
-    This thread renders the FFT bands on Arbalet
-    It is in charge of all colors and animations
+    This class renders the FFT bands on Arbalet
+    It is in charge of all colors and animations once a FFT averages list arrives in draw_bars()
     """
-    def __init__(self, rate, model, height, width, vertical=True):
-        Thread.__init__(self)
-        self.setDaemon(True)
-        self.rate = rate
+    def __init__(self, model, height, width, vertical=True):
         self.model = model
         self.height = height
         self.width = width
-        self.averages = None     # FFT bands
         self.num_bands = width if vertical else height
         self.vertical = vertical
         self.colors = [hsv(c, 100, 100) for c in range(0, 360, int(360./self.num_bands))]
         self.amplitude_factor = 3500000 # Sum of amplitudes [tricky to compute and cannot be real-time] TODO
-        self.running = True
 
-    def stop(self):
-        self.running = False
-
-    def update_bands(self, averages):
-        self.averages = map(int, averages)
-
-    def draw_bars_hv(self, num_bands, num_bins, vertical):
+    def draw_bars_hv(self, num_bands, num_bins, averages, vertical):
+        """
+        Draw the bins using FFT averages whatever the orientation is.
+        The maximum high level self.amplitude_factor is hardcoded but this should be improved
+        """
         self.model.lock()
         for bin in range(num_bins):
             ampli_b = bin*self.amplitude_factor
             for band in range(num_bands):
-                if ampli_b < self.averages[band]:
+                if ampli_b < averages[band]:
                     color = self.colors[band]
                 elif self.old_model: # animation with light decreasing
                     old = self.old_model.get_pixel(bin if vertical else band, band if vertical else bin).hsva
@@ -57,21 +49,15 @@ class Renderer(Thread):
                 self.model.set_pixel(bin if vertical else band, band if vertical else bin, color)
         self.model.unlock()
 
-    def draw_bars(self):
+    def draw_bars(self, averages):
         """
         Draw the bins using FFT averages according to the orientation of the grid (vertical, horizontal)
         """
-        if self.averages:
-            self.old_model = copy(self.model) # No need to lock during the copy, I'm the thread who is writing
-            if self.vertical:
-                self.draw_bars_hv(self.width, self.height, True)
-            else:
-                self.draw_bars_hv(self.height, self.width, False)
-
-    def run(self):
-        while self.running:
-            self.draw_bars()
-            time.sleep(1./self.rate)
+        self.old_model = copy(self.model) # No need to lock during the copy, I'm the thread who is writing
+        if self.vertical:
+            self.draw_bars_hv(self.width, self.height, averages, True)
+        else:
+            self.draw_bars_hv(self.height, self.width, averages, False)
 
 class SpectrumAnalyser(Arbapp):
     """
@@ -84,6 +70,7 @@ class SpectrumAnalyser(Arbapp):
         self.parser = argparser
         self.renderer = None
         self.file = None
+        print "Starting pyaudio..."
         self.pyaudio = pyaudio.PyAudio()
 
         ##### Fourier related attributes, we generate a suitable log-scale
@@ -132,7 +119,7 @@ class SpectrumAnalyser(Arbapp):
             while data != '':
                 mono_data = audioop.tomono(data, self.file.getsampwidth(), 0.5, 0.5)
                 self.fft(mono_data)
-                self.renderer.update_bands(self.averages)
+                self.renderer.draw_bars(self.averages)
 
                 self.stream.write(data)
                 data = self.file.readframes(self.chunk)
@@ -141,11 +128,9 @@ class SpectrumAnalyser(Arbapp):
             self.stream.close()
 
     def run(self):
-        self.renderer = Renderer(30, self.model, self.height, self.width, self.vertical)
-        self.renderer.start()
+        self.renderer = Renderer(self.model, self.height, self.width, self.vertical)
         for f in self.args.input:
             self.play_file(f)
-        self.renderer.stop()
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description='Spectrum analyzer of WAVE files')
