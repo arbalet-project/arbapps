@@ -78,8 +78,7 @@ class LightsHero(Arbapp):
         self.renderer = Renderer(self.model, self.grid, self.bar, self.height, num_lanes, self.width)
         self.reader = SongReader(path, num_lanes, level, speed)
         self.sound = SoundManager(path)
-        self.hits = UserHits()
-        self.hits.start()
+        self.hits = UserHits(self.num_lanes)
 
     def next_line(self):
         # Delete the last line leaving the grid
@@ -93,13 +92,13 @@ class LightsHero(Arbapp):
         for lane in range(self.num_lanes):
             self.grid[0][lane] = new_line[lane]
 
-    def user_hits(self):
+    def process_user_hits(self):
         """
-        Read user inputs and update the bottom bar consequently
+        Read user inputs, update the bottom bar with key states and warn the UserHits class to update the score
         """
         for lane in range(self.num_lanes):
             must_press = self.grid[self.height-1][lane] == 'active' or self.grid[self.height-1][lane] == 'bump'
-            pressed = self.hits.get_pressed(lane)
+            pressed = self.hits.get_pressed_keys()[lane]
             if must_press and pressed:
                 status = 'hit'
             elif pressed:
@@ -107,6 +106,10 @@ class LightsHero(Arbapp):
             else:
                 status = 'idle'
             self.bar[lane] = status
+
+            # warn the user hits class whether the note has to be played
+            self.hits.set_note(lane, self.grid[self.height-1][lane] in ['bump', 'active'])
+
 
     def run(self):
         countdown = self.height # Countdown triggered after Midi's EOF
@@ -116,7 +119,7 @@ class LightsHero(Arbapp):
         # it starts decreasing only when EOF is returned by the song reader
         while countdown>0:
             self.next_line()
-            self.user_hits()
+            self.process_user_hits()
             self.renderer.update_view()
 
             if self.reader.eof:
@@ -128,7 +131,7 @@ class LightsHero(Arbapp):
 
             self.rate.sleep()
 
-        self.hits.stop()
+        print "You scored", int((100.*self.hits.score)/self.hits.max_score), '% with', self.hits.score, 'hits over', self.hits.max_score
 
 song = path.join(path.dirname(__file__), 'songs', 'Feelings')
 t = LightsHero(num_lanes=5, path=song, level='expert', speed=15)

@@ -8,14 +8,28 @@ class SoundManager():
     def __init__(self, path):
         mixer.init()
         mixer.music.load(join(path, self.background))
-        self.guitar = mixer.Sound(join(path, self.guitar))
+
+        # Mutable sound tracks (muted if the player is wrong)
+        self.tracks = {'guitar': mixer.Sound(join(path, self.guitar)),
+                       'drums' : None,
+                       'bass': None}
         self.started = False
 
     def start(self):
         self.started = True
+
+        # Start background music
         mixer.music.play()
-        self.guitar.play()
-        #self.play_drums()
-        #self.play_bass()
+
+        # Start tracks
+        for name, track in self.tracks.iteritems():
+            if track:
+                track.play()
+
+    def mute(self, track, muted):
+        if muted:
+            self.tracks[track].mute()
+        else:
+            self.tracks[track].unmute()
 
 
