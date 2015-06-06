@@ -9,7 +9,8 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-import time, cv2, argparse
+import cv2, argparse
+from os.path import isfile
 from arbasdk import Arbapp
 
 class Pixeliser(Arbapp):
@@ -18,18 +19,21 @@ class Pixeliser(Arbapp):
         self.video_reader = None
 
     def play_file(self, f):
-        self.video_reader = cv2.VideoCapture(f)
+        if isfile(f):
+            self.video_reader = cv2.VideoCapture(f)
 
-        while True:
-            r, image = self.video_reader.read()
-            if r:
-                pix_image = cv2.resize(image, (self.height, self.width))
-                pix_image = cv2.transpose(pix_image)
-                self.update_model(pix_image)
-                cv2.imshow(f, image)
-                cv2.waitKey(100)
-            else:
-                break
+            while True:
+                r, image = self.video_reader.read()
+                if r:
+                    pix_image = cv2.resize(image, (self.height, self.width))
+                    pix_image = cv2.transpose(pix_image)
+                    self.update_model(pix_image)
+                    cv2.imshow(f, image)
+                    cv2.waitKey(100)
+                else:
+                    break
+        else:
+            raise IOError('No such file or directory: \'{}\''.format(f))
 
     def update_model(self, image):
         self.model.lock()
