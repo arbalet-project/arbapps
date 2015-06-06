@@ -15,11 +15,11 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-import random
+from time import time
+from os import path
 from SongReader import SongReader
 from SoundManager import SoundManager
 from UserHits import UserHits
-import pygame
 from arbasdk import Arbapp, Arbapixel, Rate
 
 
@@ -77,7 +77,7 @@ class LightsHero(Arbapp):
         # Threads creation and starting
         self.renderer = Renderer(self.model, self.grid, self.bar, self.height, num_lanes, self.width)
         self.reader = SongReader(path, num_lanes, level, speed)
-        self.sound = SoundManager(path, (self.height-2)/self.speed)
+        self.sound = SoundManager(path)
         self.hits = UserHits()
         self.hits.start()
 
@@ -109,8 +109,11 @@ class LightsHero(Arbapp):
             self.bar[lane] = status
 
     def run(self):
-        self.sound.start()
         countdown = self.height # Countdown triggered after Midi's EOF
+        start = time()
+
+        # We loop while the end countdown is not timed out
+        # it starts decreasing only when EOF is returned by the song reader
         while countdown>0:
             self.next_line()
             self.user_hits()
@@ -119,9 +122,14 @@ class LightsHero(Arbapp):
             if self.reader.eof:
                 countdown -= 1
 
+            # delayed sound playing while the first notes are reaching the bottom bar
+            if not self.sound.started and time()-start > (self.height-2)/self.speed:
+                self.sound.start()
+
             self.rate.sleep()
 
         self.hits.stop()
 
-t = LightsHero(num_lanes=5, path='./songs/Feelings', level='expert', speed=15)
+song = path.join(path.dirname(__file__), 'songs', 'Feelings')
+t = LightsHero(num_lanes=5, path=song, level='expert', speed=15)
 t.start()
