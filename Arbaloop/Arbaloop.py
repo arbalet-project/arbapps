@@ -53,12 +53,15 @@ class Arbaloop(Arbapp):
                 # and launch every app in the sequence as a client
                 try:
                     self.execute_sequence(sequence)
-                except:
-                    if self.server_process:
-                        self.server_process.terminate()
-                        self.server_process.send_signal(SIGINT)
-                        self.server_process.wait()
-                    raise
+                finally:
+                    self.close_server()
+
+    def close_server(self):
+        if self.server_process:
+            self.server_process.terminate()
+            self.server_process.send_signal(SIGINT)
+            self.server_process.wait()
+            self.server_process = None
 
     def wait(self, timeout=-1, interruptible=False, process=None):
         start = time()
@@ -97,6 +100,7 @@ class Arbaloop(Arbapp):
                 args = split(command['command'])
                 cwd = join(realpath(dirname(__file__)), '..', command['dir'])
                 args[0] = join(cwd, args[0])
+                print "WD", cwd
                 process = Popen(purify_args(args), cwd=cwd)
                 print "Starting "+str(args)
                 reason = self.wait(command['timeout'], command['interruptible'], process) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
