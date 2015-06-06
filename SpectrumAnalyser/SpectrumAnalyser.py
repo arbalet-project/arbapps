@@ -43,6 +43,7 @@ class Renderer(Thread):
         self.averages = map(int, averages)
 
     def draw_bars_hv(self, num_bands, num_bins, vertical):
+        self.model.lock()
         for bin in range(num_bins):
             ampli_b = bin*self.amplitude_factor
             for band in range(num_bands):
@@ -54,13 +55,14 @@ class Renderer(Thread):
                 else:
                     color = 'black'
                 self.model.set_pixel(bin if vertical else band, band if vertical else bin, color)
+        self.model.unlock()
 
     def draw_bars(self):
         """
         Draw the bins using FFT averages according to the orientation of the grid (vertical, horizontal)
         """
         if self.averages:
-            self.old_model = copy(self.model)
+            self.old_model = copy(self.model) # No need to lock during the copy, I'm the thread who is writing
             if self.vertical:
                 self.draw_bars_hv(self.width, self.height, True)
             else:

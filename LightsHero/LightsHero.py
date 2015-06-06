@@ -48,6 +48,7 @@ class Renderer(Thread):
 
     def update_view(self, flash_color):
         with self.grid_lock:
+            self.model.lock()
             # Big area of coming notes
             for lane in range(self.num_lanes):
                 for chunk_lane in range(self.width/self.num_lanes):
@@ -69,6 +70,7 @@ class Renderer(Thread):
                 for chunk_lane in range(self.width/self.num_lanes):
                     w = lane*self.width/self.num_lanes + chunk_lane
                     self.model.set_pixel(self.height-1, w, color)
+            self.model.unlock()
 
 
 
@@ -92,7 +94,7 @@ class LightsHero(Arbapp):
         pygame.init()
 
         # Threads creation and starting
-        self.renderer = Renderer(50, self.model, self.grid, self.grid_lock, self.bar, self.height, num_lanes, self.width)
+        self.renderer = Renderer(25, self.model, self.grid, self.grid_lock, self.bar, self.height, num_lanes, self.width)
         self.reader = SongReader(path, num_lanes, level, speed)
         self.sound = SoundManager(path, (self.height-2)/self.speed)
         self.hits = UserHits()

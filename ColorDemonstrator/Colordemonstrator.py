@@ -119,6 +119,7 @@ class ColorDemo(Arbapp):
 
         # Browse all pixel generators at each time
         while True:
+            self.model.lock()
             for h in range(self.height):
                 for w in range(self.width):
                     try:
@@ -127,6 +128,7 @@ class ColorDemo(Arbapp):
                         pass
                     else:
                         self.model.set_pixel(h, w, color)
+            self.model.unlock()
             self.rate.sleep()
 
 if __name__=='__main__':
