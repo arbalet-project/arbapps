@@ -15,6 +15,7 @@ from subprocess import Popen
 from shlex import split
 from time import sleep, time
 from pygame import event, init, joystick, JOYBUTTONDOWN
+from signal import SIGINT
 import argparse
 
 # TODO must Arbaloop inherit from Arbapp?
@@ -55,6 +56,7 @@ class Arbaloop(Arbapp):
                 except:
                     if self.server_process:
                         self.server_process.terminate()
+                        self.server_process.send_signal(SIGINT)
                         self.server_process.wait()
                     raise
 
@@ -100,8 +102,10 @@ class Arbaloop(Arbapp):
                 reason = self.wait(command['timeout'], command['interruptible'], process) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
                 print "End:", reason
                 if reason!='terminated':
-                    process.terminate()
+                    process.terminate()  # SIGTERM
+                    process.send_signal(SIGINT)
                     process.wait() # should poll() and kill() if it does not close?
+                    print 3
             if not sequence['infinite']:
                 break
 
