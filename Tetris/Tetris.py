@@ -60,46 +60,69 @@ class Tetris(Arbapp):
         Arbapp.__init__(self)
         self.grid = numpy.zeros([self.height, self.width], dtype=int)
         self.old_grid = deepcopy(self.grid)
-        self.speed = 2 # Speed of tetromino fall in Hertz
-        self.last_event = 0
+        self.speed = 2  # Speed of tetromino fall in Hertz
         self.score = 0
         self.playing = True
         self.tetromino = None
+        self.command = {'left': False, 'right': False, 'down': False, 'rotate': False}  # User commands (joy/keyboard)
+        self.touchdown = False  # True if the tetro has reached the floor
+
         pygame.init()
         pygame.joystick.init()
+
+        for j in range(pygame.joystick.get_count()):
+            joy = pygame.joystick.Joystick(j)
+            joy.init()
+            if joy.get_numhats()==0:
+                joy.quit()  # We can play only with joysticks having hats
 
     def process_events(self):
         """
         Sleep until the next step and process user events: game commands + exit
+        Previous commands are kept into account and extended events (i.e. a key stayed pressed) are propagated
         :return: True if user asked to abort sleeping (accelerate or quit), False otherwise
         """
-        self.new_event = False
+        self.command['rotate'] = False  # The rotate event cannot be extended
+        # Process new events
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.playing = False
-                return True
-            # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN JOYBUTTONUP JOYHATMOTION
+            # Joystick control
             if event.type == pygame.JOYBUTTONDOWN:
-                self.tetromino.rotate()
-                self.new_event = True
+                self.command['rotate'] = True
+            elif event.type==pygame.JOYHATMOTION:
+                if event.value[1]==1:
+                    self.command['rotate'] = True
+                elif event.value[1]==-1:
+                    self.command['down'] = True
+                elif event.value[1]==0:
+                    self.command['down'] = False
+                if event.value[0]==1:
+                    self.command['right'] = True
+                elif event.value[0]==-1:
+                    self.command['left'] = True
+                elif event.value[0]==0:
+                    self.command['left'] = False
+                    self.command['right'] = False
+            # Keyboard control
+            elif event.type in [pygame.KEYDOWN, pygame.KEYUP]:
+                if event.key==pygame.K_UP:
+                    self.command['rotate'] = event.type==pygame.KEYDOWN
+                elif event.key==pygame.K_DOWN:
+                    self.command['down'] = event.type==pygame.KEYDOWN
+                elif event.key==pygame.K_RIGHT:
+                    self.command['right'] = event.type==pygame.KEYDOWN
+                elif event.key==pygame.K_LEFT:
+                    self.command['left'] = event.type==pygame.KEYDOWN
 
-        if pygame.joystick.get_count()>0:
-            joystick = pygame.joystick.Joystick(0)
-            joystick.init()
-            hat = joystick.get_hat(0)
-            if (hat[0]!=0 or hat[1]!=0 or self.new_event) and time.time()-self.last_event>0.08:
-                self.new_event = True
-                self.last_event = time.time()
-            else:
-                self.new_event = False
-
-        if self.new_event:
-
+        changes_pending = self.command['left'] or self.command['right'] or self.command['rotate']
+        if changes_pending:
             old_position = deepcopy(self.tetromino.position)
-            self.tetromino.update_position(0, hat[0])
+            self.tetromino.update_position(0, -1 if self.command['left'] else 1 if self.command['right'] else 0)
+            if self.command['rotate']:
+                self.tetromino.rotate()
+
             self.old_grid_empty = deepcopy(self.grid)
             self.draw_tetromino()
-            if self.touchdown and hat[0]!=0:            # Touch left/right
+            if self.touchdown and changes_pending:       # If touch is due to pending changes
                 self.tetromino.position = old_position  # We cancel the last move left/right
                 self.grid = self.old_grid_empty         # We remove the collisionning tetro
                 #self.draw_tetromino()                   # And redraw
@@ -110,7 +133,8 @@ class Tetris(Arbapp):
                 self.old_grid_filled = deepcopy(self.grid)
                 self.update_view()
                 self.grid = self.old_grid_empty
-        return self.new_event and hat[1]!=0   # Return True in case of speed increasing request, False otherwise
+
+        return self.command['down']  # sleep will be aborted only if we have to go down
 
     def game_over(self):
         return not self.playing
@@ -135,7 +159,7 @@ class Tetris(Arbapp):
     def wait_for_timeout_or_event(self, allow_events=True):
         t0 = time.time()
         while time.time()-t0 < 1./self.speed:
-            time.sleep(0.001)
+            time.sleep(0.07)
             if allow_events and self.process_events():
                 return
 
