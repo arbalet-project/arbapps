@@ -6,13 +6,11 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-import sys, os
-sys.path.append(os.path.realpath(os.path.dirname(__file__))+'/../../src/')
 import time
 import random
 import numpy
-from copy import deepcopy
 import pygame
+from copy import deepcopy
 from arbasdk import Arbapp
 
 class Tetromino(object):
