@@ -136,8 +136,11 @@ class Tetris(Arbapp):
 
         return self.command['down']  # sleep will be aborted only if we have to go down
 
-    def game_over(self):
-        return not self.playing
+    def check_level_up(self):
+        raise NotImplementedError("Level up to implement!")
+        if self.score>60*self.speed:
+            print "LEVEL UP! Level", self.speed-1
+            self.speed += 1
 
     def draw_tetromino(self):
         self.touchdown = False
@@ -226,7 +229,11 @@ class Tetris(Arbapp):
             else:
                 time.sleep(0.5)
                 lines = self.check_and_delete_full_lines()
-                self.score += lines*lines
+                won = lines*lines*self.speed
+                self.score += won
+                if won>0:
+                    print "score:", self.score
+            #self.check_level_up()
 
 
 t = Tetris()
