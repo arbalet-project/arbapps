@@ -145,8 +145,8 @@ if __name__=='__main__':
     # - colors is the vector of colors to swipe in the given duration
     
     animations = {'swipe': { 'rate': 20, 'dur_min': 10, 'dur_max': 15, 'generator_id': 1,
-                             'colors': ['gold', 'darkorange', 'darkred', 'deeppink',
-                                        'purple', 'darkblue', 'turquoise', 'darkgreen', 'yellowgreen'] },
+                             'colors': ['yellowgreen', 'darkorange', 'darkred', 'deeppink',
+                                        'purple', 'darkblue', 'turquoise', 'darkgreen'] },
 
                   'african': { 'rate': 20, 'dur_min': 10, 'dur_max':15, 'generator_id': 2,
                                'colors':[(39, 26, 19), (49, 32, 23), (100, 66, 48), (172, 69, 11), (232, 139, 36)] },
@@ -158,10 +158,11 @@ if __name__=='__main__':
                                'colors':['darkblue', 'deeppink'] },
 
                   'teddy':  { 'rate': 20, 'dur_min': 5, 'dur_max': 20, 'generator_id': 2,
-                               'colors':['turquoise', (49, 32, 23)] },
+                               'colors':[(0, 30, 30), (20, 10, 0)] },
 
-                  'summer':  { 'rate': 20, 'dur_min': 10, 'dur_max': 30, 'generator_id': 2,
-                               'colors':['gold', 'red'] },
+                  'warm':  { 'rate': 50, 'dur_min': 10, 'dur_max': 30, 'generator_id': 2,
+                               'colors':[[20, 11, 2], [13, 0, 3], [10, 1, 4]] },
+
                   }
 
     parser = argparse.ArgumentParser(description='Color demonstrator with nice effects and animations for demos (and pleasure!)'
