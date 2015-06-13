@@ -36,7 +36,7 @@ class UserHits():
         ####### START X11 KEY RECORDER
         ####### thank you http://sourceforge.net/p/python-xlib/code/HEAD/tree/trunk/examples/put_selection.py
         self.record_dpy = display.Display()
-        if True:# not self.record_dpy.has_extension("RECORD"):
+        if not self.record_dpy.has_extension("RECORD"):
             print "X11 RECORD extension not found, the game will not work without GUI"
             self.x11_events = False
         else:
