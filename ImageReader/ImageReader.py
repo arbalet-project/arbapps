@@ -28,8 +28,11 @@ class ImageReader(Arbapp):
                     self.update_model(self.image.convert('RGB'))
                     self.image.seek(self.image.tell()+1)
                 except EOFError:
-                    print "End"
-                    sleep(time)
+                    if self.args.loop:
+                        self.image.seek(0)
+                        sleep(1)
+                    else:
+                        sleep(time)
                 else:
                     print "New frame"
                     sleep(0.1)
@@ -56,6 +59,12 @@ if __name__=='__main__':
                         required=True,
                         nargs='+',
                         help='Path to the image(s) to render')
+
+    parser.add_argument('-l', '--loop',
+                        action='store_const',
+                        const=True,
+                        default=False,
+                        help='Keep playing infinitely')
 
     parser.add_argument('-do', '--display-original',
                         action='store_const',
