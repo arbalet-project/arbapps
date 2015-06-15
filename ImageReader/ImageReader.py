@@ -9,7 +9,7 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 import argparse
-from PIL import Image
+import Image
 from os.path import isfile
 from arbasdk import Arbapp
 from time import sleep
