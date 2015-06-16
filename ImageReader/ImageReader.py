@@ -28,7 +28,8 @@ class ImageReader(Arbapp):
                 self.vertical = True
             while True:
                 try:
-                    self.update_model(self.image.convert('RGB'))
+                    self.update_model(self.image.convert('RGB').resize((self.width, self.height) if self.vertical
+                                                                       else (self.height, self.width)))
                     self.image.seek(self.image.tell()+1)
                 except EOFError:
                     if self.args.loop:
