@@ -147,8 +147,7 @@ class Tetris(Arbapp):
         self.grid = before_rotation
 
     def check_level_up(self):
-        raise NotImplementedError("Level up to implement!")
-        if self.score>60*self.speed:
+        if self.score/25+1>=self.speed:
             print "LEVEL UP! Level", self.speed-1
             self.speed += 1
 
@@ -240,11 +239,11 @@ class Tetris(Arbapp):
             else:
                 time.sleep(0.5)
                 lines = self.check_and_delete_full_lines()
-                won = lines*lines*self.speed
+                won = lines*lines
                 self.score += won
                 if won>0:
                     print "score:", self.score
-            #self.check_level_up()
+            self.check_level_up()
 
 
 t = Tetris()
