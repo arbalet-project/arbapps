@@ -43,9 +43,7 @@ class Tetromino(object):
         self.position[1] = max(min(self.position[1]+y, self.width-len(self.get_value()[0])), 0)
 
     def rotate(self):
-        # TODO: In case of LR touchdown, rotation is authorized (but shouldn't) but blocks the tetro
-        # TODO: replace by a drawing simulation to see if rotation is authorized...
-        if self.position[1]+len(self.get_value())<self.width:
+        if self.position[1]+len(self.get_value())-1<self.width:
             self.rotated += 1
 
     def falldown(self):
@@ -118,7 +116,7 @@ class Tetris(Arbapp):
             old_position = deepcopy(self.tetromino.position)
             self.tetromino.update_position(0, -1 if self.command['left'] else 1 if self.command['right'] else 0)
             if self.command['rotate']:
-                self.tetromino.rotate()
+                self.rotate_current_tetro()
 
             self.old_grid_empty = deepcopy(self.grid)
             self.draw_tetromino()
@@ -135,6 +133,17 @@ class Tetris(Arbapp):
                 self.grid = self.old_grid_empty
 
         return self.command['down']  # sleep will be aborted only if we have to go down
+
+    def rotate_current_tetro(self):
+        """
+        Before rotating the falling tetro we check whether this is possible with a drawing simulation
+        """
+        before_rotation = deepcopy(self.grid)
+        self.tetromino.rotate()  # simulate drawing
+        self.draw_tetromino()
+        if self.touchdown:
+            self.tetromino.rotate()  # If the rotation creates a collision, rotate again
+        self.grid = before_rotation
 
     def check_level_up(self):
         raise NotImplementedError("Level up to implement!")
@@ -198,6 +207,7 @@ class Tetris(Arbapp):
         self.tetromino = Tetromino(0, self.width/2, self.height, self.width)
         steps = 0
         while not self.touchdown:
+
             self.old_grid_empty = deepcopy(self.grid)
             self.draw_tetromino()
             if self.touchdown:
