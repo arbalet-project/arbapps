@@ -89,6 +89,7 @@ class Tetris(Arbapp):
             elif event.type==pygame.JOYHATMOTION:
                 if event.value[1]==1:
                     self.command['rotate'] = True
+                    self.command['down'] = False
                 elif event.value[1]==-1:
                     self.command['down'] = True
                 elif event.value[1]==0:
