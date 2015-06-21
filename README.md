@@ -17,6 +17,7 @@ Arbalet's source code is organized around three repositories: [Arbasdk](https://
 
 Arbalet comes with these apps:
 * **ColorDemonstrator** shows nice light effets on your Arbalet table. It comes with an initial set of 6 effects: Blue flashing to white, African style, turquoise/chocolate, pink/blue, warm colors, and whole color wheel.
+* **ImageReader** is a GIF renderer. It will stretch the frames to fit the whole table so it may distort the original image.
 * **LightsHero** is a GuitarHero-like game playable with the keys F1 to F5 of a keyboard to be holded... like a guitarist does. It's compatible with frets-on-fire songs.
 * **Pixeliser** reads any video in input and reduces dramatically its resolution to play it on the table. You won't be able to watch a movie for sure, but this is a simple way to create nice light effects with... nice input videos.
 * **SpectrumAnalyser** 	is an offline music spectrum analyzer. It reads a WAVE file, plays it and displays the spectrum computed in realtime.
