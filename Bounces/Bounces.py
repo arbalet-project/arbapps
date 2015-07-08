@@ -41,8 +41,8 @@ class Ball():
     def step_forward(self):
         x = self._x + self.x_speed
         y = self._y + self.y_speed
-        x_in = 0 < x < self.height-1
-        y_in = 0 < y < self.width-1
+        x_in = 0 < x < self.height
+        y_in = 0 < y < self.width
 
         if x_in:
             self._x = x
