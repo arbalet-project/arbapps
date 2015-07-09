@@ -11,7 +11,6 @@
 from random import randint, uniform, choice
 from arbasdk import Arbapp, Arbapixel, Rate
 from threading import Lock
-from math import cos, sin
 import argparse
 
 
@@ -41,12 +40,11 @@ class SampleListener(Leap.Listener):
     def on_frame(self, controller):
         frame = controller.frame()
         for gesture in frame.gestures():
-            if gesture.type == Leap.Gesture.TYPE_SWIPE:
-                swipe = SwipeGesture(gesture)
+            if gesture.type == Leap.Gesture.TYPE_SWIPE and gesture.state in [1, 3]: # States 1 and 3 are START and STOP, we omit updates
                 with self.swipe_lock:
                     self.swipe[0] = SwipeGesture(gesture)
-                print "  Swipe id: %d, state: %s, position: %s, direction: %s, speed: %f" % (
-                    swipe.id, swipe.state, swipe.position, swipe.direction, swipe.speed)
+                #print "  Swipe id: %d, state: %s, position: %s, direction: %s, speed: %f" % (
+                #    self.swipe[0].id, self.swipe[0].state, self.swipe[0].position, self.swipe[0].direction, self.swipe[0].speed)
 
 class Ball():
     colors = ['deeppink', 'navy', 'gold', 'white', 'grey', 'darkgreen', 'chocolate']
@@ -137,8 +135,8 @@ class Bounces(Arbapp):
                 self.model.set_pixel(ball.x, ball.y, ball.color)
                 if self.swipe[0] is not None:
                     # mapping axes (height, width) of Arbalet on axes (x, z) of Leap Motion
-                    x_speed_boost = self.swipe[0].direction[0] * self.swipe[0].speed / 1000.
-                    y_speed_boost = self.swipe[0].direction[2] * self.swipe[0].speed / 1000.
+                    x_speed_boost = self.swipe[0].direction[0] * self.swipe[0].speed / 500.
+                    y_speed_boost = self.swipe[0].direction[2] * self.swipe[0].speed / 500.
                     ball.x_speed += x_speed_boost
                     ball.y_speed += y_speed_boost
             self.swipe[0] = None
