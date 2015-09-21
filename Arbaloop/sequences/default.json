@@ -9,6 +9,7 @@
         {"dir":"ColorDemonstrator", "command": "Colordemonstrator.py -t african", "timeout": 60, "interruptible": true},
         {"dir":"Pixeliser", "command": "Pixeliser.py -i files/Cold_lights.mp4", "timeout": -1, "interruptible": true},
         {"dir":"SpectrumAnalyser", "command": "SpectrumAnalyser.py -i files/Nytrogen_-_Nytrogen_-_Trust_no_one.wav", "timeout": -1, "interruptible": true},
-        {"dir":"Pixeliser", "command": "Pixeliser.py -i files/Warm_lights.mp4", "timeout": -1, "interruptible": true}
+        {"dir":"Pixeliser", "command": "Pixeliser.py -i files/Warm_lights.mp4", "timeout": -1, "interruptible": true},
+        {"dir":"TimeClock", "command": "TimeClock.py", "timeout": 30, "interruptible": true}
     ]
 }
