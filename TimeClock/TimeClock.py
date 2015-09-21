@@ -3,7 +3,7 @@
     Arbalet - ARduino-BAsed LEd Table
     Time clock - simple time clock demonstrator.
 
-    Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
+    Copyright 2015 Joseph Silvestre, Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 
