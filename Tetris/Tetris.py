@@ -244,6 +244,9 @@ class Tetris(Arbapp):
                 if won>0:
                     print "score:", self.score
             self.check_level_up()
+        
+        if self.score>0:
+            self.model.write("Score: {}".format(self.score), 'gold')
 
 
 t = Tetris()
