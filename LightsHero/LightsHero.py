@@ -110,6 +110,23 @@ class LightsHero(Arbapp):
             # warn the user hits class whether the note has to be played
             self.hits.set_note(lane, self.grid[self.height-1][lane] in ['bump', 'active'])
 
+    def display_score(self):
+        levels = [15, 40, 60, 80, 90, 101]
+        sentences = ["did you really play?", "you need to practice...", "I'm pretty sure you can do better...",
+                    "that's a fair score!", "awesome, you're a master!", "incredible, did you cheat?"]
+        colors = ['darkred', 'orange', 'gold', 'yellowgreen', 'green', 'white']
+        score = int((100.*self.hits.score)/self.hits.max_score)
+
+        for i, level in enumerate(levels):
+            if score<level:
+                sentence = sentences[i]
+                color = colors[i]
+                break
+
+        print "You scored", score, '% with', self.hits.score, 'hits over', self.hits.max_score
+
+        if self.hits.score>0:
+            self.model.write("You scored {}%, {}".format(score, sentence), color)
 
     def run(self):
         countdown = self.height # Countdown triggered after Midi's EOF
@@ -130,8 +147,8 @@ class LightsHero(Arbapp):
                 self.sound.start()
 
             self.rate.sleep()
+        self.display_score()
 
-        print "You scored", int((100.*self.hits.score)/self.hits.max_score), '% with', self.hits.score, 'hits over', self.hits.max_score
 
 song = path.join(path.dirname(__file__), 'songs', 'Feelings')
 t = LightsHero(num_lanes=5, path=song, level='expert', speed=15)
