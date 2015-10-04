@@ -23,6 +23,11 @@ Arbalet comes with these apps:
 * **Pixeliser** reads any video in input and reduces dramatically its resolution to play it on the table. You won't be able to watch a movie for sure, but this is a simple way to create nice light effects with... nice input videos.
 * **SpectrumAnalyser** 	is an offline music spectrum analyzer. It reads a WAVE file, plays it and displays the spectrum computed in realtime.
 * **Tetris** is... a Tetris! Playable with a joystick or a keyboard.
+* **TimeClock** is a very simple time clock, currently only suited for tables of size 15x10
+
+Meta-applications:
 * **Arbaloop** is an application sequencer. Mainly written for demonstration purposes it starts Arbalet applications automatically and switch to a new one after a while or after the user asked to change.
 * **Arbaserver** 	is a server allowing to share hardware between several clients over the network
 * **Arbasnap** 	is a bridge for the [Snap! visual programming language](http://snap.berkeley.edu/).
+
+**IMPORTANT NOTE**: You **must** [download and install the Arbalet SDK](https://github.com/arbalet-project/arbadoc/wiki/Software-tutorials) before running any of these applications, otherwise you will raise an `ImportError`.
