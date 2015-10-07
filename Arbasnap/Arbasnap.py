@@ -28,7 +28,7 @@ class SnapServer(Arbapp):
         return ''
 
     def set_pixel_rgb(self, h, w, r, g, b):
-        self.model.set_pixel(int(h)-1, int(w)-1, int(float(r)), int(float(g)), int(float(b)))
+        self.model.set_pixel(int(h)-1, int(w)-1, [int(float(r)), int(float(g)), int(float(b))])
         return ''
 
     def run(self):
