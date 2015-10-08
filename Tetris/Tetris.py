@@ -148,8 +148,10 @@ class Tetris(Arbapp):
 
     def check_level_up(self):
         if self.score/25+1>=self.speed:
-            print "LEVEL UP! Level", self.speed-1
             self.speed += 1
+            text = "Level up! Level {}, score {}".format(self.speed-1, self.score)
+            print text
+            self.model.write(text, "navy")
 
     def draw_tetromino(self):
         self.touchdown = False
@@ -244,9 +246,9 @@ class Tetris(Arbapp):
                 if won>0:
                     print "score:", self.score
             self.check_level_up()
-        
+
         if self.score>0:
-            self.model.write("Score: {}".format(self.score), 'gold')
+            self.model.write("GAME OVER! Score: {}, level {}".format(self.score, self.speed-1), 'gold')
 
 
 t = Tetris()
