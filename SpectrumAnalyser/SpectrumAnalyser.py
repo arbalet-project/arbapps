@@ -22,41 +22,23 @@ class Renderer():
     This class renders the FFT bands on Arbalet
     It is in charge of all colors and animations once a FFT averages list arrives in draw_bars()
     """
-    def __init__(self, model, height, width, vertical=True):
+    def __init__(self, model, height, width, num_bins, num_bands, vertical=True):
         self.model = model
         self.height = height
         self.width = width
-        self.num_bands = width if vertical else height
+        self.num_bands = num_bands
+        self.num_bins = num_bins
         self.vertical = vertical
         self.colors = [hsv(c, 100, 100) for c in range(0, 360, int(360./self.num_bands))]
-        
+
         # A window stores the last len_window samples to scale the height of the spectrum
         self.max = 1000000
         self.window = deque()
         self.len_window = 50
 
-    def draw_bars_hv(self, num_bands, num_bins, averages, vertical):
-        """
-        Draw the bins using FFT averages whatever the orientation is.
-        The maximum high level self.amplitude_factor is hardcoded but this should be improved
-        """
-        self.model.lock()
-        for bin in range(num_bins):
-            ampli_b = bin*self.max/(num_bins-2)
-            for band in range(num_bands):
-                if ampli_b < averages[band]:
-                    color = self.colors[band]
-                elif self.old_model: # animation with light decreasing
-                    old = self.old_model.get_pixel(bin if vertical else band, band if vertical else bin).hsva
-                    color = hsv(old[0], old[1], old[2]*0.875)
-                else:
-                    color = 'black'
-                self.model.set_pixel(bin if vertical else band, band if vertical else bin, color)
-        self.model.unlock()
-
     def draw_bars(self, averages):
         """
-        Draw the bins using FFT averages according to the orientation of the grid (vertical, horizontal)
+        Draw the bins using FFT averages whatever the orientation is.
         """
         self.old_model = copy(self.model)
         if len(self.window) == self.len_window:
@@ -64,10 +46,19 @@ class Renderer():
             self.max = numpy.average(numpy.array(self.window))
         self.window.append(max(averages))
 
-        if self.vertical:
-            self.draw_bars_hv(self.width, self.height, averages, True)
-        else:
-            self.draw_bars_hv(self.height, self.width, averages, False)
+        self.model.lock()
+        for bin in range(self.num_bins):
+            ampli_b = bin*self.max/(self.num_bins-2)
+            for band in range(self.num_bands):
+                if ampli_b < averages[band]:
+                    color = self.colors[band]
+                elif self.old_model: # animation with light decreasing
+                    old = self.old_model.get_pixel(bin if self.vertical else band, band if self.vertical else bin).hsva
+                    color = hsv(old[0], old[1], old[2]*0.875)
+                else:
+                    color = 'black'
+                self.model.set_pixel(bin if self.vertical else band, band if self.vertical else bin, color)
+        self.model.unlock()
 
 class SpectrumAnalyser(Arbapp):
     """
@@ -138,7 +129,9 @@ class SpectrumAnalyser(Arbapp):
             self.stream.close()
 
     def run(self):
-        self.renderer = Renderer(self.model, self.height, self.width, self.vertical)
+        num_bands = self.width if self.vertical else self.height
+        num_bins = self.height if self.vertical else self.width
+        self.renderer = Renderer(self.model, self.height, self.width, num_bins, num_bands, self.vertical)
         for f in self.args.input:
             self.play_file(f)
 
