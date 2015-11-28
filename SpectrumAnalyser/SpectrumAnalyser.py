@@ -64,10 +64,9 @@ class SpectrumAnalyser(Arbapp):
     """
     This is the main entry point of the spectrum analyser, it reads the file, computes the FFT and plays the sound
     """
-    def __init__(self, argparser, vertical=True):
+    def __init__(self, argparser):
         Arbapp.__init__(self, argparser)
         self.chunk = 1024
-        self.vertical = vertical
         self.parser = argparser
         self.renderer = None
         self.file = None
@@ -75,7 +74,7 @@ class SpectrumAnalyser(Arbapp):
         self.pyaudio = pyaudio.PyAudio()
 
         ##### Fourier related attributes, we generate a suitable log-scale
-        self.num_bands = self.width if self.vertical else self.height
+        self.num_bands = self.width if self.args.vertical else self.height
         self.min = 50
         self.max = 22050
         #self.db_scale = [self.file.getframerate()*2**(b-self.num_bands) for b in range(self.num_bands)]
@@ -129,9 +128,9 @@ class SpectrumAnalyser(Arbapp):
             self.stream.close()
 
     def run(self):
-        num_bands = self.width if self.vertical else self.height
-        num_bins = self.height if self.vertical else self.width
-        self.renderer = Renderer(self.model, self.height, self.width, num_bins, num_bands, self.vertical)
+        num_bands = self.width if self.args.vertical else self.height
+        num_bins = self.height if self.args.vertical else self.width
+        self.renderer = Renderer(self.model, self.height, self.width, num_bins, num_bands, self.args.vertical)
         for f in self.args.input:
             self.play_file(f)
 
@@ -142,4 +141,9 @@ if __name__=='__main__':
                         required=True,
                         nargs='+',
                         help='Wave file(s) to play')
-    SpectrumAnalyser(parser, vertical=False).start()
+    parser.add_argument('-v', '--vertical',
+                        action='store_const',
+                        const=True,
+                        default=False,
+                        help='The spectrum must be vertical (less bands, more bins)')
+    SpectrumAnalyser(parser).start()
