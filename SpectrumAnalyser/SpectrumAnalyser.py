@@ -13,6 +13,7 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 import struct, argparse, numpy, pyaudio, audioop, wave
+from collections import deque
 from arbasdk import Arbapp, hsv
 from copy import copy
 
@@ -28,7 +29,11 @@ class Renderer():
         self.num_bands = width if vertical else height
         self.vertical = vertical
         self.colors = [hsv(c, 100, 100) for c in range(0, 360, int(360./self.num_bands))]
-        self.amplitude_factor = 3500000 # Sum of amplitudes [tricky to compute and cannot be real-time] TODO
+        
+        # A window stores the last len_window samples to scale the height of the spectrum
+        self.max = 1000000
+        self.window = deque()
+        self.len_window = 50
 
     def draw_bars_hv(self, num_bands, num_bins, averages, vertical):
         """
@@ -37,13 +42,13 @@ class Renderer():
         """
         self.model.lock()
         for bin in range(num_bins):
-            ampli_b = bin*self.amplitude_factor
+            ampli_b = bin*self.max/(num_bins-2)
             for band in range(num_bands):
                 if ampli_b < averages[band]:
                     color = self.colors[band]
                 elif self.old_model: # animation with light decreasing
                     old = self.old_model.get_pixel(bin if vertical else band, band if vertical else bin).hsva
-                    color = hsv(old[0], old[1], old[2]*0.8)
+                    color = hsv(old[0], old[1], old[2]*0.875)
                 else:
                     color = 'black'
                 self.model.set_pixel(bin if vertical else band, band if vertical else bin, color)
@@ -53,7 +58,12 @@ class Renderer():
         """
         Draw the bins using FFT averages according to the orientation of the grid (vertical, horizontal)
         """
-        self.old_model = copy(self.model) # No need to lock during the copy, I'm the thread who is writing
+        self.old_model = copy(self.model)
+        if len(self.window) == self.len_window:
+            self.window.popleft()
+            self.max = numpy.average(numpy.array(self.window))
+        self.window.append(max(averages))
+
         if self.vertical:
             self.draw_bars_hv(self.width, self.height, averages, True)
         else:
@@ -65,7 +75,7 @@ class SpectrumAnalyser(Arbapp):
     """
     def __init__(self, argparser, vertical=True):
         Arbapp.__init__(self, argparser)
-        self.chunk = 2*1024
+        self.chunk = 1024
         self.vertical = vertical
         self.parser = argparser
         self.renderer = None
