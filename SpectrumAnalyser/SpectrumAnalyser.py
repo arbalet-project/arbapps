@@ -36,7 +36,7 @@ class Renderer():
         self.window = deque()
         self.len_window = 50
 
-    def draw_bars(self, averages):
+    def draw_frame(self, bands):
         """
         Draw the bins using FFT averages whatever the orientation is.
         """
@@ -44,13 +44,13 @@ class Renderer():
         if len(self.window) == self.len_window:
             self.window.popleft()
             self.max = numpy.average(numpy.array(self.window))
-        self.window.append(max(averages))
+        self.window.append(max(bands))
 
         self.model.lock()
         for bin in range(self.num_bins):
             ampli_b = bin*self.max/(self.num_bins-2)
             for band in range(self.num_bands):
-                if ampli_b < averages[band]:
+                if ampli_b < bands[band]:
                     color = self.colors[band]
                 elif self.old_model: # animation with light decreasing
                     old = self.old_model.get_pixel(bin if self.vertical else band, band if self.vertical else bin).hsva
@@ -119,7 +119,7 @@ class SpectrumAnalyser(Arbapp):
             while data != '':
                 mono_data = audioop.tomono(data, self.file.getsampwidth(), 0.5, 0.5)
                 self.fft(mono_data)
-                self.renderer.draw_bars(self.averages)
+                self.renderer.draw_frame(self.averages)
 
                 self.stream.write(data)
                 data = self.file.readframes(self.chunk)
