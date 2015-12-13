@@ -24,6 +24,7 @@ class Brightness(Thread):
         self.running = True
         self.lock = RLock()
         self.timestamp = {"touched": 0, "untouched": 0}  # Last time the surface as been touched
+        self.connect()
 
     def connect(self):
         success = False
@@ -31,19 +32,10 @@ class Brightness(Thread):
         try:
             self.serial = Serial(device, self.config['speed'], timeout=0)
         except Exception, e:
-            print "[Brightness] Connection to {} at speed {} failed: {}".format(device, self.config['speed'], e.message)
+            print "[Touch] Connection to {} at speed {} failed: {}".format(device, self.config['speed'], e.message)
             self.serial = None
         else:
             success = True
-        return success
-
-    def connect_forever(self):
-        success = False
-        while not success:
-            success = self.connect()
-            if success:
-                break
-            sleep(0.05)
         return success
 
     def close(self):
@@ -54,39 +46,38 @@ class Brightness(Thread):
 
     @property
     def brightness(self):
-        now = time()
-        with self.lock:
-            if self.nc:
-                if self.timestamp["touched"] > self.timestamp["untouched"]:
-                    return min(1, (now - self.timestamp["untouched"])/self.duration)
+        if self.serial:
+            now = time()
+            with self.lock:
+                if self.nc:
+                    if self.timestamp["touched"] > self.timestamp["untouched"]:
+                        return min(1, (now - self.timestamp["untouched"])/self.duration)
+                    else:
+                        return max(0, 1 - (now - self.timestamp["touched"])/self.duration)
                 else:
-                    return max(0, 1 - (now - self.timestamp["touched"])/self.duration)
-            else:
-                if self.timestamp["touched"] > self.timestamp["untouched"]:
-                    return max(0, 1 - (now - self.timestamp["untouched"])/self.duration)
-                else:
-                    return min(1, (now - self.timestamp["touched"])/self.duration)
+                    if self.timestamp["touched"] > self.timestamp["untouched"]:
+                        return max(0, 1 - (now - self.timestamp["untouched"])/self.duration)
+                    else:
+                        return min(1, (now - self.timestamp["touched"])/self.duration)
+        else:
+            return 1.  # Touch interface not available
 
     def run(self):
         while(self.running):
-            reconnect = True
             if self.serial and self.serial.isOpen():
                 try:
                     read = self.serial.read()
                 except:
-                    pass
+                    return False
                 else:
-                    reconnect = False
                     if len(read)>0:
                         with self.lock:
                             if read == '1':
                                 self.timestamp["touched"] = time()
                             else:
                                 self.timestamp["untouched"] = time()
-            if reconnect:
-                self.connect_forever()
-            else:
-                self.rate.sleep()
+            self.rate.sleep()
+        return True
 
 if __name__=='__main__':
     Brightness().run()

@@ -8,6 +8,7 @@
 """
 import random
 from arbasdk import Arbapp, Arbapixel, Rate
+from classes.brightness import Brightness
 import argparse
 
 def gen_sweep_async(n_frames, n_frames_fade, n_frames_rand, colors):
@@ -108,6 +109,8 @@ class ColorDemo(Arbapp):
             config['colors'].append(config['colors'][0])
         self.colors = config['colors']
         self.generator = self.generators[config['generator_id']]
+        self.brightness = Brightness(2, True)
+        self.brightness.start()
 
     def run(self):
         # Construct all pixel generators
@@ -119,16 +122,16 @@ class ColorDemo(Arbapp):
 
         # Browse all pixel generators at each time
         while True:
-            self.model.lock()
-            for h in range(self.height):
-                for w in range(self.width):
-                    try:
-                        color = generators[h][w].next()
-                    except StopIteration:
-                        pass
-                    else:
-                        self.model.set_pixel(h, w, color)
-            self.model.unlock()
+            brightness = self.brightness.brightness
+            with self.model:
+                for h in range(self.height):
+                    for w in range(self.width):
+                        try:
+                            color = generators[h][w].next()
+                        except StopIteration:
+                            pass
+                        else:
+                            self.model.set_pixel(h, w, color*brightness)
             self.rate.sleep()
 
 if __name__=='__main__':
