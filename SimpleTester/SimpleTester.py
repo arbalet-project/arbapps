@@ -20,32 +20,20 @@ class SimpleTester(Arbapp):
         Arbapp.__init__(self, argparser)
         self.BG_COLOR = 'black'
         self.PIXEL_COLOR='darkred'
-        self.nbstrips=self.args.nbstrips
-        self.nbleds=self.args.nbleds
 
     def run(self):
-         # Update the screen every second.
+        # Update the screen every second.
         rate = Rate(2.0)
-
-        for y in range(self.nbstrips):
-            for x in range(self.nbleds):
-                self.model.lock()
-
-                self.model.set_pixel(x, y, self.PIXEL_COLOR)
-
-                self.model.unlock()
+        for y in range(self.width):
+            for x in range(self.height):
+                with self.model:
+                    self.model.set_pixel(x, y, self.PIXEL_COLOR)
                 rate.sleep()
+
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description='light every pixel one by one')
-    parser.add_argument('-ns', '--nbstrips',
-                        type=int,
-                        default='10',
-                        help="number of strips")
-    parser.add_argument('-nl', '--nbleds',
-                        type=int,
-                        default='15',
-                        help="number of led per strip")
+
     app = SimpleTester(parser)
     app.start()
     app.close("end of app")
