@@ -12,6 +12,7 @@ import numpy
 import pygame
 from copy import deepcopy
 from arbasdk import Arbapp
+from classes.music import Music
 
 class Tetromino(object):
     types = {'i' : [[1],
@@ -73,6 +74,8 @@ class Tetris(Arbapp):
             joy.init()
             if joy.get_numhats()==0:
                 joy.quit()  # We can play only with joysticks having hats
+
+        self.music = Music()
 
     def process_events(self):
         """
@@ -148,10 +151,12 @@ class Tetris(Arbapp):
 
     def check_level_up(self):
         if self.score/25+1>=self.speed:
+            self.music.level_end()
             self.speed += 1
             text = "Level up! Level {}, score {}".format(self.speed-1, self.score)
             print text
             self.model.write(text, "navy")
+            self.music.level_up()
 
     def draw_tetromino(self):
         self.touchdown = False
