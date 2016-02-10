@@ -16,6 +16,7 @@ import struct, argparse, numpy, pyaudio, audioop, wave
 from collections import deque
 from arbasdk import Arbapp, hsv
 from copy import copy
+from random import shuffle
 
 class Renderer():
     """
@@ -131,6 +132,12 @@ class SpectrumAnalyser(Arbapp):
         num_bands = self.width if self.args.vertical else self.height
         num_bins = self.height if self.args.vertical else self.width
         self.renderer = Renderer(self.model, self.height, self.width, num_bins, num_bands, self.args.vertical)
+
+        if self.args.random != 'none':
+            shuffle(self.args.input)
+        if self.args.random == 'once':
+            self.args.input = self.args.input[:1]
+
         for f in self.args.input:
             self.play_file(f)
 
@@ -146,4 +153,8 @@ if __name__=='__main__':
                         const=True,
                         default=False,
                         help='The spectrum must be vertical (less bands, more bins)')
+    parser.add_argument('-o', '--random',
+                        default='none',
+                        choices=['none', 'all', 'once'],
+                        help='Random playing of the file queue: Play the entire queue as is (none), Shuffle and play the entire queue (all), Randomly pick a single file, play it and exit (once)')
     SpectrumAnalyser(parser).start()
