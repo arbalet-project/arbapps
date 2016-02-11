@@ -33,27 +33,25 @@ class TimeClockApp(Arbapp):
         tick_second = False
 
         while True:
-            self.model.lock()
+            with self.model:
+                # Get the current time.
+                now = datetime.datetime.today()
+                hour = now.hour
+                minute = now.minute
 
-            # Get the current time.
-            now = datetime.datetime.today()
-            hour = now.hour
-            minute = now.minute
+                # Extract the digits of each number in order to draw them
+                # separately.
+                hour_digits = self.extract_digits(hour)
+                minute_digits = self.extract_digits(minute)
 
-            # Extract the digits of each number in order to draw them
-            # separately.
-            hour_digits = self.extract_digits(hour)
-            minute_digits = self.extract_digits(minute)
+                # Display digits on the screen.
+                self.draw_row(0, hour_digits)
+                self.draw_row(1, minute_digits)
 
-            # Display digits on the screen.
-            self.draw_row(0, hour_digits)
-            self.draw_row(1, minute_digits)
-
-            # Flash the separator every two seconds.
-            self.flash_separator(tick_second)
+                # Flash the separator every two seconds.
+                self.flash_separator(tick_second)
             tick_second = not tick_second
 
-            self.model.unlock()
             rate.sleep()
 
 

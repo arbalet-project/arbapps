@@ -47,19 +47,18 @@ class Renderer():
             self.max = numpy.average(numpy.array(self.window))
         self.window.append(max(bands))
 
-        self.model.lock()
-        for bin in range(self.num_bins):
-            ampli_b = bin*self.max/(self.num_bins-2)
-            for band in range(self.num_bands):
-                if ampli_b < bands[band]:
-                    color = self.colors[band]
-                elif self.old_model: # animation with light decreasing
-                    old = self.old_model.get_pixel(bin if self.vertical else band, band if self.vertical else bin).hsva
-                    color = hsv(old[0], old[1], old[2]*0.875)
-                else:
-                    color = 'black'
-                self.model.set_pixel(bin if self.vertical else band, band if self.vertical else bin, color)
-        self.model.unlock()
+        with self.model:
+            for bin in range(self.num_bins):
+                ampli_b = bin*self.max/(self.num_bins-2)
+                for band in range(self.num_bands):
+                    if ampli_b < bands[band]:
+                        color = self.colors[band]
+                    elif self.old_model: # animation with light decreasing
+                        old = self.old_model.get_pixel(bin if self.vertical else band, band if self.vertical else bin).hsva
+                        color = hsv(old[0], old[1], old[2]*0.875)
+                    else:
+                        color = 'black'
+                    self.model.set_pixel(bin if self.vertical else band, band if self.vertical else bin, color)
 
 class SpectrumAnalyser(Arbapp):
     """

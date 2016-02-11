@@ -231,11 +231,10 @@ class Tetris(Arbapp):
 
 
     def update_view(self):
-        self.model.lock()
-        for w in range(self.width):
-            for h in range(self.height):
-                self.model.set_pixel(h, w, Tetromino.colors[self.grid[h][w]])
-        self.model.unlock()
+        with self.model:
+            for w in range(self.width):
+                for h in range(self.height):
+                    self.model.set_pixel(h, w, Tetromino.colors[self.grid[h][w]])
 
     def run(self):
         while self.playing:

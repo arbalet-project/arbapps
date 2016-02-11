@@ -39,13 +39,12 @@ class Pixeliser(Arbapp):
             raise IOError('No such file or directory: \'{}\''.format(f))
 
     def update_model(self, image):
-        self.model.lock()
-        for h in range(self.height):
-            for w in range(self.width):
-                pixel = map(int, image[h][w])
-                pixel = [pixel[2], pixel[1], pixel[0]] # OpenCV pixels in BGR order
-                self.model.set_pixel(h, w, pixel)
-        self.model.unlock()
+        with self.model:
+            for h in range(self.height):
+                for w in range(self.width):
+                    pixel = map(int, image[h][w])
+                    pixel = [pixel[2], pixel[1], pixel[0]] # OpenCV pixels in BGR order
+                    self.model.set_pixel(h, w, pixel)
 
     def run(self):
         for f in self.args.input:

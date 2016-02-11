@@ -39,29 +39,28 @@ class Renderer():
         self.flash_color = False  # Boolean giving a "burning" impression
 
     def update_view(self):
-        self.model.lock()
-        # Big area of coming notes
-        for lane in range(self.num_lanes):
-            for chunk_lane in range(self.width/self.num_lanes):
-                w = lane*self.width/self.num_lanes + chunk_lane
-                for h in range(self.height-1): # -1 in order not to update the bottom bar
-                    if self.grid[h][lane]=='bump':
-                        color = Arbapixel((100, 100, 100)) + Arbapixel(self.colors[lane])
-                    else:
-                        color = Arbapixel(self.colors[lane])*self.intensity[self.grid[h][lane]]
-                    self.model.set_pixel(h, w, color)
+        with self.model:
+            # Big area of coming notes
+            for lane in range(self.num_lanes):
+                for chunk_lane in range(self.width/self.num_lanes):
+                    w = lane*self.width/self.num_lanes + chunk_lane
+                    for h in range(self.height-1): # -1 in order not to update the bottom bar
+                        if self.grid[h][lane]=='bump':
+                            color = Arbapixel((100, 100, 100)) + Arbapixel(self.colors[lane])
+                        else:
+                            color = Arbapixel(self.colors[lane])*self.intensity[self.grid[h][lane]]
+                        self.model.set_pixel(h, w, color)
 
-        # Bottom bar of present notes
-        for lane in range(self.num_lanes):
-            if self.bar[lane]=='hit' and self.flash_color or self.bar[lane]=='idle':
-                # To make the note "burning" we alternate white/color when self.colors[lane]=='hit'
-                color = self.colors[lane]
-            else:
-                color = 'white'
-            for chunk_lane in range(self.width/self.num_lanes):
-                w = lane*self.width/self.num_lanes + chunk_lane
-                self.model.set_pixel(self.height-1, w, color)
-        self.model.unlock()
+            # Bottom bar of present notes
+            for lane in range(self.num_lanes):
+                if self.bar[lane]=='hit' and self.flash_color or self.bar[lane]=='idle':
+                    # To make the note "burning" we alternate white/color when self.colors[lane]=='hit'
+                    color = self.colors[lane]
+                else:
+                    color = 'white'
+                for chunk_lane in range(self.width/self.num_lanes):
+                    w = lane*self.width/self.num_lanes + chunk_lane
+                    self.model.set_pixel(self.height-1, w, color)
         self.flash_color = not self.flash_color
 
 class LightsHero(Arbapp):

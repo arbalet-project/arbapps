@@ -10,7 +10,7 @@
 """
 from random import randint, uniform, choice
 from arbasdk import Arbapp, Arbapixel, Rate
-from threading import Lock
+from threading import RLock
 import argparse
 
 
@@ -118,7 +118,7 @@ class Bounces(Arbapp):
 
         # Motion control via Leap Motion
         self.swipe = [None]
-        self.swipe_lock = Lock()
+        self.swipe_lock = RLock()
         self.leap_listener = SampleListener(self.swipe, self.swipe_lock)
         self.controller = Leap.Controller()
         self.controller.add_listener(self.leap_listener)
@@ -128,19 +128,18 @@ class Bounces(Arbapp):
         self.controller.remove_listener(self.leap_listener)
 
     def render(self):
-        self.model.lock()
-        self.model.set_all('black')
-        with self.swipe_lock:
-            for ball in self.balls:
-                self.model.set_pixel(ball.x, ball.y, ball.color)
-                if self.swipe[0] is not None:
-                    # mapping axes (height, width) of Arbalet on axes (x, z) of Leap Motion
-                    x_speed_boost = self.swipe[0].direction[0] * self.swipe[0].speed / 500.
-                    y_speed_boost = self.swipe[0].direction[2] * self.swipe[0].speed / 500.
-                    ball.x_speed += x_speed_boost
-                    ball.y_speed += y_speed_boost
-            self.swipe[0] = None
-        self.model.unlock()
+        with self.model:
+            self.model.set_all('black')
+            with self.swipe_lock:
+                for ball in self.balls:
+                    self.model.set_pixel(ball.x, ball.y, ball.color)
+                    if self.swipe[0] is not None:
+                        # mapping axes (height, width) of Arbalet on axes (x, z) of Leap Motion
+                        x_speed_boost = self.swipe[0].direction[0] * self.swipe[0].speed / 500.
+                        y_speed_boost = self.swipe[0].direction[2] * self.swipe[0].speed / 500.
+                        ball.x_speed += x_speed_boost
+                        ball.y_speed += y_speed_boost
+                self.swipe[0] = None
 
     def run(self):
         while True:

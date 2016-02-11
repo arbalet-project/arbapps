@@ -41,12 +41,11 @@ class ImageReader(Arbapp):
             raise IOError('No such file or directory: \'{}\''.format(f))
 
     def update_model(self, image):
-        self.model.lock()
-        for h in range(self.height):
-            for w in range(self.width):
-                pixel = image.getpixel((w, h) if self.vertical else (h, w))
-                self.model.set_pixel(h, w, pixel)
-        self.model.unlock()
+        with self.model:
+            for h in range(self.height):
+                for w in range(self.width):
+                    pixel = image.getpixel((w, h) if self.vertical else (h, w))
+                    self.model.set_pixel(h, w, pixel)
 
     def run(self):
         for f in self.args.input:
