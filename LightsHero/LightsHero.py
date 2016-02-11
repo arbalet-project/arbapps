@@ -21,7 +21,7 @@ from SongReader import SongReader
 from SoundManager import SoundManager
 from UserHits import UserHits
 from arbasdk import Arbapp, Arbapixel, Rate
-
+import argparse
 
 class Renderer():
     """
@@ -65,8 +65,8 @@ class Renderer():
         self.flash_color = not self.flash_color
 
 class LightsHero(Arbapp):
-    def __init__(self, num_lanes, path, level, speed):
-        Arbapp.__init__(self)
+    def __init__(self, argparser, num_lanes, path, speed):
+        Arbapp.__init__(self, argparser)
         self.num_lanes = num_lanes
         self.score = 0
         self.speed = float(speed)
@@ -76,7 +76,7 @@ class LightsHero(Arbapp):
 
         # Threads creation and starting
         self.renderer = Renderer(self.model, self.grid, self.bar, self.height, num_lanes, self.width)
-        self.reader = SongReader(path, num_lanes, level, speed)
+        self.reader = SongReader(path, num_lanes, self.args.level, speed)
         self.sound = SoundManager(path)
         self.hits = UserHits(self.num_lanes)
 
@@ -149,7 +149,14 @@ class LightsHero(Arbapp):
             self.rate.sleep()
         self.display_score()
 
+if __name__=='__main__':
+    parser = argparse.ArgumentParser(description='LightsHero, is a rhythm video game for Arbalet. It is inspired from Guitar Hero and compatible with Frets On Fire songs,'
+                                                 'but this time, notes are lights and the keyboard your guitar. Be a Lights Hero!'
+                                                 'Players use the keyboard keys F1 to F5 to play along with markers which scroll on screen')
+    parser.add_argument('-l', '--level',
+                        default='difficult',
+                        choices=['easy', 'medium', 'difficult', 'expert'],
+                        help='Difficulty of the game, if the selected level is implemented for this song')
 
-song = path.join(path.dirname(__file__), 'songs', 'Feelings')
-t = LightsHero(num_lanes=5, path=song, level='expert', speed=15)
-t.start()
+    song = path.join(path.dirname(__file__), 'songs', 'Feelings')
+    LightsHero(parser, num_lanes=5, path=song, speed=15).start()

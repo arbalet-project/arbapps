@@ -16,8 +16,12 @@ class SongReader():
     metadata_filename = 'song.ini'
     notes_filename = 'notes.mid'
     states = ['background', 'bump', 'active']
-    mapping = {'difficult' : [84, 85, 86, 87, 88], # mapping level-> [midi pitch for each lane]
-               'expert': [96, 97, 98, 99, 100] }
+    # mapping level-> [midi pitch for each lane]
+    mapping = {'difficult' : [84, 85, 86, 87, 88],
+               'expert': [96, 97, 98, 99, 100],
+               'medium': [72, 73, 74, 75, 76],
+               'easy': [60, 61, 62, 63, 64]
+               }
 
     def __init__(self, path, num_lanes, level, speed):
         """
