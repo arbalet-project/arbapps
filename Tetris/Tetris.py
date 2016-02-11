@@ -251,7 +251,9 @@ class Tetris(Arbapp):
                     print "score:", self.score
             self.check_level_up()
 
+        # Game over
         if self.score>0:
+            self.music.game_over()
             self.model.write("GAME OVER! Score: {}, level {}".format(self.score, self.speed-1), 'gold')
 
 

@@ -25,6 +25,9 @@ class Music:
     def level_end(self):
         self.sounds[self.level].fadeout(5000)
 
+    def game_over(self):
+        self.level_end()
+
     def level_up(self):
         self.level = min(self.level + 1, len(self.sounds) - 1)
         self.play()
