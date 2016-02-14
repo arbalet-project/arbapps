@@ -12,6 +12,7 @@ import numpy
 import pygame
 from copy import deepcopy
 from arbasdk import Arbapp
+from arbasdk.events import get, QUADRI_DIRECTIONAL
 from classes.music import Music
 
 class Tetromino(object):
@@ -114,6 +115,16 @@ class Tetris(Arbapp):
                     self.command['right'] = event.type==pygame.KEYDOWN
                 elif event.key==pygame.K_LEFT:
                     self.command['left'] = event.type==pygame.KEYDOWN
+
+        for event in get(QUADRI_DIRECTIONAL):
+            if event['key']=='up':
+                self.command['rotate'] = event['type']=='down'
+            elif event['key']=='down':
+                self.command['down'] = event['type']=='down'
+            elif event['key']=='right':
+                self.command['right'] = event['type']=='down'
+            elif event['key']=='left':
+                self.command['left'] = event['type']=='down'
 
         changes_pending = self.command['left'] or self.command['right'] or self.command['rotate']
         if changes_pending:
