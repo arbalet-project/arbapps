@@ -12,7 +12,6 @@ import numpy
 import pygame
 from copy import deepcopy
 from arbasdk import Arbapp
-from arbasdk.events import get, QUADRI_DIRECTIONAL
 from classes.music import Music
 
 class Tetromino(object):
@@ -57,7 +56,7 @@ class Tetromino(object):
 
 class Tetris(Arbapp):
     def __init__(self):
-        Arbapp.__init__(self)
+        Arbapp.__init__(self, touch_mode='quadridirectional')
         self.grid = numpy.zeros([self.height, self.width], dtype=int)
         self.old_grid = deepcopy(self.grid)
         self.speed = 2  # Speed of tetromino fall in Hertz
@@ -116,7 +115,7 @@ class Tetris(Arbapp):
                 elif event.key==pygame.K_LEFT:
                     self.command['left'] = event.type==pygame.KEYDOWN
 
-        for event in get(QUADRI_DIRECTIONAL):
+        for event in self.arbalet.touch.get():
             if event['key']=='up':
                 self.command['rotate'] = event['type']=='down'
             elif event['key']=='down':
@@ -246,6 +245,7 @@ class Tetris(Arbapp):
             for w in range(self.width):
                 for h in range(self.height):
                     self.model.set_pixel(h, w, Tetromino.colors[self.grid[h][w]])
+
 
     def run(self):
         while self.playing:
