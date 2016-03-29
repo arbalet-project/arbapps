@@ -144,7 +144,7 @@ if __name__=='__main__':
         # Represent a 1.
         [
             [False, False, True],
-            [False, False, True],
+            [False, True, True],
             [False, False, True],
             [False, False, True],
             [False, False, True]
@@ -188,7 +188,7 @@ if __name__=='__main__':
 
         # Represent a 6.
         [
-            [True, False, False],
+            [True, True, True],
             [True, False, False],
             [True, True, True],
             [True, False, True],
@@ -219,7 +219,7 @@ if __name__=='__main__':
             [True, False, True],
             [True, True, True],
             [False, False, True],
-            [False, False, True]
+            [True, True, True]
         ]
     ]
 

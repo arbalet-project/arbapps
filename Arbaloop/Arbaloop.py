@@ -12,6 +12,7 @@ from arbasdk import Arbapp
 from os.path import isfile, join, realpath, dirname
 from json import load
 from subprocess import Popen
+from glob import glob
 from shlex import split
 from time import sleep, time
 from pygame import event, init, joystick, JOYBUTTONDOWN
@@ -65,11 +66,15 @@ class Arbaloop(Arbapp):
 
     def wait(self, timeout=-1, interruptible=False, process=None):
         start = time()
-        # We loop while the process is not termianted, the timeout is not expired, and user has not asked 'next' with the joystick
+        # We loop while the process is not terminated, the timeout is not expired, and user has not asked 'next' with the joystick
         while (timeout < 0 or time()-start < timeout) and (process is None or process.poll() is None):
             for e in event.get():
-                if interruptible and e.type == JOYBUTTONDOWN:
+                if interruptible and e.type == JOYBUTTONDOWN and e.button in [4, 5, 6, 7, 8, 9]:
+                    # An upper jostick key jumps to the next app, unless interruptible has been disabled e.g. by apps using upper keys
                     return 'joystick'
+                else:
+                    # Any other activity resets the timer
+                    start = time()
             sleep(0.01)
         return 'timeout' if (process is None or process.poll() is None) else 'terminated'
 
@@ -94,12 +99,23 @@ class Arbaloop(Arbapp):
                 args.append(add_arg)
             return args
 
+        def expand_args(args, cwd):
+            args = map(lambda arg: glob(join(cwd, arg)) if len(glob(join(cwd, arg))) > 0 else arg, args)  # Expand . ? and *
+            expanded_args = []
+            for arg in args:
+                if isinstance(arg, str):
+                    expanded_args.append(arg)
+                else:
+                    for expanded_arg in arg:
+                        expanded_args.append(expanded_arg)
+            expanded_args[0] = join(cwd, expanded_args[0])
+            return expanded_args
+
         while True:
             for command in sequence['sequence']:
                 args = split(command['command'])
                 cwd = join(realpath(dirname(__file__)), '..', command['dir'])
-                args[0] = join(cwd, args[0])
-                process = Popen(purify_args(args), cwd=cwd)
+                process = Popen(purify_args(expand_args(args, cwd)), cwd=cwd)
                 print "Starting "+str(args)
                 reason = self.wait(command['timeout'], command['interruptible'], process) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
                 print "End:", reason
@@ -111,7 +127,7 @@ class Arbaloop(Arbapp):
                 break
 
 if __name__=='__main__':
-    parser = argparse.ArgumentParser(description='Application sequencer. Runs and closes Arbalet apps according to a sequence file')
+    parser = argparse.ArgumentParser(description='Application sequencer. Runs and closes Arbalet apps according to a sequence file. In general the timeout specifies the duration of user inactivity (joystick or keyboard before switching to the next app. A press on any jostick upper joystick key forces app swicthing unless this has been disabled by interruptible = False within the config files, e.g. for apps already using upper keys. Only apps that guarantee termination in case of user inactivity should set a timeout to -1')
     parser.add_argument('-q', '--sequence',
                         type=str,
                         default='sequences/default.json',
