@@ -27,6 +27,7 @@ class Arbaserver(Arbapp):
     def work(self):
         json_model = self.connection.recv_json()
         self.model.from_json(json_model)
+        self.connection.send_json(self.arbalet.touch.get_touch_frame())
 
     def run(self):
         print "Waiting for connection..."
