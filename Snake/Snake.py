@@ -22,7 +22,7 @@ UP=(-1, 0)
 
 class Snake(Arbapp):
     def __init__(self, argparser):
-        Arbapp.__init__(self, argparser)
+        Arbapp.__init__(self, argparser, touch_mode='quadridirectional')
         self.BG_COLOR = 'black'
         self.PIXEL_COLOR='darkred'
         self.FOOD_COLOR='green'
@@ -65,6 +65,17 @@ class Snake(Arbapp):
                     new_dir = RIGHT
                 elif event.key==pygame.K_LEFT:
                     new_dir = LEFT
+
+        for event in self.arbalet.touch.get():
+            if event['key']=='up':
+                new_dir = UP
+            elif event['key']=='down':
+                new_dir = DOWN
+            elif event['key']=='right':
+                new_dir = RIGHT
+            elif event['key']=='left':
+                new_dir = LEFT
+
         if new_dir is not None:
             self.DIRECTION=new_dir
 
