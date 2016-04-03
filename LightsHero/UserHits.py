@@ -1,4 +1,4 @@
-from pygame import K_F1, K_F2, K_F3, K_F4, K_F5, KEYDOWN, KEYUP, event
+from pygame import K_F1, K_F2, K_F3, K_F4, K_F5, KEYDOWN, KEYUP
 
 # Import a bunch of modules to get X11 keyboards event without opening a window (threaded)
 from Xlib import X, display
@@ -25,8 +25,9 @@ class UserHits():
     #hit_window = {'easy': 0.2, 'medium': 0.18, 'difficult': 0.16, 'expert': 0.14 }
     # More precise hit window: https://raw.githubusercontent.com/fofix/fofix/master/doc/old/hitwindows.htm
 
-    def __init__(self, num_lanes):
+    def __init__(self, num_lanes, arbalet):
         self.score = 0
+        self.arbalet = arbalet
         self.max_score = 0  # measures the maximum score that the user could have
         self.num_lanes = num_lanes
         self.active_notes = [False]*num_lanes
@@ -87,7 +88,7 @@ class UserHits():
                         elif evt.detail==X11_F5:
                             self.keys[4] = evt.type==X.KeyPress
             else:  # Use pygame events
-                for evt in event.get():
+                for evt in self.arbalet.events.get():
                     if evt.type in [KEYDOWN, KEYUP]:
                         if evt.key==K_F1:
                             self.keys[0] = evt.type==KEYDOWN

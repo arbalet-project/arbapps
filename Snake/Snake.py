@@ -33,18 +33,10 @@ class Snake(Arbapp):
         self.rate=2
         self.rate_increase=self.args.speed
         self.start_food=self.args.food
-        pygame.init()
-        pygame.joystick.init()
-
-        for j in range(pygame.joystick.get_count()):
-            joy = pygame.joystick.Joystick(j)
-            joy.init()
-            if joy.get_numhats()==0:
-                joy.quit()  # We can play only with joysticks having hats
 
     def process_events(self):
         new_dir=None
-        for event in pygame.event.get():
+        for event in self.arbalet.events.get():
             # Joystick control
             if event.type == pygame.JOYBUTTONDOWN:
                 #self.command['rotate'] = True

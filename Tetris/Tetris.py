@@ -65,16 +65,6 @@ class Tetris(Arbapp):
         self.tetromino = None
         self.command = {'left': False, 'right': False, 'down': False, 'rotate': False}  # User commands (joy/keyboard)
         self.touchdown = False  # True if the tetro has reached the floor
-
-        pygame.init()
-        pygame.joystick.init()
-
-        for j in range(pygame.joystick.get_count()):
-            joy = pygame.joystick.Joystick(j)
-            joy.init()
-            if joy.get_numhats()==0:
-                joy.quit()  # We can play only with joysticks having hats
-
         self.music = Music()
 
     def process_events(self):
@@ -85,7 +75,7 @@ class Tetris(Arbapp):
         """
         self.command['rotate'] = False  # The rotate event cannot be extended
         # Process new events
-        for event in pygame.event.get():
+        for event in self.arbalet.events.get():
             # Joystick control
             if event.type == pygame.JOYBUTTONDOWN:
                 self.command['rotate'] = True

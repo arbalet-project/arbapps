@@ -77,7 +77,7 @@ class LightsHero(Arbapp):
         self.renderer = Renderer(self.model, self.grid, self.bar, self.height, num_lanes, self.width)
         self.reader = SongReader(path, num_lanes, self.args.level, speed)
         self.sound = SoundManager(path)
-        self.hits = UserHits(self.num_lanes)
+        self.hits = UserHits(self.num_lanes, self.arbalet)
 
     def next_line(self):
         # Delete the last line leaving the grid

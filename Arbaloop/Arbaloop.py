@@ -15,7 +15,7 @@ from subprocess import Popen
 from glob import glob
 from shlex import split
 from time import sleep, time
-from pygame import event, init, joystick, JOYBUTTONDOWN
+from pygame import JOYBUTTONDOWN
 from signal import SIGINT
 import argparse
 
@@ -25,21 +25,7 @@ import argparse
 class Arbaloop(Arbapp):
     def __init__(self, argparser):
         Arbapp.__init__(self, argparser, True) # starting mock mode, init flags (-w and -ng) will be redirected to the server
-        init()
-        joystick.init()
-        self.joysticks = []
         self.server_process = None
-
-        # Joysticks initialization
-        for i in range(joystick.get_count()):
-            joy = joystick.Joystick(i)
-            joy.init()
-            if joy.get_numbuttons()>0:
-                self.joysticks.append(joy)
-            else:
-                joy.quit()
-
-        print len(self.joysticks), 'joystick(s) with buttons found!'
 
     def run(self):
         if len(self.args.sequence)>0:
@@ -68,9 +54,9 @@ class Arbaloop(Arbapp):
         start = time()
         # We loop while the process is not terminated, the timeout is not expired, and user has not asked 'next' with the joystick
         while (timeout < 0 or time()-start < timeout) and (process is None or process.poll() is None):
-            for e in event.get():
-                if interruptible and e.type == JOYBUTTONDOWN and e.button in [4, 5, 6, 7, 8, 9]:
-                    # An upper jostick key jumps to the next app, unless interruptible has been disabled e.g. by apps using upper keys
+            for e in self.arbalet.events.get():
+                if interruptible and e.type == JOYBUTTONDOWN and e.button in [5, 7]:
+                    # An upper right joystick key jumps to the next app, unless interruptible has been disabled e.g. by apps using upper keys
                     return 'joystick'
                 else:
                     # Any other activity resets the timer
