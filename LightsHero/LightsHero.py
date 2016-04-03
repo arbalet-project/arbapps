@@ -65,7 +65,8 @@ class Renderer():
 
 class LightsHero(Arbapp):
     def __init__(self, argparser, num_lanes, path, speed):
-        Arbapp.__init__(self, argparser)
+        Arbapp.__init__(self, argparser, touch_mode='columns')
+        self.arbalet.touch.set_keypad(False)
         self.num_lanes = num_lanes
         self.score = 0
         self.speed = float(speed)

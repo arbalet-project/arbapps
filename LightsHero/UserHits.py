@@ -100,6 +100,19 @@ class UserHits():
                             self.keys[3] = evt.type==KEYDOWN
                         elif evt.key==K_F5:
                             self.keys[4] = evt.type==KEYDOWN
+            for event in self.arbalet.touch.get():
+                if event['key']==1:
+                    self.keys[0] = event['type']=='down'
+                elif event['key']==2:
+                    self.keys[1] = event['type']=='down'
+                elif event['key']==3:
+                    self.keys[2] = event['type']=='down'
+                elif event['key']==4:
+                    self.keys[3] = event['type']=='down'
+                elif event['key']==5:
+                    self.keys[4] = event['type']=='down'
+                else:
+                    print "UNKNOWN", event
 
     def get_pressed_keys(self):
         """
@@ -107,8 +120,7 @@ class UserHits():
         :return: vector of one boolean per lane True if the corresponding lane is being pressed
         """
         # 1. Get pressed keys
-        if not self.x11_events:
-            self.update_keys()
+        self.update_keys()
 
         # 2. Update the score and the maximum score
         for lane in range(self.num_lanes):
