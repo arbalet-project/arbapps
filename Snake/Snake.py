@@ -105,7 +105,6 @@ class Snake(Arbapp):
             with self.model:
                 self.process_events()
                 new_pos=((self.HEAD[0]+self.DIRECTION[0])%self.height, (self.HEAD[1]+self.DIRECTION[1])%self.width)
-                print "pos:{}".format(new_pos)
                 #check
                 if new_pos in self.queue:
                     break
