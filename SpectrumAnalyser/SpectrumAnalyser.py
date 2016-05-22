@@ -12,7 +12,7 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-import struct, argparse, numpy, pyaudio, audioop, wave
+import struct, argparse, numpy, alsaaudio, audioop, wave
 from collections import deque
 from arbasdk import Arbapp, hsv
 from copy import copy
@@ -70,8 +70,7 @@ class SpectrumAnalyser(Arbapp):
         self.parser = argparser
         self.renderer = None
         self.file = None
-        print "Starting pyaudio..."
-        self.pyaudio = pyaudio.PyAudio()
+        self.output = alsaaudio.PCM()
 
         ##### Fourier related attributes, we generate a suitable log-scale
         self.num_bands = self.width if self.args.vertical else self.height
@@ -110,22 +109,23 @@ class SpectrumAnalyser(Arbapp):
 
     def play_file(self, f):
         self.file = wave.open(f, 'rb')
-        self.stream = self.pyaudio.open(format=self.pyaudio.get_format_from_width(self.file.getsampwidth()),
-                                channels=self.file.getnchannels(),
-                                rate=self.file.getframerate(),
-                                output=True)
         try:
-            data = self.file.readframes(self.chunk)
-            while data != '':
+            self.output.setchannels(self.file.getnchannels())
+            self.output.setrate(self.file.getframerate())
+            self.output.setformat(alsaaudio.PCM_FORMAT_S16_LE)
+            self.output.setperiodsize(self.chunk)
+            
+            while True:
+                data = self.file.readframes(self.chunk)
+                if not data: break
                 mono_data = audioop.tomono(data, self.file.getsampwidth(), 0.5, 0.5)
                 self.fft(mono_data)
                 self.renderer.draw_frame(self.averages)
 
-                self.stream.write(data)
-                data = self.file.readframes(self.chunk)
+                self.output.write(data)
         finally:
-            self.stream.stop_stream()
-            self.stream.close()
+            self.file.close()
+
 
     def run(self):
         num_bands = self.width if self.args.vertical else self.height
