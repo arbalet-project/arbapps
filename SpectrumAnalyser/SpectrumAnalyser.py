@@ -76,7 +76,7 @@ class SpectrumAnalyser(Arbapp):
         self.num_bands = self.width if self.args.vertical else self.height
         self.min = 50
         self.max = 22050
-        #self.db_scale = [self.file.getframerate()*2**(b-self.num_bands) for b in range(self.num_bands)]
+        #self.db_scale = [self.framerate*2**(b-self.num_bands) for b in range(self.num_bands)]
         #self.db_scale = [self.min+self.max*2**(b-self.num_bands+1) for b in range(self.num_bands)]
         self.db_scale = [self.max*(numpy.exp(-numpy.log(float(self.min)/self.max)/self.num_bands))**(b-self.num_bands) for b in range(1, self.num_bands+1)]
         print "Scale of maximum frequencies:", map(int, self.db_scale)
@@ -85,20 +85,13 @@ class SpectrumAnalyser(Arbapp):
         """
         Compute the FFT on this sample and update the self.averages FFT result
         """
-        def chunks(l, n):
-            for i in xrange(0, len(l), n):
-                yield l[i:i+n]
-
-        def str_to_int(string):
-            return struct.unpack('<h', string)[0] # Convert little-endian char into int
-
-        sample_range = map(str_to_int, list(chunks(sample, self.file.getsampwidth())))
+        sample_range = struct.unpack('<{}h'.format(self.chunk), sample)
         fft_data = abs(numpy.fft.rfft(sample_range)) # real fft gives samplewidth/2 bands
         try:
             fft_freq = numpy.fft.rfftfreq(len(sample_range))
         except AttributeError:   # numpy<1.8
             fft_freq = [0.5/len(fft_data)*f for f in range(len(fft_data))]
-        freq_hz = [abs(fft_freq[i])*self.file.getframerate() for i, fft in enumerate(fft_data)]
+        freq_hz = [abs(fft_freq[i])*self.framerate for i, fft in enumerate(fft_data)]
         fft_freq_scaled = [0.]*len(self.db_scale)
         ref_index = 0
         for i, f in enumerate(fft_data):
@@ -111,7 +104,8 @@ class SpectrumAnalyser(Arbapp):
         self.file = wave.open(f, 'rb')
         try:
             self.output.setchannels(self.file.getnchannels())
-            self.output.setrate(self.file.getframerate())
+            self.framerate = self.file.getframerate()
+            self.output.setrate(self.framerate)
             self.output.setformat(alsaaudio.PCM_FORMAT_S16_LE)
             self.output.setperiodsize(self.chunk)
             
@@ -157,3 +151,4 @@ if __name__=='__main__':
                         choices=['none', 'all', 'once'],
                         help='Random playing of the file queue: Play the entire queue as is (none), Shuffle and play the entire queue (all), Randomly pick a single file, play it and exit (once)')
     SpectrumAnalyser(parser).start()
+
