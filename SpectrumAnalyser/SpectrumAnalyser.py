@@ -85,7 +85,7 @@ class SpectrumAnalyser(Arbapp):
         """
         Compute the FFT on this sample and update the self.averages FFT result
         """
-        sample_range = struct.unpack('<{}h'.format(self.chunk), sample)
+        sample_range = struct.unpack('<{}h'.format(len(sample)/self.sample_width), sample)
         fft_data = abs(numpy.fft.rfft(sample_range)) # real fft gives samplewidth/2 bands
         try:
             fft_freq = numpy.fft.rfftfreq(len(sample_range))
@@ -101,24 +101,29 @@ class SpectrumAnalyser(Arbapp):
         self.averages = fft_freq_scaled
 
     def play_file(self, f):
-        self.file = wave.open(f, 'rb')
         try:
-            self.output.setchannels(self.file.getnchannels())
-            self.framerate = self.file.getframerate()
-            self.output.setrate(self.framerate)
-            self.output.setformat(alsaaudio.PCM_FORMAT_S16_LE)
-            self.output.setperiodsize(self.chunk)
-            
-            while True:
-                data = self.file.readframes(self.chunk)
-                if not data: break
-                mono_data = audioop.tomono(data, self.file.getsampwidth(), 0.5, 0.5)
-                self.fft(mono_data)
-                self.renderer.draw_frame(self.averages)
+            self.file = wave.open(f, 'rb')
+        except IOError as e:
+            print "Can't open file {}, skipping: {}".format(f, e.message)
+        else:
+            try:
+                self.output.setchannels(self.file.getnchannels())
+                self.framerate = self.file.getframerate()
+                self.output.setrate(self.framerate)
+                self.output.setformat(alsaaudio.PCM_FORMAT_S16_LE)
+                self.output.setperiodsize(self.chunk)
+                self.sample_width = self.file.getsampwidth()
 
-                self.output.write(data)
-        finally:
-            self.file.close()
+                while True:
+                    data = self.file.readframes(self.chunk)
+                    if not data: break
+                    mono_data = audioop.tomono(data, self.sample_width, 0.5, 0.5)
+                    self.fft(mono_data)
+                    self.renderer.draw_frame(self.averages)
+
+                    self.output.write(data)
+            finally:
+                self.file.close()
 
 
     def run(self):
