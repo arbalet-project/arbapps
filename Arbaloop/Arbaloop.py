@@ -55,9 +55,12 @@ class Arbaloop(Arbapp):
         # We loop while the process is not terminated, the timeout is not expired, and user has not asked 'next' with the joystick
         while (timeout < 0 or time()-start < timeout) and (process is None or process.poll() is None):
             for e in self.arbalet.events.get():
-                if interruptible and e.type == JOYBUTTONDOWN and e.button in [5, 7]:
-                    # An upper right joystick key jumps to the next app, unless interruptible has been disabled e.g. by apps using upper keys
+                if interruptible and e.type == JOYBUTTONDOWN and e.button in self.arbalet.joystick['back']:
+                    # A "back" joystick key jumps to the next app, unless interruptible has been disabled
                     return 'joystick'
+                elif e.type == JOYBUTTONDOWN and e.button in self.arbalet.joystick['start']:
+                    # A "start" joystick key restarts the same app
+                    return 'restart'
                 else:
                     # Any other activity resets the timer
                     start = time()
@@ -101,14 +104,17 @@ class Arbaloop(Arbapp):
             for command in sequence['sequence']:
                 args = split(command['command'])
                 cwd = join(realpath(dirname(__file__)), '..', command['dir'])
-                process = Popen(purify_args(expand_args(args, cwd)), cwd=cwd)
-                print "Starting "+str(args)
-                reason = self.wait(command['timeout'], command['interruptible'], process) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
-                print "End:", reason
-                if reason!='terminated':
-                    process.terminate()  # SIGTERM
-                    process.send_signal(SIGINT)
-                    process.wait() # should poll() and kill() if it does not close?
+                while True:  # Loop allowing the user to play again, by restarting app
+                    process = Popen(purify_args(expand_args(args, cwd)), cwd=cwd)
+                    print "Starting "+str(args)
+                    reason = self.wait(command['timeout'], command['interruptible'], process) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
+                    print "End:", reason
+                    if reason != 'terminated':
+                        process.terminate()  # SIGTERM
+                        process.send_signal(SIGINT)
+                        process.wait() # should poll() and kill() if it does not close?
+                    if reason != 'restart':
+                        break
             if not sequence['infinite']:
                 break
 
