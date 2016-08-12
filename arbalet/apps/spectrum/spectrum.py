@@ -12,9 +12,9 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-import struct, argparse, numpy, alsaaudio, audioop, wave
+import struct, numpy, alsaaudio, audioop, wave
 from collections import deque
-from arbasdk import Arbapp, hsv
+from arbalet.core import Arbapp, hsv
 from copy import copy
 from random import shuffle
 
@@ -79,13 +79,13 @@ class SpectrumAnalyser(Arbapp):
         #self.db_scale = [self.framerate*2**(b-self.num_bands) for b in range(self.num_bands)]
         #self.db_scale = [self.min+self.max*2**(b-self.num_bands+1) for b in range(self.num_bands)]
         self.db_scale = [self.max*(numpy.exp(-numpy.log(float(self.min)/self.max)/self.num_bands))**(b-self.num_bands) for b in range(1, self.num_bands+1)]
-        print "Scale of maximum frequencies:", map(int, self.db_scale)
+        print("Scale of maximum frequencies:", list(map(int, self.db_scale)))
 
     def fft(self, sample):
         """
         Compute the FFT on this sample and update the self.averages FFT result
         """
-        sample_range = struct.unpack('<{}h'.format(len(sample)/self.sample_width), sample)
+        sample_range = struct.unpack('<{}h'.format(len(sample)//self.sample_width), sample)
         fft_data = abs(numpy.fft.rfft(sample_range)) # real fft gives samplewidth/2 bands
         try:
             fft_freq = numpy.fft.rfftfreq(len(sample_range))
@@ -104,7 +104,7 @@ class SpectrumAnalyser(Arbapp):
         try:
             self.file = wave.open(f, 'rb')
         except IOError as e:
-            print "Can't open file {}, skipping: {}".format(f, e.message)
+            print("Can't open file {}, skipping: {}".format(f, e.message))
         else:
             try:
                 self.output.setchannels(self.file.getnchannels())
@@ -138,22 +138,4 @@ class SpectrumAnalyser(Arbapp):
 
         for f in self.args.input:
             self.play_file(f)
-
-if __name__=='__main__':
-    parser = argparse.ArgumentParser(description='Spectrum analyzer of WAVE files')
-    parser.add_argument('-i', '--input',
-                        type=str,
-                        required=True,
-                        nargs='+',
-                        help='Wave file(s) to play')
-    parser.add_argument('-v', '--vertical',
-                        action='store_const',
-                        const=True,
-                        default=False,
-                        help='The spectrum must be vertical (less bands, more bins)')
-    parser.add_argument('-o', '--random',
-                        default='none',
-                        choices=['none', 'all', 'once'],
-                        help='Random playing of the file queue: Play the entire queue as is (none), Shuffle and play the entire queue (all), Randomly pick a single file, play it and exit (once)')
-    SpectrumAnalyser(parser).start()
 
