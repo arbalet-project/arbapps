@@ -11,8 +11,7 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 import random
-import argparse
-from arbasdk import Arbapp, Rate
+from arbalet.core import Arbapp, Rate
 import pygame
 
 LEFT=(0,-1)
@@ -42,7 +41,6 @@ class Snake(Arbapp):
                 #self.command['rotate'] = True
                 pass
             elif event.type==pygame.JOYHATMOTION:
-                print event.value
                 if event.value[1]==1 and self.DIRECTION != DOWN:
                     new_dir = UP
                 elif event.value[1]==-1 and self.DIRECTION != UP:
@@ -97,7 +95,7 @@ class Snake(Arbapp):
         self.model.set_all(self.BG_COLOR)
         self.model.set_pixel(self.HEAD[0],self.HEAD[1],self.PIXEL_COLOR)
         self.spawn_food(self.start_food)
-        for x,y in self.FOOD_POSITIONS.iterkeys():
+        for x,y in self.FOOD_POSITIONS:
             self.model.set_pixel(x, y, self.FOOD_COLOR)
 
         while True:
@@ -126,14 +124,6 @@ class Snake(Arbapp):
         exit()
 
     def game_over(self):
-        print "Game OVER"
+        print("Game OVER")
         self.model.write("GAME OVER! Score: {}".format(len(self.queue)), 'gold')
 
-if __name__=='__main__':
-    parser = argparse.ArgumentParser(description='Snake game')
-    parser.add_argument('--speed', type=float, default=0.5)
-    parser.add_argument('--food', type=int, default=3)
-
-    app = Snake(parser)
-    app.start()
-    app.close("end of app")
