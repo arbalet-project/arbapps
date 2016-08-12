@@ -11,8 +11,8 @@ import random
 import numpy
 import pygame
 from copy import deepcopy
-from arbasdk import Arbapp
-from classes.music import Music
+from arbalet.core import Arbapp
+from .music import Music
 
 class Tetromino(object):
     types = {'i' : [[1],
@@ -33,7 +33,7 @@ class Tetromino(object):
     colors = ['black', 'cyan', 'green', 'deeppink', 'yellow', 'orangered']
 
     def __init__(self, px, py, height, width):
-        self.type = random.choice(self.types.keys())
+        self.type = random.choice(list(self.types.keys()))
         self.rotated = 0
         self.position = [px-len(self.get_value())+1, py]
         self.height = height
@@ -150,11 +150,11 @@ class Tetris(Arbapp):
         self.grid = before_rotation
 
     def check_level_up(self):
-        if self.score/25+1>=self.speed:
+        if self.score/2+1>=self.speed:
             self.music.level_end()
             self.speed += 1
             text = "Level up! Level {}, score {}".format(self.speed-1, self.score)
-            print text
+            print(text)
             self.model.write(text, "navy")
             self.music.level_up()
 
@@ -162,8 +162,8 @@ class Tetris(Arbapp):
         self.touchdown = False
         for x, z in enumerate(self.tetromino.get_value()):
             for y, v in enumerate(z):
-                px = x + self.tetromino.position[0] # x-position of the pixel we are about to draw
-                py = y + self.tetromino.position[1] # y-position of the pixel we are about to draw
+                px = int(x + self.tetromino.position[0]) # x-position of the pixel we are about to draw
+                py = int(y + self.tetromino.position[1]) # y-position of the pixel we are about to draw
 
                 before_world = px<0
                 in_world = not before_world and px<self.height
@@ -240,8 +240,8 @@ class Tetris(Arbapp):
     def run(self):
         while self.playing:
             if self.new_tetromino()==1:
-                print "GAME OVER"
-                print "You scored", self.score
+                print("GAME OVER")
+                print("You scored", self.score)
                 break
             else:
                 time.sleep(0.5)
@@ -249,15 +249,11 @@ class Tetris(Arbapp):
                 won = lines*lines
                 self.score += won
                 if won>0:
-                    print "score:", self.score
+                    print("score:", self.score)
             self.check_level_up()
 
         # Game over
         if self.score>0:
             self.music.game_over()
             self.model.write("GAME OVER! Score: {}, level {}".format(self.score, self.speed-1), 'gold')
-
-
-t = Tetris()
-t.start()
 
