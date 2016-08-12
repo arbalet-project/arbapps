@@ -7,23 +7,17 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 
-from arbasdk import Arbapp, Arbapixel, Rate
-import argparse
+from arbalet.core import Arbapp, Arbapixel, Rate
 import datetime
 
+
 class TimeClockApp(Arbapp):
-
-
-    def __init__(self, parser, matrixes):
+    def __init__(self, parser):
 
         Arbapp.__init__(self, parser)
 
         self.CHAR_COLORS = self.args.type
         self.BG_COLOR = 'black'
-
-        # Matrix of matrixes. Each matrix represents a digit.
-        self.matrixes = matrixes
-
 
     def run(self):
 
@@ -121,16 +115,8 @@ class TimeClockApp(Arbapp):
         else:
             extracted = str(number)
             return [int(extracted[0]), int(extracted[1])]
-
-
-
-if __name__=='__main__':
-    """
-    Display a simple clock. The colour is configurable.
-    The app has been written for a 10x15 screen, and does not scale.
-    """
-
-    # Define a matrix to represent each digit.
+    
+    # Matrix of matrixes. Each matrix represents a digit.
     matrixes = [
         # Represent a 0.
         [
@@ -223,11 +209,3 @@ if __name__=='__main__':
         ]
     ]
 
-    parser = argparse.ArgumentParser(description='Simple Clock.')
-    parser.add_argument('-t', '--type',
-                        default='darkred',
-                        help="Font's color")
-
-    app = TimeClockApp(parser, matrixes)
-    app.start()
-    app.close("end")
