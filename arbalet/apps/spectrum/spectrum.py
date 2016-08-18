@@ -104,7 +104,7 @@ class SpectrumAnalyser(Arbapp):
         try:
             self.file = wave.open(f, 'rb')
         except IOError as e:
-            print("Can't open file {}, skipping: {}".format(f, e.message))
+            print("Can't open file {}, skipping: {}".format(f, repr(e)))
         else:
             try:
                 self.output.setchannels(self.file.getnchannels())

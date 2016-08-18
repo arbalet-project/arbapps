@@ -78,8 +78,8 @@ def gen_random_flashing(n_frames, n_frames_fade, n_frames_rand, colors):
     """
     n_frames += n_frames_rand
     n_frames -= n_frames%2  # We need an even number of frames since we are going to divide them by two
-    base_exp = [1.1**(p-n_frames/2+1) for p in range(n_frames/2)]  # The first n_frames/2 are an exponential ascending phase
-    reverse_base = [base_exp[i] for i in range(n_frames/2-1, -1, -1)]  # The last n_frames/2 are an exponential descending phase
+    base_exp = [1.1**(p-n_frames/2+1) for p in range(n_frames//2)]  # The first n_frames/2 are an exponential ascending phase
+    reverse_base = [base_exp[i] for i in range(n_frames//2-1, -1, -1)]  # The last n_frames/2 are an exponential descending phase
     white_generator = base_exp+reverse_base
     blue_generator = [1.0-i for i in white_generator]
     color_generator = [blue_generator, white_generator]
