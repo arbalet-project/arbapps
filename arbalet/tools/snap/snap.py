@@ -11,6 +11,7 @@
 from bottle import Bottle
 from arbasdk import Arbapp
 
+from arbalet.core import Arbapp
 
 class SnapServer(Arbapp):
     def __init__(self, port, argparser=None):
@@ -34,5 +35,3 @@ class SnapServer(Arbapp):
     def run(self):
         self.bottle.run(host='localhost', port=self.port)
 
-if __name__=='__main__':
-    SnapServer(33450).run()

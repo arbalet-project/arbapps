@@ -1,8 +1,0 @@
-{
-    "infinite": false,
-    "sequence": [
-        {"dir":"ColorDemonstrator", "command": "Colordemonstrator.py -t flashes", "timeout": 5, "interruptible": true},
-        {"dir":"ColorDemonstrator", "command": "Colordemonstrator.py -t swipe", "timeout": 5, "interruptible": true},
-        {"dir":"ColorDemonstrator", "command": "Colordemonstrator.py -t african", "timeout": 5, "interruptible": true}
-    ]
-}

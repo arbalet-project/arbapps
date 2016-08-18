@@ -8,8 +8,10 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-from arbasdk import Arbapp
+from arbalet.core import Arbapp
 from os.path import isfile, join, realpath, dirname
+from os import getcwd, chdir
+from sys import executable
 from json import load
 from subprocess import Popen
 from glob import glob
@@ -17,7 +19,7 @@ from shlex import split
 from time import sleep, time
 from pygame import JOYBUTTONDOWN
 from signal import SIGINT
-import argparse
+
 
 # TODO must Arbaloop inherit from Arbapp?
 # It should ignore -ng -w and redirect them to the children
@@ -29,13 +31,14 @@ class Arbaloop(Arbapp):
 
     def run(self):
         if len(self.args.sequence)>0:
-            if not isfile(self.args.sequence):
-                print "Sequence file '{}' not found".format(self.args.sequence)
+            sequence_file = join(realpath(dirname(__file__)), self.args.sequence)
+            if not isfile(sequence_file):
+                print("Sequence file '{}' not found".format(sequence_file))
             else:
                 # launch the server
                 self.start_server(self.args.hardware, self.args.no_gui)
                 # read the sequence
-                with open(self.args.sequence) as fsequence:
+                with open(sequence_file) as fsequence:
                     sequence = load(fsequence)
                 # and launch every app in the sequence as a client
                 try:
@@ -68,14 +71,13 @@ class Arbaloop(Arbapp):
         return 'timeout' if (process is None or process.poll() is None) else 'terminated'
 
     def start_server(self, hardware, no_gui):
-        cwd = join(realpath(dirname(__file__)), '..', 'Arbaserver')
-        command = join(cwd, 'Arbaserver.py')
+        command = "{} -m arbalet.tools.server".format(executable)
         if hardware:
             command += ' -w'
         if no_gui:
             command += ' -ng'
-        print "Starting server with: " + command
-        self.server_process = Popen(command.split(), cwd=cwd)
+        print("Starting server with: " + command)
+        self.server_process = Popen(command.split())
 
     def execute_sequence(self, sequence):
         def purify_args(args):
@@ -88,27 +90,31 @@ class Arbaloop(Arbapp):
                 args.append(add_arg)
             return args
 
-        def expand_args(args, cwd):
-            args = map(lambda arg: glob(join(cwd, arg)) if len(glob(join(cwd, arg))) > 0 else arg, args)  # Expand . ? and *
+        def expand_args(args, cwd):          
+            #args = map(lambda arg: if len(glob(join(cwd, arg))) > 0 else arg, args)  # Expand . ? and *
             expanded_args = []
             for arg in args:
-                if isinstance(arg, str):
+                globed_arg = glob(join(cwd, arg))
+                if len(globed_arg)==0:
                     expanded_args.append(arg)
                 else:
-                    for expanded_arg in arg:
+                    for expanded_arg in globed_arg:
                         expanded_args.append(expanded_arg)
-            expanded_args[0] = join(cwd, expanded_args[0])
             return expanded_args
+
+        # change WD to the modules' root
+        cwd = join(realpath(dirname(__file__)), '..', '..', 'apps')
+        chdir(cwd)
 
         while True:
             for command in sequence['sequence']:
-                args = split(command['command'])
-                cwd = join(realpath(dirname(__file__)), '..', command['dir'])
+                args = "{} -m {} {}".format(executable, command['app'], command['args'] if 'args' in command else '')
+                module_command = purify_args(expand_args(args.split(), join(*command['app'].split('.'))))
                 while True:  # Loop allowing the user to play again, by restarting app
-                    process = Popen(purify_args(expand_args(args, cwd)), cwd=cwd)
-                    print "Starting "+str(args)
+                    print("### STARTING '{}'".format(module_command))
+                    process = Popen(module_command, cwd=cwd)
                     reason = self.wait(command['timeout'], command['interruptible'], process) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
-                    print "End:", reason
+                    print("### END:", reason)
                     if reason != 'terminated':
                         process.terminate()  # SIGTERM
                         process.send_signal(SIGINT)
@@ -118,11 +124,3 @@ class Arbaloop(Arbapp):
             if not sequence['infinite']:
                 break
 
-if __name__=='__main__':
-    parser = argparse.ArgumentParser(description='Application sequencer. Runs and closes Arbalet apps according to a sequence file. In general the timeout specifies the duration of user inactivity (joystick or keyboard before switching to the next app. A press on any jostick upper joystick key forces app swicthing unless this has been disabled by interruptible = False within the config files, e.g. for apps already using upper keys. Only apps that guarantee termination in case of user inactivity should set a timeout to -1')
-    parser.add_argument('-q', '--sequence',
-                        type=str,
-                        default='sequences/default.json',
-                        nargs='?',
-                        help='Configuration file describing the sequence of apps to launch')
-    Arbaloop(parser).start()

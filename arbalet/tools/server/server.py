@@ -9,8 +9,8 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-from arbasdk import Arbapp
-import zmq, argparse
+from arbalet.core import Arbapp
+import zmq
 
 class Arbaserver(Arbapp):
     def __init__(self, argparser):
@@ -28,24 +28,14 @@ class Arbaserver(Arbapp):
         json_model = self.connection.recv_json()
         self.model.from_json(json_model)
         frame = self.arbalet.touch.get_touch_frame()
-        frame = (frame[0], map(bool, frame[1]))  # Hack because json is not able to serialize type 'numpy.bool_'
+        frame = (frame[0], list(map(bool, frame[1])))  # Hack because json is not able to serialize type 'numpy.bool_'
         self.connection.send_json(frame)
 
     def run(self):
-        print "Waiting for connection..."
+        print("Server is waiting for connection...")
         self.bind()
-
-        print "Connection successful"
+        print("Connection successful to server")
         while True:
             self.work()
 
 
-if __name__=='__main__':
-    parser = argparse.ArgumentParser(description='Server allowing multiple clients to connect to hardware alternatively'
-                                                 'Controllable from a GUI or command-line, the server can also stream'
-                                                 'data like sound and joystick/keyboard inputs from/to a headless computer')
-    parser.add_argument('-p', '--port',
-                        default=33400,
-                        help='Listening port [default is 33400]')
-    s = Arbaserver(parser)
-    s.start()
