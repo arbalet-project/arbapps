@@ -123,7 +123,7 @@ class ColorDemo(Arbapp):
             for h in range(self.height):
                 for w in range(self.width):
                     try:
-                        color = generators[h][w].__next__()
+                        color = next(generators[h][w])
                     except StopIteration:
                         pass
                     else:
