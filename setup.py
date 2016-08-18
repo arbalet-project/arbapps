@@ -32,5 +32,11 @@ setup(
     data_files=[('arbalet/apps/tetris/music', ['arbalet/apps/tetris/music/Cailloux_-_tetris.ogg']),
                 ('arbalet/apps/tetris/music', ['arbalet/apps/tetris/music/ExDeath_-_Another_Tetris_Remix.ogg']),
                 ('arbalet/apps/tetris/music', ['arbalet/apps/tetris/music/Mic_-_Mic_music_tetris__.ogg']),
+                ('arbalet/apps/lightshero/songs/Feelings', ['arbalet/apps/lightshero/songs/Feelings/guitar.ogg']),
+                ('arbalet/apps/lightshero/songs/Feelings', ['arbalet/apps/lightshero/songs/Feelings/notes.mid']),
+                ('arbalet/apps/lightshero/songs/Feelings', ['arbalet/apps/lightshero/songs/Feelings/song.ini']),
+                ('arbalet/apps/lightshero/songs/Feelings', ['arbalet/apps/lightshero/songs/Feelings/song.ogg']),
+                ('arbalet/apps/spectrum/libre', ['arbalet/apps/spectrum/libre/Nytrogen_-_Nytrogen_-_Trust_no_one.wav']),
+                ('arbalet/tools/sequencer/sequences', ['arbalet/tools/sequencer/sequences/default.json']),
     ],
 )
