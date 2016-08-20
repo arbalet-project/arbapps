@@ -20,11 +20,12 @@ DOWN=(1, 0)
 UP=(-1, 0)
 
 class Snake(Arbapp):
-    def __init__(self, argparser):
-        Arbapp.__init__(self, argparser, touch_mode='quadridirectional')
-        self.BG_COLOR = 'black'
-        self.PIXEL_COLOR='darkred'
-        self.FOOD_COLOR='green'
+    BG_COLOR = 'black'
+    PIXEL_COLOR='darkred'
+    FOOD_COLOR='green'
+    
+    def __init__(self, argparser, touch_mode='quadridirectional'):
+        Arbapp.__init__(self, argparser, touch_mode=touch_mode)
         self.DIRECTION=DOWN
         self.HEAD=(5,5)
         self.queue=[self.HEAD]
@@ -76,6 +77,9 @@ class Snake(Arbapp):
 
         if new_dir is not None:
             self.DIRECTION=new_dir
+        
+    def process_extras(self):
+        pass
 
     def spawn_food(self, quantity=4):
         for _ in range(0,quantity):
@@ -87,9 +91,7 @@ class Snake(Arbapp):
 
             self.model.set_pixel(f[0], f[1], self.FOOD_COLOR)
 
-
     def run(self):
-        # Update the screen every second.
         rate = Rate(self.rate)
 
         self.model.set_all(self.BG_COLOR)
@@ -119,6 +121,7 @@ class Snake(Arbapp):
                     del self.FOOD_POSITIONS[new_pos]
                     self.spawn_food(1)
                     self.rate+=self.rate_increase
+            self.process_extras()
             rate.sleep()
         self.game_over()
         exit()
