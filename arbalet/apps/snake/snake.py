@@ -78,7 +78,7 @@ class Snake(Arbapp):
         if new_dir is not None:
             self.DIRECTION=new_dir
         
-    def process_extras(self):
+    def process_extras(self, x=None, y=None):
         pass
 
     def spawn_food(self, quantity=4):
@@ -117,11 +117,12 @@ class Snake(Arbapp):
                 if new_pos not in self.FOOD_POSITIONS:
                     x, y=self.queue.pop(0)
                     self.model.set_pixel(x, y, self.BG_COLOR)
+                    self.process_extras(x, y)
                 else:
                     del self.FOOD_POSITIONS[new_pos]
                     self.spawn_food(1)
                     self.rate+=self.rate_increase
-            self.process_extras()
+                    self.process_extras()
             rate.sleep()
         self.game_over()
         exit()

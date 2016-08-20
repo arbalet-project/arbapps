@@ -26,34 +26,37 @@ class SnakeAI(Snake):
         Snake.__init__(self, argparser, touch_mode='off')
         self.potential_field = zeros((self.height, self.width))
 
-    def process_extras(self):
-        self.update_potential_field() # Update for visu only # TODO Lock model to avoid black flashing at high speed
+    def process_extras(self, x=None, y=None):
+        if x is not None and y is not None:
+            self.update_potential_field_of(x, y)
         for h in range(self.height):
             for w in range(self.width):
                 if self.model.get_pixel(h, w) not in [SnakeAI.FOOD, SnakeAI.BODY] :
-                    color = Arbapixel('white')*(self.potential_field[h, w]/100)  # TODO find better brightness adaption
+                    color = Arbapixel('white')*(self.potential_field[h, w]/500)  # TODO find better brightness adaption
                     self.model.set_pixel(h, w, color)
-    
-    
+
     def update_potential_field(self):
         for h in range(self.height):
             for w in range(self.width):
-                pixel = array((h, w))
-                score = 0
-                if self.model.get_pixel(h, w) == SnakeAI.FOOD:
-                    score = SnakeAI.SCORE_FOOD_TARGET
-                elif self.model.get_pixel(h, w) == SnakeAI.BODY:
-                    score = SnakeAI.SCORE_BODY_TARGET
-                else:
-                    for food in self.FOOD_POSITIONS:
-                        food = array(food)
-                        distance = norm(food - pixel)
-                        score += SnakeAI.SCORE_FOOD_ATTRACTION/distance
-                    for body in self.queue:
-                        body = array(body)
-                        distance = norm(food - pixel)
-                        score += SnakeAI.SCORE_BODY_ATTRACTION/distance
-                self.potential_field[h, w] = score           
+                self.update_potential_field_of(h, w)
+
+    def update_potential_field_of(self, h, w):
+        pixel = array((h, w))
+        score = 0
+        if self.model.get_pixel(h, w) == SnakeAI.FOOD:
+            score = SnakeAI.SCORE_FOOD_TARGET
+        elif self.model.get_pixel(h, w) == SnakeAI.BODY:
+            score = SnakeAI.SCORE_BODY_TARGET
+        else:
+            for food in self.FOOD_POSITIONS:
+                food = array(food)
+                distance = norm(food - pixel)
+                score += SnakeAI.SCORE_FOOD_ATTRACTION/distance
+            for body in self.queue:
+                body = array(body)
+                distance = norm(food - pixel)
+                score += SnakeAI.SCORE_BODY_ATTRACTION/distance
+        self.potential_field[h, w] = score           
     
     def process_events(self):
         self.update_potential_field()
