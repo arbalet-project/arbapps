@@ -16,12 +16,10 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 from time import time
-from os import path
-from SongReader import SongReader
-from SoundManager import SoundManager
-from UserHits import UserHits
-from arbasdk import Arbapp, Arbapixel, Rate
-import argparse
+from .song import SongReader
+from .sound import SoundManager
+from .hits import UserHits
+from arbalet.core import Arbapp, Arbapixel, Rate
 
 class Renderer():
     """
@@ -42,8 +40,8 @@ class Renderer():
         with self.model:
             # Big area of coming notes
             for lane in range(self.num_lanes):
-                for chunk_lane in range(self.width/self.num_lanes):
-                    w = lane*self.width/self.num_lanes + chunk_lane
+                for chunk_lane in range(self.width//self.num_lanes):
+                    w = lane*self.width//self.num_lanes + chunk_lane
                     for h in range(self.height-1): # -1 in order not to update the bottom bar
                         if self.grid[h][lane]=='bump':
                             color = Arbapixel((100, 100, 100)) + Arbapixel(self.colors[lane])
@@ -58,8 +56,8 @@ class Renderer():
                     color = self.colors[lane]
                 else:
                     color = 'white'
-                for chunk_lane in range(self.width/self.num_lanes):
-                    w = lane*self.width/self.num_lanes + chunk_lane
+                for chunk_lane in range(self.width//self.num_lanes):
+                    w = lane*self.width//self.num_lanes + chunk_lane
                     self.model.set_pixel(self.height-1, w, color)
         self.flash_color = not self.flash_color
 
@@ -123,7 +121,7 @@ class LightsHero(Arbapp):
                 color = colors[i]
                 break
 
-        print "You scored", score, '% with', self.hits.score, 'hits over', self.hits.max_score
+        print("You scored", score, '% with', self.hits.score, 'hits over', self.hits.max_score)
 
         if self.hits.score>0:
             self.model.write("You scored {}%, {}".format(score, sentence), color)
@@ -149,14 +147,3 @@ class LightsHero(Arbapp):
             self.rate.sleep()
         self.display_score()
 
-if __name__=='__main__':
-    parser = argparse.ArgumentParser(description='LightsHero, is a rhythm video game for Arbalet. It is inspired from Guitar Hero and compatible with Frets On Fire songs,'
-                                                 'but this time, notes are lights and the keyboard your guitar. Be a Lights Hero!'
-                                                 'Players use the keyboard keys F1 to F5 to play along with markers which scroll on screen')
-    parser.add_argument('-l', '--level',
-                        default='difficult',
-                        choices=['easy', 'medium', 'difficult', 'expert'],
-                        help='Difficulty of the game, if the selected level is implemented for this song')
-
-    song = path.join(path.dirname(__file__), 'songs', 'Feelings')
-    LightsHero(parser, num_lanes=5, path=song, speed=15).start()

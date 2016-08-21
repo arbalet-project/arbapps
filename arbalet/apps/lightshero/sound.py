@@ -22,7 +22,7 @@ class SoundManager():
         mixer.music.play()
 
         # Start tracks
-        for name, track in self.tracks.iteritems():
+        for name, track in self.tracks.items():
             if track:
                 track.play()
 

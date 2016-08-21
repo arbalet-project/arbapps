@@ -38,7 +38,7 @@ class UserHits():
         ####### thank you http://sourceforge.net/p/python-xlib/code/HEAD/tree/trunk/examples/put_selection.py
         self.record_dpy = display.Display()
         if not self.record_dpy.has_extension("RECORD"):
-            print "X11 RECORD extension not found, the game will not work without GUI"
+            print("X11 RECORD extension not found, the game will not work without GUI")
             self.x11_events = False
         else:
             self.x11_events = True
@@ -111,8 +111,7 @@ class UserHits():
                     self.keys[3] = event['type']=='down'
                 elif event['key']==5:
                     self.keys[4] = event['type']=='down'
-                else:
-                    print "UNKNOWN", event
+
 
     def get_pressed_keys(self):
         """

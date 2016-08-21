@@ -1,5 +1,5 @@
 import midi                    # pip install python-midi # https://github.com/vishnubob/python-midi
-import ConfigParser
+import configparser
 import time
 from collections import deque
 from copy import copy
@@ -35,22 +35,20 @@ class SongReader():
         self.eof = False
 
         # Config parser
-        parser = ConfigParser.ConfigParser()
+        parser = configparser.ConfigParser()
         parser.read(path+'/'+self.metadata_filename)
         self.name = parser.get('song', 'name')
         self.artist = parser.get('song', 'artist')
 
         # midi parser
-        midi_parser = midi.FileReader()
-        with open(path+'/'+self.notes_filename) as f:
-            data = midi_parser.read(f)
-            data.make_ticks_abs() # Change ticks in absolute timestamp
-            raw_metadata = data[0] # Raw metadata of midi file
-            tempo_event = [e for e in raw_metadata if isinstance(e, midi.events.SetTempoEvent)]
-            if len(tempo_event)!=1:
-                raise Exception("Not yet able to read this file, I does not support dynamic ticks")
-            self.metadata = { "tick_duration": 60/tempo_event[0].get_bpm()/data.resolution }
-            self.notes = deque(data[1]) # Actual stream of notes read as a FIFO structure
+        data = midi.read_midifile(path+'/'+self.notes_filename)
+        data.make_ticks_abs() # Change ticks in absolute timestamp
+        raw_metadata = data[0] # Raw metadata of midi file
+        tempo_event = [e for e in raw_metadata if isinstance(e, midi.events.SetTempoEvent)]
+        if len(tempo_event)!=1:
+            raise Exception("Not yet able to read this file, I does not support dynamic ticks")
+        self.metadata = { "tick_duration": 60/tempo_event[0].get_bpm()/data.resolution }
+        self.notes = deque(data[1]) # Actual stream of notes read as a FIFO structure
 
         self.old_line = None
         self.start = None # Stores when the song started playing
