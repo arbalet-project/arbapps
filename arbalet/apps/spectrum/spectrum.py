@@ -14,7 +14,7 @@
 """
 import struct, numpy, alsaaudio, audioop, wave
 from collections import deque
-from arbalet.core import Arbapp, hsv
+from arbalet.core import Application, hsv
 from copy import copy
 from random import shuffle
 
@@ -60,12 +60,12 @@ class Renderer():
                         color = 'black'
                     self.model.set_pixel(bin if self.vertical else band, band if self.vertical else bin, color)
 
-class SpectrumAnalyser(Arbapp):
+class SpectrumAnalyser(Application):
     """
     This is the main entry point of the spectrum analyser, it reads the file, computes the FFT and plays the sound
     """
     def __init__(self, argparser):
-        Arbapp.__init__(self, argparser)
+        Application.__init__(self, argparser)
         self.chunk = 1024
         self.parser = argparser
         self.renderer = None

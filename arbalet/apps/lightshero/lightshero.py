@@ -19,7 +19,7 @@ from time import time
 from .song import SongReader
 from .sound import SoundManager
 from .hits import UserHits
-from arbalet.core import Arbapp, Arbapixel, Rate
+from arbalet.core import Application, Pixel, Rate
 
 class Renderer():
     """
@@ -44,9 +44,9 @@ class Renderer():
                     w = lane*self.width//self.num_lanes + chunk_lane
                     for h in range(self.height-1): # -1 in order not to update the bottom bar
                         if self.grid[h][lane]=='bump':
-                            color = Arbapixel((100, 100, 100)) + Arbapixel(self.colors[lane])
+                            color = Pixel((100, 100, 100)) + Pixel(self.colors[lane])
                         else:
-                            color = Arbapixel(self.colors[lane])*self.intensity[self.grid[h][lane]]
+                            color = Pixel(self.colors[lane])*self.intensity[self.grid[h][lane]]
                         self.model.set_pixel(h, w, color)
 
             # Bottom bar of present notes
@@ -61,9 +61,9 @@ class Renderer():
                     self.model.set_pixel(self.height-1, w, color)
         self.flash_color = not self.flash_color
 
-class LightsHero(Arbapp):
+class LightsHero(Application):
     def __init__(self, argparser, num_lanes, path, speed):
-        Arbapp.__init__(self, argparser, touch_mode='columns')
+        Application.__init__(self, argparser, touch_mode='columns')
         self.arbalet.touch.set_keypad(False)
         self.num_lanes = num_lanes
         self.score = 0

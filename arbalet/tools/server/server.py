@@ -9,12 +9,12 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-from arbalet.core import Arbapp
+from arbalet.core import Application
 import zmq
 
-class Arbaserver(Arbapp):
+class Arbaserver(Application):
     def __init__(self, argparser):
-        Arbapp.__init__(self, argparser)
+        Application.__init__(self, argparser)
         self.port = str(self.args.port)
         self.context = zmq.Context()
         self.connection = None

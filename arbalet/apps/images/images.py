@@ -10,12 +10,12 @@
 """
 from PIL import Image
 from os.path import isfile
-from arbalet.core import Arbapp
+from arbalet.core import Application
 from time import sleep
 
-class ImageReader(Arbapp):
+class ImageReader(Application):
     def __init__(self, argparser):
-        Arbapp.__init__(self, argparser)
+        Application.__init__(self, argparser)
         self.image = None
         self.palette = None
         self.vertical = False

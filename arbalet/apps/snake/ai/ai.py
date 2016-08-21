@@ -7,15 +7,15 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-from arbalet.core import Arbapixel
+from arbalet.core import Pixel
 from ..snake import Snake, LEFT, RIGHT, UP, DOWN
 from numpy import zeros, array
 from numpy.linalg import norm
 
 
 class SnakeAI(Snake):
-    FOOD = Arbapixel(Snake.FOOD_COLOR)
-    BODY = Arbapixel(Snake.PIXEL_COLOR)
+    FOOD = Pixel(Snake.FOOD_COLOR)
+    BODY = Pixel(Snake.PIXEL_COLOR)
     
     SCORE_FOOD_ATTRACTION = 100
     SCORE_FOOD_TARGET = 500
@@ -32,7 +32,7 @@ class SnakeAI(Snake):
         for h in range(self.height):
             for w in range(self.width):
                 if self.model.get_pixel(h, w) not in [SnakeAI.FOOD, SnakeAI.BODY] :
-                    color = Arbapixel('white')*(self.potential_field[h, w]/500)  # TODO find better brightness adaption
+                    color = Pixel('white')*(self.potential_field[h, w]/500)  # TODO find better brightness adaption
                     self.model.set_pixel(h, w, color)
 
     def update_potential_field(self):

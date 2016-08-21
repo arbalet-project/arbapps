@@ -9,7 +9,7 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 from random import randint, uniform, choice
-from arbalet.core import Arbapp, Rate
+from arbalet.core import Application, Rate
 from threading import RLock
 import os, sys, inspect
 
@@ -103,10 +103,10 @@ class Ball():
         if abs(self.y_speed)>self.min_speed:
             self.y_speed *= self.friction_factor
 
-class Bounces(Arbapp):
+class Bounces(Application):
 
     def __init__(self, parser, rate):
-        Arbapp.__init__(self, parser)
+        Application.__init__(self, parser)
         self.balls = []
         self.rate = Rate(rate)
 
@@ -129,7 +129,7 @@ class Bounces(Arbapp):
             self.controller.add_listener(self.leap_listener)
 
     def close(self, reason='unknown'):
-        Arbapp.close(self, reason)
+        Application.close(self, reason)
         if leapmotion:
             self.controller.remove_listener(self.leap_listener)
 

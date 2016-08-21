@@ -11,7 +11,7 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 import random
-from arbalet.core import Arbapp, Rate
+from arbalet.core import Application, Rate
 import pygame
 
 LEFT=(0,-1)
@@ -19,13 +19,13 @@ RIGHT=(0, 1)
 DOWN=(1, 0)
 UP=(-1, 0)
 
-class Snake(Arbapp):
+class Snake(Application):
     BG_COLOR = 'black'
     PIXEL_COLOR='darkred'
     FOOD_COLOR='green'
     
     def __init__(self, argparser, touch_mode='quadridirectional'):
-        Arbapp.__init__(self, argparser, touch_mode=touch_mode)
+        Application.__init__(self, argparser, touch_mode=touch_mode)
         self.DIRECTION=DOWN
         self.HEAD=(5,5)
         self.queue=[self.HEAD]

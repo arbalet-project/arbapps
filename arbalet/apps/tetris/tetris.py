@@ -11,7 +11,7 @@ import random
 import numpy
 import pygame
 from copy import deepcopy
-from arbalet.core import Arbapp
+from arbalet.core import Application
 from .music import Music
 
 class Tetromino(object):
@@ -54,9 +54,9 @@ class Tetromino(object):
         return numpy.rot90(numpy.array(self.types[self.type], dtype=int), self.rotated)
 
 
-class Tetris(Arbapp):
+class Tetris(Application):
     def __init__(self):
-        Arbapp.__init__(self, touch_mode='quadridirectional')
+        Application.__init__(self, touch_mode='quadridirectional')
         self.grid = numpy.zeros([self.height, self.width], dtype=int)
         self.old_grid = deepcopy(self.grid)
         self.speed = 2  # Speed of tetromino fall in Hertz

@@ -9,11 +9,11 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 from bottle import Bottle, response, hook
-from arbalet.core import Arbapp
+from arbalet.core import Application
 
-class SnapServer(Arbapp):
+class SnapServer(Application):
     def __init__(self, port, argparser=None):
-        Arbapp.__init__(self, argparser)
+        Application.__init__(self, argparser)
         self.bottle = Bottle()
         self.port = int(port)
         self.route()

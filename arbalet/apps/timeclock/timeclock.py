@@ -7,14 +7,14 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 
-from arbalet.core import Arbapp, Arbapixel, Rate
+from arbalet.core import Application, Pixel, Rate
 import datetime
 
 
-class TimeClockApp(Arbapp):
+class TimeClockApp(Application):
     def __init__(self, parser):
 
-        Arbapp.__init__(self, parser)
+        Application.__init__(self, parser)
 
         self.CHAR_COLORS = self.args.type
         self.BG_COLOR = 'black'

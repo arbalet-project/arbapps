@@ -11,11 +11,11 @@
 """
 import cv2
 from os.path import isfile
-from arbalet.core import Arbapp
+from arbalet.core import Application
 
-class Pixeliser(Arbapp):
+class Pixeliser(Application):
     def __init__(self, argparser):
-        Arbapp.__init__(self, argparser)
+        Application.__init__(self, argparser)
         self.video_reader = None
 
     def play_file(self, f):

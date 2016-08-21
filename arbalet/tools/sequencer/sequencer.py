@@ -8,7 +8,7 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-from arbalet.core import Arbapp
+from arbalet.core import Application
 from os.path import isfile, join, realpath, dirname
 from os import getcwd, chdir
 from sys import executable
@@ -21,12 +21,12 @@ from pygame import JOYBUTTONDOWN
 from signal import SIGINT
 
 
-# TODO must Arbaloop inherit from Arbapp?
+# TODO must Arbaloop inherit from Application?
 # It should ignore -ng -w and redirect them to the children
 
-class Arbaloop(Arbapp):
+class Arbaloop(Application):
     def __init__(self, argparser):
-        Arbapp.__init__(self, argparser, True) # starting mock mode, init flags (-w and -ng) will be redirected to the server
+        Application.__init__(self, argparser, True) # starting mock mode, init flags (-w and -ng) will be redirected to the server
         self.server_process = None
 
     def run(self):
@@ -111,7 +111,7 @@ class Arbaloop(Arbapp):
                 args = "{} -m {} {}".format(executable, command['app'], command['args'] if 'args' in command else '')
                 module_command = purify_args(expand_args(args.split(), join(*command['app'].split('.'))))
                 while True:  # Loop allowing the user to play again, by restarting app
-                    print("### STARTING '{}'".format(module_command))
+                    print("### STARTING {}".format(module_command))
                     process = Popen(module_command, cwd=cwd)
                     reason = self.wait(command['timeout'], command['interruptible'], process) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
                     print("### END:", reason)

@@ -7,7 +7,7 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 import random
-from arbalet.core import Arbapp, Arbapixel, Rate
+from arbalet.core import Application, Pixel, Rate
 
 
 def gen_sweep_async(n_frames, n_frames_fade, n_frames_rand, colors):
@@ -24,7 +24,7 @@ def gen_sweep_async(n_frames, n_frames_fade, n_frames_rand, colors):
     """
     # This loop fades up and is also the random seed
     for f in range(n_frames_rand):
-        yield Arbapixel(colors[0])*(float(f)/n_frames_rand)
+        yield Pixel(colors[0])*(float(f)/n_frames_rand)
 
     color_generator = [[float(x)/n_frames for x in range(n_frames, -1, -1)],           # Descending phase
                        [float(x)/n_frames for x in range(n_frames)]]                   # Ascending phase
@@ -34,7 +34,7 @@ def gen_sweep_async(n_frames, n_frames_fade, n_frames_rand, colors):
     while True:
         for color1, color2 in pairs:
             for s in range(n_frames):
-                col = Arbapixel(color1)*color_generator[0][s] + Arbapixel(color2)*color_generator[1][s]
+                col = Pixel(color1)*color_generator[0][s] + Pixel(color2)*color_generator[1][s]
                 yield col
 
 def gen_sweep_rand(n_frames, n_frames_fade, n_frames_rand, colors):
@@ -54,7 +54,7 @@ def gen_sweep_rand(n_frames, n_frames_fade, n_frames_rand, colors):
                        [float(x)/n_frames for x in range(n_frames)]]                   # Ascending phase
 
     # This loop fades up
-    fade_color = Arbapixel(pairs[start][1][0])*color_generator[0][0] + Arbapixel(pairs[start][1][1])*color_generator[1][0]
+    fade_color = Pixel(pairs[start][1][0])*color_generator[0][0] + Pixel(pairs[start][1][1])*color_generator[1][0]
     for f in range(n_frames_fade):
         yield fade_color*(float(f)/n_frames_fade)
 
@@ -62,7 +62,7 @@ def gen_sweep_rand(n_frames, n_frames_fade, n_frames_rand, colors):
     while True:
         for c in range(start, len(pairs)):
             for s in range(n_frames):
-                col = Arbapixel(pairs[c][1][0])*color_generator[0][s] + Arbapixel(pairs[c][1][1])*color_generator[1][s]
+                col = Pixel(pairs[c][1][0])*color_generator[0][s] + Pixel(pairs[c][1][1])*color_generator[1][s]
                 yield col
         start = 0
 
@@ -88,19 +88,19 @@ def gen_random_flashing(n_frames, n_frames_fade, n_frames_rand, colors):
 
     # Fade up
     for f in range(n_frames_fade):
-        yield Arbapixel(colors[0]) + Arbapixel(colors[1])*(color_generator[1][start]*(float(f)/n_frames_fade))
+        yield Pixel(colors[0]) + Pixel(colors[1])*(color_generator[1][start]*(float(f)/n_frames_fade))
 
     while True:
         for s in range(start, n_frames):
-            col = Arbapixel(colors[0]) + Arbapixel(colors[1])*color_generator[1][s]
+            col = Pixel(colors[0]) + Pixel(colors[1])*color_generator[1][s]
             yield col
         start = 0
 
-class ColorDemo(Arbapp):
+class ColorDemo(Application):
     generators = [gen_random_flashing, gen_sweep_async, gen_sweep_rand, ]
 
     def __init__(self, parser, animations):
-        Arbapp.__init__(self, parser)
+        Application.__init__(self, parser)
         config = animations[self.args.type]
         self.durations = [int(config['dur_min']*config['rate']), int(config['dur_max']*config['rate'])]
         self.rate = Rate(config['rate'])

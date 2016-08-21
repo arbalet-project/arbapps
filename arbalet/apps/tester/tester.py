@@ -10,12 +10,12 @@
 """
 __author__ = 'titimoby@gmail.com'
 
-from arbalet.core import Arbapp, Rate, Arbapixel
+from arbalet.core import Application, Rate, Pixel
 
 
-class SimpleTester(Arbapp):
+class SimpleTester(Application):
     def __init__(self, argparser):
-        Arbapp.__init__(self, argparser)
+        Application.__init__(self, argparser)
         self.colors = ['red', 'green', 'blue']
         self.color_index = 0
 
@@ -25,6 +25,6 @@ class SimpleTester(Arbapp):
         for w in range(self.width):
             for h in range(self.height):
                 with self.model:
-                    self.model.set_pixel(h, w, Arbapixel(self.colors[self.color_index]))
+                    self.model.set_pixel(h, w, Pixel(self.colors[self.color_index]))
                 rate.sleep()
             self.color_index = (self.color_index +1) % len(self.colors)
