@@ -13,38 +13,41 @@ from arbalet.core import Arbapp, Rate
 from threading import RLock
 import os, sys, inspect
 
-
-
-import sys
+# Provide the path of your Leapmotion Python SDK
 lib = '/home/yoan/Téléchargements/LeapDeveloperKit_2.2.6+29154_linux/LeapSDK/lib'
 sys.path.append(lib)
 
-import os, sys, inspect
+# These import instructions are provided by Leapmotion at the time of coding, check for updates
 src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
 arch_dir = lib+'/x64' if sys.maxsize > 2**32 else lib+'/x86'
 sys.path.insert(0, os.path.abspath(os.path.join(src_dir, arch_dir)))
 
-import Leap
-from Leap import SwipeGesture
+try:
+    from Leap import SwipeGesture, Gesture, Listener, Controller
+except ImportError:
+    print("Leapmotion SDK for Python not found, the gesture feature will not be available")
+    print("If installed, you might want to edit the *lib* variable at the top of {}".format(__file__))
+    leapmotion = False
+else:
+    leapmotion = True
+    class SampleListener(Listener):
+        def __init__(self, swipe, swipe_lock):
+            Listener.__init__(self)
+            self.swipe = swipe
+            self.swipe_lock = swipe_lock
+            print "Leap listener is started!"
 
-class SampleListener(Leap.Listener):
-    def __init__(self, swipe, swipe_lock):
-        Leap.Listener.__init__(self)
-        self.swipe = swipe
-        self.swipe_lock = swipe_lock
-        print "Leap listener is started!"
+        def on_connect(self, controller):
+            controller.enable_gesture(Gesture.TYPE_SWIPE)
 
-    def on_connect(self, controller):
-        controller.enable_gesture(Leap.Gesture.TYPE_SWIPE)
-
-    def on_frame(self, controller):
-        frame = controller.frame()
-        for gesture in frame.gestures():
-            if gesture.type == Leap.Gesture.TYPE_SWIPE and gesture.state in [1, 3]: # States 1 and 3 are START and STOP, we omit updates
-                with self.swipe_lock:
-                    self.swipe[0] = SwipeGesture(gesture)
-                #print "  Swipe id: %d, state: %s, position: %s, direction: %s, speed: %f" % (
-                #    self.swipe[0].id, self.swipe[0].state, self.swipe[0].position, self.swipe[0].direction, self.swipe[0].speed)
+        def on_frame(self, controller):
+            frame = controller.frame()
+            for gesture in frame.gestures():
+                if gesture.type == Gesture.TYPE_SWIPE and gesture.state in [1, 3]: # States 1 and 3 are START and STOP, we omit updates
+                    with self.swipe_lock:
+                        self.swipe[0] = SwipeGesture(gesture)
+                    #print "  Swipe id: %d, state: %s, position: %s, direction: %s, speed: %f" % (
+                    #    self.swipe[0].id, self.swipe[0].state, self.swipe[0].position, self.swipe[0].direction, self.swipe[0].speed)
 
 class Ball():
     colors = ['deeppink', 'navy', 'gold', 'white', 'grey', 'darkgreen', 'chocolate']
@@ -119,13 +122,16 @@ class Bounces(Arbapp):
         # Motion control via Leap Motion
         self.swipe = [None]
         self.swipe_lock = RLock()
-        self.leap_listener = SampleListener(self.swipe, self.swipe_lock)
-        self.controller = Leap.Controller()
-        self.controller.add_listener(self.leap_listener)
+
+        if leapmotion:
+            self.leap_listener = SampleListener(self.swipe, self.swipe_lock)
+            self.controller = Controller()
+            self.controller.add_listener(self.leap_listener)
 
     def close(self, reason='unknown'):
         Arbapp.close(self, reason)
-        self.controller.remove_listener(self.leap_listener)
+        if leapmotion:
+            self.controller.remove_listener(self.leap_listener)
 
     def render(self):
         with self.model:
@@ -147,14 +153,3 @@ class Bounces(Arbapp):
                 ball.step_forward()
             self.render()
             self.rate.sleep()
-
-if __name__=='__main__':
-
-    parser = argparse.ArgumentParser(description='Bouncing pixels propelled by a leap motion controller'
-                                                 'You must plug a Leap Motion controller, install its SDK and run its daemon first')
-
-    e = Bounces(parser, 50)
-    try:
-        e.start()
-    finally:
-        e.close("end")
