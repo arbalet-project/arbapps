@@ -9,9 +9,9 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-import cv2, argparse
+import cv2
 from os.path import isfile
-from arbasdk import Arbapp
+from arbalet.core import Arbapp
 
 class Pixeliser(Arbapp):
     def __init__(self, argparser):
@@ -22,7 +22,7 @@ class Pixeliser(Arbapp):
         if isfile(f):
             self.video_reader = cv2.VideoCapture(f)
             self.rate = self.video_reader.get(cv2.cv.CV_CAP_PROP_FPS)
-            print self.rate, 'fps'
+            print(self.rate, 'fps')
 
             while True:
                 r, image = self.video_reader.read()
@@ -49,20 +49,3 @@ class Pixeliser(Arbapp):
     def run(self):
         for f in self.args.input:
             self.play_file(f)
-
-if __name__=='__main__':
-    parser = argparse.ArgumentParser(description='Pixelise a video file, i.e. decrease dramatically the number of'
-                                                 'pixels to play the latter on the table')
-    parser.add_argument('-i', '--input',
-                        type=str,
-                        required=True,
-                        nargs='+',
-                        help='Video file(s) to pixelise')
-
-    parser.add_argument('-do', '--display-original',
-                        action='store_const',
-                        const=True,
-                        default=False,
-                        help='Display the original video in an OpenCV window (require access to X display)')
-
-    Pixeliser(parser).start()
