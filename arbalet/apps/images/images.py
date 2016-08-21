@@ -8,10 +8,9 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-import argparse
-import Image
+from PIL import Image
 from os.path import isfile
-from arbasdk import Arbapp
+from arbalet.core import Arbapp
 from time import sleep
 
 class ImageReader(Arbapp):
@@ -51,25 +50,3 @@ class ImageReader(Arbapp):
         for f in self.args.input:
             self.play_file(f)
 
-
-if __name__=='__main__':
-    parser = argparse.ArgumentParser(description='Render an animated image (gif, apng, mng...) on Arbalet')
-    parser.add_argument('-i', '--input',
-                        type=str,
-                        required=True,
-                        nargs='+',
-                        help='Path to the image(s) to render')
-
-    parser.add_argument('-l', '--loop',
-                        action='store_const',
-                        const=True,
-                        default=False,
-                        help='Keep playing infinitely')
-
-    parser.add_argument('-do', '--display-original',
-                        action='store_const',
-                        const=True,
-                        default=False,
-                        help='Display the original image (require access to X display)')
-
-    ImageReader(parser).start()
