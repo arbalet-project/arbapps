@@ -9,8 +9,7 @@
 """
 from arbalet.core import Pixel
 from ..snake import Snake, LEFT, RIGHT, UP, DOWN
-from numpy import zeros, array
-from numpy.linalg import norm
+from numpy import zeros
 
 
 class SnakeAI(Snake):
@@ -32,8 +31,13 @@ class SnakeAI(Snake):
         for h in range(self.height):
             for w in range(self.width):
                 if self.model.get_pixel(h, w) not in [SnakeAI.FOOD, SnakeAI.BODY] :
-                    color = Pixel('white')*(self.potential_field[h, w]/500)  # TODO find better brightness adaption
+                    color = Pixel('white')*(self.potential_field[h, w]/self.SCORE_FOOD_ATTRACTION)  # TODO find better brightness adaption
                     self.model.set_pixel(h, w, color)
+
+    @staticmethod
+    def norm(x, y):
+        # Not using the euclidian distance for faster calculations
+        return abs(y[0]-x[0]) + abs(y[1]-x[1])
 
     def update_potential_field(self):
         for h in range(self.height):
@@ -41,7 +45,7 @@ class SnakeAI(Snake):
                 self.update_potential_field_of(h, w)
 
     def update_potential_field_of(self, h, w):
-        pixel = array((h, w))
+        pixel = (h, w)
         score = 0
         if self.model.get_pixel(h, w) == SnakeAI.FOOD:
             score = SnakeAI.SCORE_FOOD_TARGET
@@ -49,13 +53,12 @@ class SnakeAI(Snake):
             score = SnakeAI.SCORE_BODY_TARGET
         else:
             for food in self.FOOD_POSITIONS:
-                food = array(food)
-                distance = norm(food - pixel)
+                distance = self.norm(food, pixel)
                 score += SnakeAI.SCORE_FOOD_ATTRACTION/distance
             for body in self.queue:
-                body = array(body)
-                distance = norm(food - pixel)
-                score += SnakeAI.SCORE_BODY_ATTRACTION/distance
+                distance = self.norm(body, pixel)
+                if distance < 4:
+                    score += SnakeAI.SCORE_BODY_ATTRACTION/distance
         self.potential_field[h, w] = score           
     
     def process_events(self):
