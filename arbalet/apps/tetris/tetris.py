@@ -150,7 +150,7 @@ class Tetris(Application):
         self.grid = before_rotation
 
     def check_level_up(self):
-        if self.score/2+1>=self.speed:
+        if self.score/25+1>=self.speed:
             self.music.level_end()
             self.speed += 1
             text = "Level up! Level {}, score {}".format(self.speed-1, self.score)
