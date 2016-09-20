@@ -16,18 +16,19 @@ Arbalet's source code is organized around three repositories: [Arbasdk](https://
 *Arbapps* (Arbalet applications) is your workspace for all Arbalet applications. This repository already contains a set of basic applications written in Python, feel free to fork it, improve them and add your custom programs.
 
 Arbalet comes with these apps:
-* **Bounces** are bouncing balls propelled by physical interaction with hand gestures thanks to a [LeapMotion controller](http://leapmotion.com/).
-* **ColorDemonstrator** shows nice light effets on your Arbalet table. It comes with an initial set of 6 effects: Blue flashing to white, African style, turquoise/chocolate, pink/blue, warm colors, and whole color wheel.
-* **ImageReader** is a GIF renderer. It will stretch the frames to fit the whole table so it may distort the original image.
-* **LightsHero** is a GuitarHero-like game playable with the keys F1 to F5 of a keyboard to be holded... like a guitarist does. It's compatible with frets-on-fire songs.
-* **Pixeliser** reads any video in input and reduces dramatically its resolution to play it on the table. You won't be able to watch a movie for sure, but this is a simple way to create nice light effects with... nice input videos.
-* **SpectrumAnalyser** 	is an offline music spectrum analyzer. It reads a WAVE file, plays it and displays the spectrum computed in realtime.
-* **Tetris** is... a Tetris! Playable with a joystick or a keyboard.
-* **TimeClock** is a very simple time clock, currently only suited for tables of size 15x10
+* **bounces** are bouncing balls propelled by physical interaction with hand gestures thanks to a [LeapMotion controller](http://leapmotion.com/).
+* **colors** shows nice light effets on your Arbalet table. It comes with an initial set of 6 effects: Blue flashing to white, African style, turquoise/chocolate, pink/blue, warm colors, and whole color wheel.
+* **images** is a GIF renderer. It will stretch the frames to fit the whole table so it may distort the original image.
+* **lightshero** is a GuitarHero-like game playable with the keys F1 to F5 of a keyboard to be holded... like a guitarist does. It's compatible with frets-on-fire songs.
+* **pixeliser** reads any video in input and reduces dramatically its resolution to play it on the table. You won't be able to watch a movie for sure, but this is a simple way to create nice light effects with... nice input videos.
+* **snake** is a Snake game, playable with a joystick or a keyboard. It also comes with an autoplaying AI in module `snake.ai` 
+* **spectrum** 	is an offline music spectrum analyzer. It reads a WAVE file, plays it and displays the spectrum computed in realtime.
+* **tetris** is... a Tetris! Playable with a joystick or a keyboard.
+* **timeclock** is a very simple time clock, currently only suited for tables of size 15x10
 
-Meta-applications:
-* **Arbaloop** is an application sequencer. Mainly written for demonstration purposes it starts Arbalet applications automatically and switch to a new one after a while or after the user asked to change.
-* **Arbaserver** 	is a server allowing to share hardware between several clients over the network
-* **Arbasnap** 	is a bridge for the [Snap! visual programming language](http://snap.berkeley.edu/). (see the [quick start for with Snap!](https://github.com/arbalet-project/arbadoc/wiki/Meta-applications#arbasnap))
+Tools and meta-applications:
+* **sequencer** is an application sequencer. Mainly written for demonstration purposes it starts Arbalet applications automatically and switch to a new one after a while or after the user asked to change.
+* **server** 	is a server allowing to share hardware between several clients over the network
+* **snap** 	is a bridge for the [Snap! visual programming language](http://snap.berkeley.edu/). (see the [quick start for with Snap!](https://github.com/arbalet-project/arbadoc/wiki/Meta-applications#arbasnap))
 
 **IMPORTANT NOTE**: You **must** [download and install the Arbalet SDK](https://github.com/arbalet-project/arbadoc/wiki/Software-tutorials) before running any of these applications, otherwise you will raise an `ImportError`.
