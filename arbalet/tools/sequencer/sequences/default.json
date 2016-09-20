@@ -6,6 +6,7 @@
         {"app":"colors", "args": "-t swipe", "timeout": 120, "interruptible": true},
         {"app":"lightshero", "timeout": -1, "interruptible": true},
         {"app":"timeclock", "timeout": 30, "interruptible": true},
+        {"app":"snake.ai", "timeout": -1, "interruptible": true},
         {"app":"snake", "timeout": 20, "interruptible": true},
         {"app":"spectrum", "args": "-o once -i libre/*.wav", "timeout": -1, "interruptible": true}
     ]
