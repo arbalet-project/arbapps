@@ -8,7 +8,7 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 from arbalet.core import Pixel
-from ..snake import Snake, LEFT, RIGHT, UP, DOWN
+from ..snake import Snake
 from numpy import zeros
 
 
@@ -31,7 +31,7 @@ class SnakeAI(Snake):
         for h in range(self.height):
             for w in range(self.width):
                 if self.model.get_pixel(h, w) not in [SnakeAI.FOOD, SnakeAI.BODY] :
-                    color = Pixel('white')*(self.potential_field[h, w]/self.SCORE_FOOD_ATTRACTION)  # TODO find better brightness adaption
+                    color = Pixel('white')*(self.potential_field[h, w]/(3*self.SCORE_FOOD_ATTRACTION))
                     self.model.set_pixel(h, w, color)
 
     @staticmethod
