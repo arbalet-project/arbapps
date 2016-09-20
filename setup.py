@@ -5,12 +5,12 @@ from setuptools import setup, find_packages
 
 setup(
     name='arbalet_apps',
-    version='1.0.0',
+    version='2.0.0',
     license="GNU General Public License 3",
     description="Python API for development with Arbalet LED tables (ARduino-BAsed LEd Table)",
     url='http://github.com/arbalet-project',
     author="Yoan Mollard",
-    author_email="contact@konqi.fr",
+    author_email="contact@arbalet-project.org",
     long_description=open('README.md').read(),
 
     install_requires= ["pygame", "configparser", "bottle", "pyalsaaudio", "zmq", "python-xlib", "Pillow", "numpy"], # "python-midi"
