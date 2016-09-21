@@ -113,7 +113,8 @@ class Arbaloop(Application):
                 while True:  # Loop allowing the user to play again, by restarting app
                     print("### STARTING {}".format(module_command))
                     process = Popen(module_command, cwd=cwd)
-                    reason = self.wait(command['timeout'], command['interruptible'], process) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
+                    timeout = command['timeout'] if 'timeout' in command else -1
+                    reason = self.wait(timeout, command['interruptible'], process) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
                     print("### END:", reason)
                     if reason != 'terminated':
                         process.terminate()  # SIGTERM
