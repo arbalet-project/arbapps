@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
     Arbalet - ARduino-BAsed LEd Table
-    Arbaloop - Sequencer of Arbalet applications
+    Sequencer of Arbalet applications
 
     Runs and closes Arbalet apps according to a sequence file
 
@@ -21,10 +21,10 @@ from pygame import JOYBUTTONDOWN
 from signal import SIGINT
 
 
-# TODO must Arbaloop inherit from Application?
+# TODO must Sequencer inherit from Application?
 # It should ignore -ng -w and redirect them to the children
 
-class Arbaloop(Application):
+class Sequencer(Application):
     def __init__(self, argparser):
         Application.__init__(self, argparser, True) # starting mock mode, init flags (-w and -ng) will be redirected to the server
         self.server_process = None
