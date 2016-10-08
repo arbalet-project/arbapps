@@ -36,7 +36,6 @@ setup(
                 ('arbalet/apps/lightshero/songs/Feelings', ['arbalet/apps/lightshero/songs/Feelings/notes.mid']),
                 ('arbalet/apps/lightshero/songs/Feelings', ['arbalet/apps/lightshero/songs/Feelings/song.ini']),
                 ('arbalet/apps/lightshero/songs/Feelings', ['arbalet/apps/lightshero/songs/Feelings/song.ogg']),
-                ('arbalet/apps/spectrum/libre', ['arbalet/apps/spectrum/libre/Nytrogen_-_Nytrogen_-_Trust_no_one.wav']),
                 ('arbalet/tools/sequencer/sequences', ['arbalet/tools/sequencer/sequences/default.json']),
     ],
 )
