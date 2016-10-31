@@ -153,7 +153,7 @@ class Tetris(Application):
         if self.score/25+1>=self.speed:
             self.music.level_end()
             self.speed += 1
-            text = "Level up! Level {}, score {}".format(self.speed-1, self.score)
+            text = "Level {}".format(self.speed-1)
             print(text)
             self.model.write(text, "navy")
             self.music.level_up()
@@ -255,5 +255,6 @@ class Tetris(Application):
         # Game over
         if self.score>0:
             self.music.game_over()
-            self.model.write("GAME OVER! Score: {}, level {}".format(self.score, self.speed-1), 'gold')
+            self.model.flash()
+            self.model.write("GAME OVER! Score: {}, level {}".format(self.score, self.speed-1), 'deeppink')
 

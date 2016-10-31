@@ -129,5 +129,6 @@ class Snake(Application):
 
     def game_over(self):
         print("Game OVER")
-        self.model.write("GAME OVER! Score: {}".format(len(self.queue)), 'gold')
+        self.model.flash()
+        self.model.write("GAME OVER! Score: {}".format(len(self.queue)), 'deeppink')
 
