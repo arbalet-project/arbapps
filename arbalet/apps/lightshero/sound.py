@@ -14,6 +14,7 @@ class SoundManager():
                        'drums' : None,
                        'bass': None}
         self.started = False
+        self.guitar_muted = False
 
     def start(self):
         self.started = True
@@ -26,10 +27,12 @@ class SoundManager():
             if track:
                 track.play()
 
-    def mute(self, track, muted):
-        if muted:
-            self.tracks[track].mute()
-        else:
-            self.tracks[track].unmute()
+    def set_playing_well(self, playing_well):
+        if self.guitar_muted and playing_well:
+            self.tracks['guitar'].set_volume(1)
+            self.guitar_muted = False
+        elif not self.guitar_muted and not playing_well:
+            self.tracks['guitar'].set_volume(0.1)
+            self.guitar_muted = True
 
 

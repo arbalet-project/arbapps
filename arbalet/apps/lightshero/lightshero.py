@@ -61,6 +61,7 @@ class Renderer():
                     self.model.set_pixel(self.height-1, w, color)
         self.flash_color = not self.flash_color
 
+
 class LightsHero(Application):
     def __init__(self, argparser, num_lanes, path, speed):
         Application.__init__(self, argparser, touch_mode='columns')
@@ -76,7 +77,7 @@ class LightsHero(Application):
         self.renderer = Renderer(self.model, self.grid, self.bar, self.height, num_lanes, self.width)
         self.reader = SongReader(path, num_lanes, self.args.level, speed)
         self.sound = SoundManager(path)
-        self.hits = UserHits(self.num_lanes, self.arbalet)
+        self.hits = UserHits(self.num_lanes, self.arbalet, self.sound, self.args.simulate_player)
 
     def next_line(self):
         # Delete the last line leaving the grid

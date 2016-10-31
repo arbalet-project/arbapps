@@ -1,4 +1,4 @@
-from pygame import K_F1, K_F2, K_F3, K_F4, K_F5, KEYDOWN, KEYUP
+from pygame import K_F1, K_F2, K_F3, K_F4, K_F5, KEYDOWN, KEYUP, JOYBUTTONDOWN
 
 # Import a bunch of modules to get X11 keyboards event without opening a window (threaded)
 from Xlib import X, display
@@ -25,7 +25,11 @@ class UserHits():
     #hit_window = {'easy': 0.2, 'medium': 0.18, 'difficult': 0.16, 'expert': 0.14 }
     # More precise hit window: https://raw.githubusercontent.com/fofix/fofix/master/doc/old/hitwindows.htm
 
-    def __init__(self, num_lanes, arbalet):
+    def __init__(self, num_lanes, arbalet, sound, simulate_player):
+        self.simulate_player = simulate_player
+        self.sound = sound
+        self.sliding_failures = -50  # Starting with negative will give some extra time before starting
+        self.window_failures = 25  # Number of consecutive errors accepted
         self.score = 0
         self.arbalet = arbalet
         self.max_score = 0  # measures the maximum score that the user could have
@@ -100,6 +104,9 @@ class UserHits():
                             self.keys[3] = evt.type==KEYDOWN
                         elif evt.key==K_F5:
                             self.keys[4] = evt.type==KEYDOWN
+                    elif evt.type == JOYBUTTONDOWN:
+                        self.switch_simulation()
+
             for event in self.arbalet.touch.get():
                 if event['key']==1:
                     self.keys[0] = event['type']=='down'
@@ -112,6 +119,24 @@ class UserHits():
                 elif event['key']==5:
                     self.keys[4] = event['type']=='down'
 
+    def switch_simulation(self):
+        self.simulate_player = not self.simulate_player
+        if self.simulate_player:
+            self.set_playing_well(True)
+
+    def set_playing_well(self, playing_well):
+        """
+        Call this method each time a note must be played,
+        :param sucess: True if the user has correctly played this song, False otherwise
+        :return:
+        """
+        if playing_well:
+            self.sliding_failures = 0
+            self.sound.set_playing_well(True)
+        else:
+            self.sliding_failures = min(self.sliding_failures + 1, self.window_failures)
+            if self.sliding_failures == self.window_failures:
+                self.sound.set_playing_well(False)
 
     def get_pressed_keys(self):
         """
@@ -122,14 +147,27 @@ class UserHits():
         self.update_keys()
 
         # 2. Update the score and the maximum score
+        playing_well = True
+        must_update = False
         for lane in range(self.num_lanes):
             if self.keys[lane] and self.active_notes[lane]:
+                # Playing while he must
                 self.score += 10
+                must_update = True
             elif self.keys[lane] and not self.active_notes[lane]:
+                # Playing while he must not
                 self.score -= 2
+                playing_well = False
+                must_update = True
+            elif not self.keys[lane] and self.active_notes[lane]:
+                # Not playing while he must
+                playing_well = False
+                must_update = True
 
             if self.active_notes[lane]:
                 self.max_score += 10
+        if must_update and not self.simulate_player:
+            self.set_playing_well(playing_well)
         return self.keys
 
 
