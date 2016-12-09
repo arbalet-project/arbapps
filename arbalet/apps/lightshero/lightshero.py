@@ -19,7 +19,8 @@ from time import time
 from .song import SongReader
 from .sound import SoundManager
 from .hits import UserHits
-from arbalet.core import Application, Pixel, Rate
+from arbalet.core import Application, Rate
+from arbalet.colors import add, mul
 
 class Renderer():
     """
@@ -32,7 +33,7 @@ class Renderer():
         self.height = table_height
         self.width = table_width
         self.num_lanes = num_lanes
-        self.colors = ['darkgreen', 'darkred', 'orange', 'navy', 'deeppink']
+        self.colors = {'bump': (0.4, 0.4, 0.4), 'lanes': ['darkgreen', 'darkred', 'orange', 'navy', 'deeppink']}
         self.intensity = {'background': 0.05, 'marker': 0.03, 'active': 0.9}
         self.flash_color = False  # Boolean giving a "burning" impression
 
@@ -44,23 +45,22 @@ class Renderer():
                     w = lane*self.width//self.num_lanes + chunk_lane
                     for h in range(self.height-1): # -1 in order not to update the bottom bar
                         if self.grid[h][lane]=='bump':
-                            color = Pixel((100, 100, 100)) + Pixel(self.colors[lane])
+                            color = add(self.colors['lanes'][lane], self.colors['bump'])
                         else:
-                            color = Pixel(self.colors[lane])*self.intensity[self.grid[h][lane]]
+                            color = mul(self.colors['lanes'][lane], self.intensity[self.grid[h][lane]])
                         self.model.set_pixel(h, w, color)
 
             # Bottom bar of present notes
             for lane in range(self.num_lanes):
                 if self.bar[lane]=='hit' and self.flash_color or self.bar[lane]=='idle':
-                    # To make the note "burning" we alternate white/color when self.colors[lane]=='hit'
-                    color = self.colors[lane]
+                    # To make the note "burning" we alternate white/color when self.colors['lanes'][lane]=='hit'
+                    color = self.colors['lanes'][lane]
                 else:
                     color = 'white'
                 for chunk_lane in range(self.width//self.num_lanes):
                     w = lane*self.width//self.num_lanes + chunk_lane
                     self.model.set_pixel(self.height-1, w, color)
         self.flash_color = not self.flash_color
-
 
 class LightsHero(Application):
     def __init__(self, argparser, num_lanes, path, speed):
