@@ -1,5 +1,6 @@
 import argparse
 from .colors import ColorDemo
+from arbalet.colors import name_to_hsv, rgb_to_hsv
 
 # Below is declared the dictionary of available effects
 # Effects are generated thanks to Python generators: https://wiki.python.org/moin/Generators
@@ -13,29 +14,29 @@ from .colors import ColorDemo
 # the small dur_max - dur_min is, the more synchronized all the pixels are
 # - colors is the vector of colors to swipe in the given duration
 
-animations = {'swipe': { 'rate': 20, 'dur_min': 10, 'dur_max': 15, 'generator_id': 1,
-                         'colors': ['yellowgreen', 'darkorange', 'darkred', 'deeppink',
-                                    'purple', 'darkblue', 'turquoise', 'darkgreen'] },
 
-              'african': { 'rate': 20, 'dur_min': 10, 'dur_max':15, 'generator_id': 2,
-                           'colors':[(39, 26, 19), (49, 32, 23), (100, 66, 48), (172, 69, 11), (232, 139, 36)] },
+animations = {'swipe': { 'rate': 20, 'dur_min': 30, 'dur_max': 35, 'generator_id': 1,
+                         'colors': [(0.1, 1, 1)] },
 
-              'flashes': { 'rate': 20, 'dur_min': 10, 'dur_max': 60, 'generator_id': 0,
-                           'colors':['darkblue', 'white'] },
+              'african': { 'rate': 20, 'dur_min': 10, 'dur_max': 15, 'generator_id': 2,
+                           'colors': map(rgb_to_hsv,
+                                         [(39, 26, 19), (49, 32, 23), (100, 66, 48), (172, 69, 11), (232, 139, 36)]) },
+
+              'flashes': { 'rate': 20, 'dur_min': 3, 'dur_max': 30, 'generator_id': 0,
+                           'colors': map(name_to_hsv, ['darkblue']) },
 
               'gender': { 'rate': 20, 'dur_min': 5, 'dur_max': 15, 'generator_id': 2,
-                           'colors':['darkblue', 'deeppink'] },
+                           'colors': map(name_to_hsv, ['darkblue', 'deeppink']) },
 
               'teddy':  { 'rate': 20, 'dur_min': 5, 'dur_max': 20, 'generator_id': 2,
-                           'colors':[(0, 30, 30), (20, 10, 0)] },
+                           'colors': map(rgb_to_hsv, [(0, 30, 30), (20, 10, 0)]) },
 
-              'warm':  { 'rate': 50, 'dur_min': 10, 'dur_max': 30, 'generator_id': 2,
-                           'colors':[[20, 11, 2], [13, 0, 3], [10, 1, 4]] },
+              'warm':  { 'rate': 20, 'dur_min': 10, 'dur_max': 30, 'generator_id': 2,
+                           'colors': map(rgb_to_hsv, [[20, 11, 2], [13, 0, 3], [10, 1, 4]]) },
 
               }
 
-parser = argparse.ArgumentParser(description='Color demonstrator with nice effects and animations for demos (and pleasure!)'
-                                             'To be enriched with newer animations!')
+parser = argparse.ArgumentParser(description='Color demonstrator and coloured ambient light')
 parser.add_argument('-t', '--type',
                     default='swipe',
                     choices=animations.keys(),
