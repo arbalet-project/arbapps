@@ -18,10 +18,7 @@ class Music(object):
         self.play()
 
     def play(self):
-        channel = self.sounds[self.level].play(loops=self.loops)
-        sleep(0.25)
-        if not channel.get_busy():
-            print("Error: unable to play file {}".format(self.files[self.level]))
+        self.sounds[self.level].play(loops=self.loops)
 
     def level_end(self):
         self.sounds[self.level].fadeout(5000)
