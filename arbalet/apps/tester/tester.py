@@ -10,7 +10,7 @@
 """
 __author__ = 'titimoby@gmail.com'
 
-from arbalet.core import Application, Rate, Pixel
+from arbalet.core import Application, Rate
 
 
 class SimpleTester(Application):
@@ -25,6 +25,6 @@ class SimpleTester(Application):
         for w in range(self.width):
             for h in range(self.height):
                 with self.model:
-                    self.model.set_pixel(h, w, Pixel(self.colors[self.color_index]))
+                    self.model.set_pixel(h, w, self.colors[self.color_index])
                 rate.sleep()
             self.color_index = (self.color_index +1) % len(self.colors)
