@@ -14,7 +14,8 @@
 """
 import struct, numpy, alsaaudio, audioop, wave
 from collections import deque
-from arbalet.core import Application, hsv
+from arbalet.core import Application
+from arbalet.colors import mul, hsv_to_rgb
 from copy import copy
 from random import shuffle
 
@@ -30,7 +31,7 @@ class Renderer():
         self.num_bands = num_bands
         self.num_bins = num_bins
         self.vertical = vertical
-        self.colors = [hsv(c, 100, 100) for c in range(0, 360, int(360./self.num_bands))]
+        self.colors = [hsv_to_rgb((float(c)/self.num_bands, 1., 1.)) for c in range(self.num_bands)]
 
         # A window stores the last len_window samples to scale the height of the spectrum
         self.max = 1000000
@@ -54,8 +55,8 @@ class Renderer():
                     if ampli_b < bands[band]:
                         color = self.colors[band]
                     elif self.old_model: # animation with light decreasing
-                        old = self.old_model.get_pixel(bin if self.vertical else band, band if self.vertical else bin).hsva
-                        color = hsv(old[0], old[1], old[2]*0.875)
+                        old = self.old_model.get_pixel(bin if self.vertical else band, band if self.vertical else bin)
+                        color = mul(old, 0.875)
                     else:
                         color = 'black'
                     self.model.set_pixel(bin if self.vertical else band, band if self.vertical else bin, color)
