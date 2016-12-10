@@ -7,14 +7,14 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-from arbalet.core import Pixel
+from arbalet.colors import mul, name_to_rgb, equal
 from ..snake import Snake
 from numpy import zeros
 
 
 class SnakeAI(Snake):
-    FOOD = Pixel(Snake.FOOD_COLOR)
-    BODY = Pixel(Snake.PIXEL_COLOR)
+    FOOD = name_to_rgb(Snake.FOOD_COLOR)
+    BODY = name_to_rgb(Snake.PIXEL_COLOR)
     
     SCORE_FOOD_ATTRACTION = 100
     SCORE_FOOD_TARGET = 500
@@ -30,8 +30,9 @@ class SnakeAI(Snake):
             self.update_potential_field_of(x, y)
         for h in range(self.height):
             for w in range(self.width):
-                if self.model.get_pixel(h, w) not in [SnakeAI.FOOD, SnakeAI.BODY] :
-                    color = Pixel('white')*(self.potential_field[h, w]/(3*self.SCORE_FOOD_ATTRACTION))
+                pixel = self.model.get_pixel(h, w)
+                if not equal(pixel, SnakeAI.FOOD) and not equal(pixel, SnakeAI.BODY):
+                    color = mul('white', self.potential_field[h, w]/(3*self.SCORE_FOOD_ATTRACTION))
                     self.model.set_pixel(h, w, color)
 
     @staticmethod
@@ -47,9 +48,9 @@ class SnakeAI(Snake):
     def update_potential_field_of(self, h, w):
         pixel = (h, w)
         score = 0
-        if self.model.get_pixel(h, w) == SnakeAI.FOOD:
+        if equal(self.model.get_pixel(h, w), SnakeAI.FOOD):
             score = SnakeAI.SCORE_FOOD_TARGET
-        elif self.model.get_pixel(h, w) == SnakeAI.BODY:
+        elif equal(self.model.get_pixel(h, w), SnakeAI.BODY):
             score = SnakeAI.SCORE_BODY_TARGET
         else:
             for food in self.FOOD_POSITIONS:
