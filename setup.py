@@ -13,7 +13,7 @@ setup(
     author_email="contact@arbalet-project.org",
     long_description=open('README.md').read(),
 
-    install_requires= ["pygame", "configparser", "bottle", "pyalsaaudio", "zmq", "python-xlib", "Pillow", "numpy"], # "python-midi"
+    install_requires= ["pygame", "configparser", "bottle", "pyalsaaudio", "zmq", "python-xlib", "numpy"], # "python-midi", "Pillow", # These packages are not Raspi-friendly
     include_package_data=True,
     zip_safe=False,  # contains data files
 
