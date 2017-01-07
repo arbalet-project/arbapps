@@ -32,10 +32,15 @@ class Arbaserver(Application):
         self.connection.send_json(frame)
 
     def run(self):
-        print("Server is waiting for connection...")
+        print("[Arbalet server] Waiting for app connection...")
         self.bind()
-        print("Connection successful to server")
+        print("[Arbalet server] App connected successfully")
         while True:
-            self.work()
-
+            try:
+                self.work()
+            except KeyboardInterrupt:
+                print("[Arbalet server] Shutdown initiated via SIGINT, closing...")
+                if not self.connection.closed:
+                    self.connection.close()
+                return
 

@@ -18,9 +18,8 @@ from glob import glob
 from shlex import split
 from time import sleep, time
 from pygame import JOYBUTTONDOWN
-from signal import SIGINT
-
-
+from signal import SIGINT, signal
+ 
 # TODO must Sequencer inherit from Application?
 # It should ignore -ng -w and redirect them to the children
 
@@ -28,12 +27,17 @@ class Sequencer(Application):
     def __init__(self, argparser):
         Application.__init__(self, argparser, True) # starting mock mode, init flags (-w and -ng) will be redirected to the server
         self.server_process = None
+        self.running = True
+        signal(SIGINT, self.close_processes)
 
+    def close_processes(self, signal, frame):
+        self.running = False
+ 
     def run(self):
         if len(self.args.sequence)>0:
             sequence_file = join(realpath(dirname(__file__)), self.args.sequence)
             if not isfile(sequence_file):
-                print("Sequence file '{}' not found".format(sequence_file))
+                print("[Arbalet Sequencer] Sequence file '{}' not found".format(sequence_file))
             else:
                 # launch the server
                 self.start_server(self.args.hardware, self.args.no_gui)
@@ -48,7 +52,6 @@ class Sequencer(Application):
 
     def close_server(self):
         if self.server_process:
-            self.server_process.terminate()
             self.server_process.send_signal(SIGINT)
             self.server_process.wait()
             self.server_process = None
@@ -56,7 +59,7 @@ class Sequencer(Application):
     def wait(self, timeout=-1, interruptible=False, process=None):
         start = time()
         # We loop while the process is not terminated, the timeout is not expired, and user has not asked 'next' with the joystick
-        while (timeout < 0 or time()-start < timeout) and (process is None or process.poll() is None):
+        while self.running and (timeout < 0 or time()-start < timeout) and (process is None or process.poll() is None):
             for e in self.arbalet.events.get():
                 if interruptible and e.type == JOYBUTTONDOWN and e.button in self.arbalet.joystick['back']:
                     # A "back" joystick key jumps to the next app, unless interruptible has been disabled
@@ -76,7 +79,7 @@ class Sequencer(Application):
             command += ' -w'
         if no_gui:
             command += ' -ng'
-        print("Starting server with: " + command)
+        print("[Arbalet Sequencer] Starting server with: " + command)
         self.server_process = Popen(command.split())
 
     def execute_sequence(self, sequence):
@@ -106,20 +109,19 @@ class Sequencer(Application):
         cwd = join(realpath(dirname(__file__)), '..', '..', 'apps')
         chdir(cwd)
 
-        while True:
+        while self.running:
             for command in sequence['sequence']:
                 args = "{} -m {} {}".format(executable, command['app'], command['args'] if 'args' in command else '')
                 module_command = purify_args(expand_args(args.split(), join(*command['app'].split('.'))))
-                while True:  # Loop allowing the user to play again, by restarting app
-                    print("### STARTING {}".format(module_command))
+                while self.running:  # Loop allowing the user to play again, by restarting app
+                    print("[Arbalet Sequencer] STARTING {}".format(module_command))
                     process = Popen(module_command, cwd=cwd)
                     timeout = command['timeout'] if 'timeout' in command else -1
                     reason = self.wait(timeout, command['interruptible'], process) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
-                    print("### END:", reason)
-                    if reason != 'terminated':
-                        process.terminate()  # SIGTERM
+                    print("[Arbalet Sequencer] END: {}".format(reason))
+                    if reason != 'terminated' or not self.running:
                         process.send_signal(SIGINT)
-                        process.wait() # should poll() and kill() if it does not close?
+                        process.wait()
                     if reason != 'restart':
                         break
             if not sequence['infinite']:
