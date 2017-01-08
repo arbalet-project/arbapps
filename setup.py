@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='arbalet_apps',
-    version='3.0.1',
+    version='3.0.2',
     license="GNU General Public License 3",
     description="Python API for development with Arbalet LED tables (ARduino-BAsed LEd Table)",
     url='http://github.com/arbalet-project',

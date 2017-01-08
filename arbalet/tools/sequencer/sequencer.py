@@ -10,7 +10,7 @@
 """
 from arbalet.core import Application
 from os.path import isfile, join, realpath, dirname
-from os import getcwd, chdir
+from os import chdir
 from sys import executable
 from json import load
 from subprocess import Popen
@@ -19,7 +19,7 @@ from shlex import split
 from time import sleep, time
 from pygame import JOYBUTTONDOWN
 from signal import SIGINT, signal
- 
+
 # TODO must Sequencer inherit from Application?
 # It should ignore -ng -w and redirect them to the children
 
@@ -97,7 +97,7 @@ class Sequencer(Application):
             #args = map(lambda arg: if len(glob(join(cwd, arg))) > 0 else arg, args)  # Expand . ? and *
             expanded_args = []
             for arg in args:
-                globed_arg = glob(join(cwd, arg))
+                globed_arg = glob(arg)
                 if len(globed_arg)==0:
                     expanded_args.append(arg)
                 else:
@@ -126,4 +126,3 @@ class Sequencer(Application):
                         break
             if not sequence['infinite']:
                 break
-

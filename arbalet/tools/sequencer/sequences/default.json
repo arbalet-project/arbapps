@@ -8,6 +8,6 @@
         {"app":"timeclock", "timeout": 30, "interruptible": true},
         {"app":"snake.ai", "interruptible": true},
         {"app":"snake", "timeout": 20, "interruptible": true},
-        {"app":"spectrum", "args": "-o once -i files/*.wav", "interruptible": true}
+        {"app":"spectrum", "args": "-o once -i spectrum/files/*.wav", "interruptible": true}
     ]
 }
