@@ -19,6 +19,7 @@ from shlex import split
 from time import sleep, time
 from pygame import JOYBUTTONDOWN
 from signal import SIGINT, signal
+from copy import deepcopy
 
 # TODO must Sequencer inherit from Application?
 # It should ignore -ng -w and redirect them to the children
@@ -29,6 +30,8 @@ class Sequencer(Application):
         self.server_process = None
         self.running = True
         signal(SIGINT, self.close_processes)
+        self.command = None
+        self.current_app_index = 0
 
     def close_processes(self, signal, frame):
         self.running = False
@@ -60,6 +63,8 @@ class Sequencer(Application):
         start = time()
         # We loop while the process is not terminated, the timeout is not expired, and user has not asked 'next' with the joystick
         while self.running and (timeout < 0 or time()-start < timeout) and (process is None or process.poll() is None):
+            if self.command is not None:
+                return 'new_launch'
             for e in self.arbalet.events.get():
                 if interruptible and e.type == JOYBUTTONDOWN and e.button in self.arbalet.joystick['back']:
                     # A "back" joystick key jumps to the next app, unless interruptible has been disabled
@@ -110,19 +115,26 @@ class Sequencer(Application):
         chdir(cwd)
 
         while self.running:
-            for command in sequence['sequence']:
-                args = "{} -m {} {}".format(executable, command['app'], command['args'] if 'args' in command else '')
-                module_command = purify_args(expand_args(args.split(), join(*command['app'].split('.'))))
-                while self.running:  # Loop allowing the user to play again, by restarting app
-                    print("[Arbalet Sequencer] STARTING {}".format(module_command))
-                    process = Popen(module_command, cwd=cwd)
-                    timeout = command['timeout'] if 'timeout' in command else -1
-                    reason = self.wait(timeout, command['interruptible'], process) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
-                    print("[Arbalet Sequencer] END: {}".format(reason))
-                    if reason != 'terminated' or not self.running:
-                        process.send_signal(SIGINT)
-                        process.wait()
-                    if reason != 'restart':
-                        break
+            command = deepcopy(self.command)
+            self.command = None
+
+            if command is None:
+                command = sequence['sequence'][self.current_app_index]
+                self.current_app_index = (self.current_app_index + 1) % len(sequence['sequence'])
+
+            args = "{} -m {} {}".format(executable, command['app'], command['args'] if 'args' in command else '')
+            module_command = purify_args(expand_args(args.split(), join(*command['app'].split('.'))))
+            while self.running:  # Loop allowing the user to play again, by restarting app
+                print("[Arbalet Sequencer] STARTING {}".format(module_command))
+                process = Popen(module_command, cwd=cwd)
+                timeout = command['timeout'] if 'timeout' in command else -1
+                reason = self.wait(timeout, command['interruptible'], process) # TODO interruptible raw_input in new_thread for 2.7, exec with timeout= for 3
+                print("[Arbalet Sequencer] END: {}".format(reason))
+                if reason != 'terminated' or not self.running:
+                    process.send_signal(SIGINT)
+                    process.wait()
+                if reason != 'restart':
+                    break
+
             if not sequence['infinite']:
                 break
