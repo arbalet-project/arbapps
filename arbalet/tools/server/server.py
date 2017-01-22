@@ -27,8 +27,9 @@ class Arbaserver(Application):
     def work(self):
         json_model = self.connection.recv_json()
         self.model.from_json(json_model)
-        frame = self.arbalet.touch.get_touch_frame()
-        frame = (frame[0], list(map(bool, frame[1])))  # Hack because json is not able to serialize type 'numpy.bool_'
+        #frame = self.arbalet.touch.get_touch_frame()
+        #frame = (frame[0], list(map(bool, frame[1])))  # Hack because json is not able to serialize type 'numpy.bool_'
+        frame = (0, [False]*6)
         self.connection.send_json(frame)
 
     def run(self):
