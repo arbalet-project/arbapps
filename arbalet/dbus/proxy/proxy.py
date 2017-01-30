@@ -17,7 +17,6 @@ class Proxy(object):
         self.context = zmq.Context()
 
     def run(self):
-        print("Arbalet D-Bus running")
         ingoing_connection = "tcp://{}:{}".format(self.config['ip_binding'], self.config['xpub_port'])
         outgoing_connection = "tcp://{}:{}".format(self.config['ip_binding'], self.config['xsub_port'])
         print("Binding to {} for publishers".format(ingoing_connection))
@@ -27,6 +26,7 @@ class Proxy(object):
         ingoing_socket.bind(ingoing_connection)
         outgoing_socket = self.context.socket(zmq.PUB)
         outgoing_socket.bind(outgoing_connection)
+        print("Arbalet D-Bus running")
         try:
             zmq.proxy(ingoing_socket, outgoing_socket)
         except KeyboardInterrupt as e:
