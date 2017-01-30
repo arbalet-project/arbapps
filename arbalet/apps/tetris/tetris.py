@@ -11,7 +11,6 @@ import random
 import numpy
 from copy import deepcopy
 from arbalet.core import Application
-from arbalet.events import EventClient
 from .music import Music
 
 class Tetromino(object):
@@ -66,7 +65,6 @@ class Tetris(Application):
         self.command = {'left': False, 'right': False, 'down': False, 'rotate': False}  # User commands (joy/keyboard)
         self.touchdown = False  # True if the tetro has reached the floor
         self.music = Music()
-        self.events = EventClient()
 
     def process_events(self):
         """
@@ -77,7 +75,6 @@ class Tetris(Application):
         self.command['rotate'] = False  # The rotate event cannot be extended
         # Process new events
         for event in self.events.get():
-            print event
             if event['key']=='down':
                 self.command['down'] = event['pressed']
             elif event['key']=='right':
