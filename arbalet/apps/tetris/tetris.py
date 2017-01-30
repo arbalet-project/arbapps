@@ -9,9 +9,9 @@
 import time
 import random
 import numpy
-import pygame
 from copy import deepcopy
 from arbalet.core import Application
+from arbalet.events import EventClient
 from .music import Music
 
 class Tetromino(object):
@@ -66,6 +66,7 @@ class Tetris(Application):
         self.command = {'left': False, 'right': False, 'down': False, 'rotate': False}  # User commands (joy/keyboard)
         self.touchdown = False  # True if the tetro has reached the floor
         self.music = Music()
+        self.events = EventClient()
 
     def process_events(self):
         """
@@ -75,45 +76,16 @@ class Tetris(Application):
         """
         self.command['rotate'] = False  # The rotate event cannot be extended
         # Process new events
-        for event in self.arbalet.events.get():
-            # Joystick control
-            if event.type == pygame.JOYBUTTONDOWN:
-                self.command['rotate'] = True
-            elif event.type==pygame.JOYHATMOTION:
-                if event.value[1]==1:
-                    self.command['rotate'] = True
-                    self.command['down'] = False
-                elif event.value[1]==-1:
-                    self.command['down'] = True
-                elif event.value[1]==0:
-                    self.command['down'] = False
-                if event.value[0]==1:
-                    self.command['right'] = True
-                elif event.value[0]==-1:
-                    self.command['left'] = True
-                elif event.value[0]==0:
-                    self.command['left'] = False
-                    self.command['right'] = False
-            # Keyboard control
-            elif event.type in [pygame.KEYDOWN, pygame.KEYUP]:
-                if event.key==pygame.K_UP:
-                    self.command['rotate'] = event.type==pygame.KEYDOWN
-                elif event.key==pygame.K_DOWN:
-                    self.command['down'] = event.type==pygame.KEYDOWN
-                elif event.key==pygame.K_RIGHT:
-                    self.command['right'] = event.type==pygame.KEYDOWN
-                elif event.key==pygame.K_LEFT:
-                    self.command['left'] = event.type==pygame.KEYDOWN
-
-        for event in self.arbalet.touch.get():
-            if event['key']=='up':
-                self.command['rotate'] = event['type']=='down'
-            elif event['key']=='down':
-                self.command['down'] = event['type']=='down'
+        for event in self.events.get():
+            print event
+            if event['key']=='down':
+                self.command['down'] = event['pressed']
             elif event['key']=='right':
-                self.command['right'] = event['type']=='down'
+                self.command['right'] = event['pressed']
             elif event['key']=='left':
-                self.command['left'] = event['type']=='down'
+                self.command['left'] = event['pressed']
+            else: #elif event['key'] == 'up':   # Any other button rotates
+                self.command['rotate'] = event['pressed']
 
         changes_pending = self.command['left'] or self.command['right'] or self.command['rotate']
         if changes_pending:
