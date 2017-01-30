@@ -9,39 +9,26 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-from arbalet.core import Application
-import zmq
+from arbalet.core import Application, DBusClient
 
 class Arbaserver(Application):
     def __init__(self, argparser):
         Application.__init__(self, argparser)
         self.port = str(self.args.port)
-        self.context = zmq.Context()
-        self.connection = None
-
-    def bind(self):
-        self.connection = self.context.socket(zmq.PAIR)
-        connect_to = "tcp://0.0.0.0:" + self.port
-        self.connection.bind(connect_to)
+        self.bus = DBusClient(display_subscriber=True)
+        self.running = False
 
     def work(self):
-        json_model = self.connection.recv_json()
-        self.model.from_json(json_model)
-        #frame = self.arbalet.touch.get_touch_frame()
-        #frame = (frame[0], list(map(bool, frame[1])))  # Hack because json is not able to serialize type 'numpy.bool_'
-        frame = (0, [False]*6)
-        self.connection.send_json(frame)
+        model = self.bus.display.recv(blocking=True)
+        self.model.from_dict(model)
 
     def run(self):
-        print("[Arbalet server] Waiting for app connection...")
-        self.bind()
-        print("[Arbalet server] App connected successfully")
-        while True:
+        self.running = True
+        while self.running:
             try:
                 self.work()
             except KeyboardInterrupt:
-                print("[Arbalet server] Shutdown initiated via SIGINT, closing...")
-                if not self.connection.closed:
-                    self.connection.close()
+                print("[Arbalet Display server] Shutdown initiated via SIGINT, closing...")
+                self.running = False
                 return
 
