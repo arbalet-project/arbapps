@@ -9,7 +9,9 @@
     Copyright 2015 Yoan Mollard - Arbalet project - http://github.com/arbalet-project
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
-from arbalet.core import Application, DBusClient
+from arbalet.core import Application
+from arbalet.dbus import DBusClient
+
 
 class Arbaserver(Application):
     def __init__(self, argparser):

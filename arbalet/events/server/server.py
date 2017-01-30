@@ -1,5 +1,6 @@
-from arbalet.core.config import ConfigReader
-from arbalet.core import Rate, DBusClient
+from arbalet.config import ConfigReader
+from arbalet.core import Rate
+from arbalet.dbus import DBusClient
 from arbalet.events import CapacitiveTouchEvents, SystemEvents
 
 
