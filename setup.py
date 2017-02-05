@@ -27,7 +27,7 @@ setup(
     ],
 
     packages=find_packages(),
-    namespace_packages = ['arbalet', 'arbalet.events', 'arbalet.dbus'],
+    namespace_packages = ['arbalet'],
 
     data_files=[('arbalet/apps/tetris/music', ['arbalet/apps/tetris/music/Cailloux_-_tetris.ogg']),
                 ('arbalet/apps/tetris/music', ['arbalet/apps/tetris/music/ExDeath_-_Another_Tetris_Remix.ogg']),
