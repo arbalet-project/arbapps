@@ -22,7 +22,7 @@ Arbalet comes with these apps:
 * **lightshero** is a GuitarHero-like game playable with the keys F1 to F5 of a keyboard to be holded... like a guitarist does. It's compatible with frets-on-fire songs.
 * **pixeliser** reads any video in input and reduces dramatically its resolution to play it on the table. You won't be able to watch a movie for sure, but this is a simple way to create nice light effects with... nice input videos.
 * **snake** is a Snake game, playable with a joystick or a keyboard. It also comes with an autoplaying AI in module `snake.ai` 
-* **spectrum** 	is an offline music spectrum analyzer. It reads a WAVE file, plays it and displays the spectrum computed in realtime.
+* **spectrum** 	is an online musical spectrum analyzer. Play a song from your favorite music player and it renders your song in colors
 * **tetris** is... a Tetris! Playable with a joystick or a keyboard.
 * **timeclock** is a very simple time clock, currently only suited for tables of size 15x10
 
