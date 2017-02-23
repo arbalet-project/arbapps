@@ -11,7 +11,8 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 import random
-from arbalet.core import Application, Rate
+from arbalet.core import Application
+from arbalet.tools import Rate
 import pygame
 
 LEFT=(0,-1)
@@ -36,47 +37,15 @@ class Snake(Application):
 
     def process_events(self):
         new_dir=None
-        for event in self.arbalet.events.get():
-            # Joystick control
-            if event.type == pygame.JOYBUTTONDOWN:
-                #self.command['rotate'] = True
-                pass
-            elif event.type==pygame.JOYHATMOTION:
-                if event.value[1]==1 and self.DIRECTION != DOWN:
-                    new_dir = UP
-                elif event.value[1]==-1 and self.DIRECTION != UP:
-                     new_dir = DOWN
-                elif event.value[1]==0:
-                    pass
-                if event.value[0]==1 and self.DIRECTION != LEFT:
-                     new_dir = RIGHT
-                elif event.value[0]==-1 and self.DIRECTION != RIGHT:
-                     new_dir = LEFT
-                elif event.value[0]==0:
-                    pass
-            # Keyboard control
-            elif event.type in [pygame.KEYDOWN, pygame.KEYUP]:
-                if event.key==pygame.K_UP:
-                    new_dir=UP
-                elif event.key==pygame.K_DOWN:
-                    new_dir=DOWN
-                elif event.key==pygame.K_RIGHT:
-                    new_dir = RIGHT
-                elif event.key==pygame.K_LEFT:
-                    new_dir = LEFT
-
-        for event in self.arbalet.touch.get():
+        for event in self.events.get():
             if event['key']=='up':
-                new_dir = UP
+                self.DIRECTION = UP
             elif event['key']=='down':
-                new_dir = DOWN
+                self.DIRECTION = DOWN
             elif event['key']=='right':
-                new_dir = RIGHT
+                self.DIRECTION = RIGHT
             elif event['key']=='left':
-                new_dir = LEFT
-
-        if new_dir is not None:
-            self.DIRECTION=new_dir
+                self.DIRECTION = LEFT
         
     def process_extras(self, x=None, y=None):
         pass

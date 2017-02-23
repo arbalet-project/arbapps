@@ -7,7 +7,8 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 
-from arbalet.core import Application, Rate
+from arbalet.core import Application
+from arbalet.tools import Rate
 import datetime
 
 

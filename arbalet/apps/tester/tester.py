@@ -10,7 +10,8 @@
 """
 __author__ = 'titimoby@gmail.com'
 
-from arbalet.core import Application, Rate
+from arbalet.core import Application
+from arbalet.tools import Rate
 
 
 class SimpleTester(Application):
