@@ -13,6 +13,10 @@ from arbalet.application import Application
 from arbalet.tools import Rate
 from arbalet.colors import mul, hsv_to_rgb
 from copy import copy
+from os import listdir
+from os.path import isdir, isfile, realpath, join
+from random import choice
+from subprocess import call
 
 import numpy
 import pyaudio
@@ -107,6 +111,21 @@ class SpectrumAnalyser(Application):
 
         return None, pyaudio.paContinue
 
+
+    def get_playable_files(self, path, files):
+        """
+        Recursively get the list of playable files within file system
+        """
+        print("Exploring", path)
+        for f in listdir(path):
+            f = realpath(join(path, f))
+            if isdir(f):
+                self.get_playable_files(f, files)
+            elif isfile(f):
+                extension = f.split('.')[-1]
+                if extension in ['mp3', 'MP3', 'ogg', 'OGG', 'mp4', 'MP4']:
+                    files.append(f)
+
     def run(self):
         pa = pyaudio.PyAudio()
         num_bands = self.width if self.vertical else self.height
@@ -125,9 +144,16 @@ class SpectrumAnalyser(Application):
 
         stream.start_stream()
 
-        rate = Rate(5)
-        while stream.is_active():
-            rate.sleep()
+        if self.args.scan_devices:
+            files = []
+            self.get_playable_files('/media/', files)
+            print("{} playable files found.".format(len(files)))
+            if len(files) > 0:
+                call(['mplayer', choice(files), '-novideo'])
+        else:
+            rate = Rate(5)
+            while stream.is_active():
+                rate.sleep()
 
         stream.close()
         pa.terminate()
