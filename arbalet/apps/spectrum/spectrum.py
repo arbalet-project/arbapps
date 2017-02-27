@@ -15,7 +15,8 @@ from copy import copy
 from os import listdir
 from os.path import isdir, isfile, realpath, join
 from random import choice
-from subprocess import call
+from subprocess import Popen
+from signal import signal, SIGINT
 
 import numpy
 import pyaudio
@@ -74,6 +75,7 @@ class SpectrumAnalyser(Application):
         self.parser = argparser
         self.renderer = None
         self.framerate = 44100
+        self.subprocess = None  # For mplayer
 
         ##### Fourier related attributes, we generate a suitable log-scale
         self.num_bands = self.width if self.args.vertical else self.height
@@ -125,6 +127,11 @@ class SpectrumAnalyser(Application):
                 if extension in ['mp3', 'MP3', 'ogg', 'OGG', 'mp4', 'MP4']:
                     files.append(f)
 
+    def signal_handler(self, signal, frame):
+        # Only used to forward the signal to mplayer if need be
+        if self.subprocess is not None:
+            self.subprocess.send_signal(signal)
+
     def run(self):
         pa = pyaudio.PyAudio()
         num_bands = self.width if self.args.vertical else self.height
@@ -148,7 +155,9 @@ class SpectrumAnalyser(Application):
             self.get_playable_files('/media/', files)
             print("{} playable files found.".format(len(files)))
             if len(files) > 0:
-                call(['mplayer', choice(files), '-novideo'])
+                self.subprocess = Popen(['mplayer', choice(files), '-novideo'])
+                signal(SIGINT, self.signal_handler)
+                self.subprocess.wait()
         else:
             rate = Rate(5)
             while stream.is_active():
