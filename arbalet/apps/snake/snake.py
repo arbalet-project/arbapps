@@ -11,7 +11,7 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 import random
-from arbalet.core import Application
+from arbalet.application import Application
 from arbalet.tools import Rate
 import pygame
 

@@ -10,7 +10,7 @@
 """
 from PIL import Image
 from os.path import isfile
-from arbalet.core import Application
+from arbalet.application import Application
 from time import sleep
 
 class ImageReader(Application):

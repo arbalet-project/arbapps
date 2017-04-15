@@ -9,7 +9,8 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 from random import randint, uniform, choice
-from arbalet.core import Application, Rate
+from arbalet.application import Application
+from arbalet.tools import Rate
 from threading import RLock
 import os, sys, inspect
 

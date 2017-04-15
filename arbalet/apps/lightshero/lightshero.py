@@ -19,7 +19,8 @@ from time import time
 from .song import SongReader
 from .sound import SoundManager
 from .hits import UserHits
-from arbalet.core import Application, Rate
+from arbalet.application import Application
+from arbalet.tools import Rate
 from arbalet.colors import add, mul
 
 class Renderer():

@@ -9,7 +9,7 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 from collections import deque
-from arbalet.core import Application
+from arbalet.application import Application
 from arbalet.tools import Rate
 from arbalet.colors import mul, hsv_to_rgb
 from copy import copy

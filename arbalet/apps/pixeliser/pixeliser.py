@@ -11,7 +11,7 @@
 """
 import cv2
 from os.path import isfile
-from arbalet.core import Application
+from arbalet.application import Application
 
 class Pixeliser(Application):
     def __init__(self, argparser):

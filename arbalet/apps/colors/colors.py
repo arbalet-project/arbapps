@@ -7,7 +7,7 @@
     License: GPL version 3 http://www.gnu.org/licenses/gpl.html
 """
 import random
-from arbalet.core import Application
+from arbalet.application import Application
 from arbalet.tools import Rate
 from .generators import gen_random_flashing, gen_sweep_async, gen_sweep_rand
 
