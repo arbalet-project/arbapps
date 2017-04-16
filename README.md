@@ -20,6 +20,7 @@ Arbalet comes with these apps:
 * **colors** shows nice light effets on your Arbalet table. It comes with an initial set of 6 effects: Blue flashing to white, African style, turquoise/chocolate, pink/blue, warm colors, and whole color wheel.
 * **images** is a GIF renderer. It will stretch the frames to fit the whole table so it may distort the original image.
 * **lightshero** is a GuitarHero-like game playable with the keys F1 to F5 of a keyboard to be holded... like a guitarist does. It's compatible with frets-on-fire songs.
+* **lost in space** is a light painting game inspired by modern art and its relation to code. This game allows players to express themselves with digital tools.
 * **pixeliser** reads any video in input and reduces dramatically its resolution to play it on the table. You won't be able to watch a movie for sure, but this is a simple way to create nice light effects with... nice input videos.
 * **snake** is a Snake game, playable with a joystick or a keyboard. It also comes with an autoplaying AI in module `snake.ai` 
 * **spectrum** 	is an online musical spectrum analyzer. Play a song from your favorite music player and it renders your song in colors
@@ -30,5 +31,8 @@ Tools and meta-applications:
 * **sequencer** is an application sequencer. Mainly written for demonstration purposes it starts Arbalet applications automatically and switch to a new one after a while or after the user asked to change.
 * **server** 	is a server allowing to share hardware between several clients over the network
 * **snap** 	is a bridge for the [Snap! visual programming language](http://snap.berkeley.edu/). (see the [quick start for with Snap!](https://github.com/arbalet-project/arbadoc/wiki/Meta-applications#arbasnap))
+
+## Quick start
+First [install the SDK](https://github.com/arbalet-project/arbadoc/wiki/Software-tutorials). Then, to try an app from a workstation, run for instance: `python -m arbalet.apps.tetris --standalone`
 
 **IMPORTANT NOTE**: You **must** [download and install the Arbalet SDK](https://github.com/arbalet-project/arbadoc/wiki/Software-tutorials) before running any of these applications, otherwise you will raise an `ImportError`.
