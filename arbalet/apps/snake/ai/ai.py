@@ -21,8 +21,8 @@ class SnakeAI(Snake):
     SCORE_BODY_ATTRACTION = -5
     SCORE_BODY_TARGET = -500
     
-    def __init__(self, argparser):
-        Snake.__init__(self, argparser, touch_mode='off')
+    def __init__(self, **kwargs):
+        Snake.__init__(self, touch_mode='off', **kwargs)
         self.potential_field = zeros((self.height, self.width))
 
     def process_extras(self, x=None, y=None):
@@ -70,11 +70,11 @@ class SnakeAI(Snake):
             next_x = (self.HEAD[0] + direction[0])%self.height
             next_y = (self.HEAD[1] + direction[1])%self.width
             score = self.potential_field[next_x][next_y]
-            print("Decision {} has a score of {}".format(name, score))
+            #print("Decision {} has a score of {}".format(name, score))
             if score > max_score:
                 max_score = score
                 decision = direction
                 decision_name = name
-        print("Choosen decision {} score {}".format(decision_name, max_score))
+        #print("Choosen decision {} score {}".format(decision_name, max_score))
         self.DIRECTION = decision
 

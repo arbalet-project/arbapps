@@ -104,10 +104,10 @@ class Ball():
         if abs(self.y_speed)>self.min_speed:
             self.y_speed *= self.friction_factor
 
-class Bounces(Application):
 
-    def __init__(self, parser, rate):
-        Application.__init__(self, parser)
+class Bounces(Application):
+    def __init__(self, rate=50, **kwargs):
+        Application.__init__(self, **kwargs)
         self.balls = []
         self.rate = Rate(rate)
 
@@ -129,8 +129,8 @@ class Bounces(Application):
             self.controller = Controller()
             self.controller.add_listener(self.leap_listener)
 
-    def close(self, reason='unknown'):
-        Application.close(self, reason)
+    def close(self,):
+        Application.close(self)
         if leapmotion:
             self.controller.remove_listener(self.leap_listener)
 

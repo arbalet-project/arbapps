@@ -15,8 +15,8 @@ from arbalet.tools import Rate
 
 
 class SimpleTester(Application):
-    def __init__(self, argparser):
-        Application.__init__(self, argparser)
+    def __init__(self, **kwargs):
+        Application.__init__(self, **kwargs)
         self.colors = ['red', 'green', 'blue']
         self.color_index = 0
 

@@ -1,6 +1,6 @@
 import argparse
-from os.path import join, dirname
 from .lightshero import LightsHero
+from arbalet.application import get_application_parser
 
 parser = argparse.ArgumentParser(description='LightsHero, is a rhythm video game for Arbalet. It is inspired from Guitar Hero and compatible with Frets On Fire songs,'
                                              'but this time, notes are lights and the keyboard your guitar. Be a Lights Hero!'
@@ -11,11 +11,20 @@ parser.add_argument('-l', '--level',
                     choices=['easy', 'medium', 'difficult', 'expert'],
                     help='Difficulty of the game, if the selected level is implemented for this song')
 
+parser.add_argument('-p', '--path',
+                    default='default',
+                    nargs='?',
+                    const=True,
+                    help='Path to the song: must be a directory containing the MID and OGG files. '
+                         'If not provided the default song will play.')
+
 parser.add_argument('-sp', '--simulate-player',
                     action='store_const',
                     const=True,
                     default=False,
                     help='Simulate a player, i.e. do not mute the guitar when the user fails to play')
 
-song = join(dirname(__file__), 'songs', 'Feelings')
-LightsHero(parser, num_lanes=5, path=song, speed=15).start()
+parser = get_application_parser(parser)
+args = parser.parse_args()
+
+LightsHero(**args.__dict__).start()

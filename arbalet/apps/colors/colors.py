@@ -9,19 +9,19 @@
 import random
 from arbalet.application import Application
 from arbalet.tools import Rate
-from .generators import gen_random_flashing, gen_sweep_async, gen_sweep_rand
-
+from .generators import gen_random_flashing, gen_sweep_async, gen_sweep_rand, animations
 
 class ColorDemo(Application):
     generators = [gen_random_flashing, gen_sweep_async, gen_sweep_rand, ]
 
-    def __init__(self, parser, animations):
-        Application.__init__(self, parser)
-        config = animations[self.args.type]
+    def __init__(self, type, **kwargs):
+        Application.__init__(self, **kwargs)
+        config = animations[type]
         self.durations = [int(config['dur_min']*config['rate']), int(config['dur_max']*config['rate'])]
         self.rate = Rate(config['rate'])
         self.colors = config['colors']
-        self.generator = self.generators[config['generator_id']]
+        generator_id = config['generator_id']
+        self.generator = self.generators[generator_id]
 
     def run(self):
         # Construct all pixel generators

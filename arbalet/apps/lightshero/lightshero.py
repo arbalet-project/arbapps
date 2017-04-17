@@ -19,6 +19,7 @@ from time import time
 from .song import SongReader
 from .sound import SoundManager
 from .hits import UserHits
+from os.path import join, dirname
 from arbalet.application import Application
 from arbalet.tools import Rate
 from arbalet.colors import add, mul
@@ -65,21 +66,27 @@ class Renderer():
 
 
 class LightsHero(Application):
-    def __init__(self, argparser, num_lanes, path, speed):
-        Application.__init__(self, argparser, touch_mode='columns')
+    def __init__(self, level='difficult', path='default', simulate_player=False, num_lanes=5, speed=15, **kwargs):
+        Application.__init__(self, touch_mode='columns', **kwargs)
         # self.arbalet.touch.set_keypad(False) # TODO: must be a command event
+
+        if path == 'default':  # Load the default song
+            path = join(dirname(__file__), 'songs', 'Feelings')
+
         self.num_lanes = num_lanes
         self.score = 0
         self.speed = float(speed)
+        self.level = level
+        self.simulate_player = simulate_player
         self.rate = Rate(self.speed)
         self.grid = [['background']*num_lanes for h in range(self.height)] # The coming notes (last line included even if it will overwritten by the bottom bar)
         self.bar = ['idle']*num_lanes # The bottom bar, idle = not pressed, hit = pressed during a note, pressed = pressed outside a note
 
         # Threads creation and starting
         self.renderer = Renderer(self.model, self.grid, self.bar, self.height, num_lanes, self.width)
-        self.reader = SongReader(path, num_lanes, self.args.level, speed)
+        self.reader = SongReader(path, num_lanes, self.level, speed)
         self.sound = SoundManager(path)
-        self.hits = UserHits(self.num_lanes, self.events, self.sound, self.args.simulate_player)
+        self.hits = UserHits(self.num_lanes, self.events, self.sound, self.simulate_player)
 
     def next_line(self):
         # Delete the last line leaving the grid

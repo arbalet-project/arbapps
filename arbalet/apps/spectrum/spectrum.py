@@ -24,7 +24,7 @@ class Renderer(object):
     This class renders the FFT bands on Arbalet
     It is in charge of all colors and animations once a FFT averages list arrives in draw_bars()
     """
-    def __init__(self, model, height, width, num_bins, num_bands, vertical=True):
+    def __init__(self, model, height, width, num_bins, num_bands, vertical=False):
         self.model = model
         self.height = height
         self.width = width
@@ -55,25 +55,25 @@ class Renderer(object):
                     if ampli_b < bands[band]:
                         color = self.colors[band]
                     elif self.old_model: # animation with light decreasing
-                        old = self.old_model.get_pixel(bin if self.vertical else band, band if self.vertical else bin)
+                        old = self.old_model.get_pixel(self.height - bin -1 if self.vertical else band, band if self.vertical else bin)
                         color = mul(old, 0.875)
                     else:
                         color = 'black'
-                    self.model.set_pixel(bin if self.vertical else band, band if self.vertical else bin, color)
+                    self.model.set_pixel(self.height - bin -1 if self.vertical else band, band if self.vertical else bin, color)
 
 
 class SpectrumAnalyser(Application):
     """
     This is the main entry point of the spectrum analyser, it reads the file, computes the FFT and plays the sound
     """
-    def __init__(self, argparser):
-        Application.__init__(self, argparser)
-        self.parser = argparser
+    def __init__(self, vertical=False, **kwargs):
+        Application.__init__(self, **kwargs)
         self.renderer = None
+        self.vertical = vertical
         self.framerate = 44100
 
         ##### Fourier related attributes, we generate a suitable log-scale
-        self.num_bands = self.width if self.args.vertical else self.height
+        self.num_bands = self.width if self.vertical else self.height
         self.min = 50
         self.max = 22050
         #self.db_scale = [self.framerate*2**(b-self.num_bands) for b in range(self.num_bands)]
@@ -109,9 +109,9 @@ class SpectrumAnalyser(Application):
 
     def run(self):
         pa = pyaudio.PyAudio()
-        num_bands = self.width if self.args.vertical else self.height
-        num_bins = self.height if self.args.vertical else self.width
-        self.renderer = Renderer(self.model, self.height, self.width, num_bins, num_bands, self.args.vertical)
+        num_bands = self.width if self.vertical else self.height
+        num_bins = self.height if self.vertical else self.width
+        self.renderer = Renderer(self.model, self.height, self.width, num_bins, num_bands, self.vertical)
 
         input_device_info = pa.get_default_input_device_info()
         self.framerate = int(input_device_info['defaultSampleRate'])

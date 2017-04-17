@@ -12,11 +12,15 @@
 import cv2
 from os.path import isfile
 from arbalet.application import Application
+from arbalet.colors import mul
+
 
 class Pixeliser(Application):
-    def __init__(self, argparser):
-        Application.__init__(self, argparser)
+    def __init__(self, input, display_original=False, **kwargs):
+        Application.__init__(self, **kwargs)
         self.video_reader = None
+        self.display_original = display_original
+        self.input = [input] if isinstance(input, (str, unicode)) else input
 
     def play_file(self, f):
         if isfile(f):
@@ -30,7 +34,7 @@ class Pixeliser(Application):
                     pix_image = cv2.resize(image, (self.height, self.width))
                     pix_image = cv2.transpose(pix_image)
                     self.update_model(pix_image)
-                    if self.args.display_original:
+                    if self.display_original:
                         cv2.imshow(f, image)
                     cv2.waitKey(80)
                 else:
@@ -47,5 +51,5 @@ class Pixeliser(Application):
                     self.model.set_pixel(h, w, pixel)
 
     def run(self):
-        for f in self.args.input:
+        for f in self.input:
             self.play_file(f)

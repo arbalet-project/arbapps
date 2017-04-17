@@ -54,8 +54,8 @@ class Tetromino(object):
 
 
 class Tetris(Application):
-    def __init__(self, parser):
-        Application.__init__(self, parser, touch_mode='quadridirectional')
+    def __init__(self, **kwargs):
+        super(Tetris, self).__init__( touch_mode='quadridirectional', **kwargs)
         self.grid = numpy.zeros([self.height, self.width], dtype=int)
         self.old_grid = deepcopy(self.grid)
         self.speed = 2  # Speed of tetromino fall in Hertz
@@ -207,6 +207,7 @@ class Tetris(Application):
 
 
     def run(self):
+        self.music.start()
         while self.playing:
             if self.new_tetromino()==1:
                 print("GAME OVER")

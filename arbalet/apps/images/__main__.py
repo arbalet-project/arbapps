@@ -1,5 +1,6 @@
 import argparse
 from .images import ImageReader
+from arbalet.application import get_application_parser
 
 parser = argparse.ArgumentParser(description='Render an animated image (gif, apng, mng...) on Arbalet')
 parser.add_argument('-i', '--input',
@@ -9,9 +10,8 @@ parser.add_argument('-i', '--input',
                     help='Path to the image(s) to render')
 
 parser.add_argument('-l', '--loop',
-                    action='store_const',
-                    const=True,
-                    default=False,
+                    action='store_true',
+                    default=True,
                     help='Keep playing infinitely')
 
 parser.add_argument('-do', '--display-original',
@@ -20,4 +20,7 @@ parser.add_argument('-do', '--display-original',
                     default=False,
                     help='Display the original image (require access to X display)')
 
-ImageReader(parser).start()
+parser = get_application_parser(parser)
+args = parser.parse_args()
+
+ImageReader(**args.__dict__).start()

@@ -22,8 +22,8 @@ MAX_SPAWNS = size[0]*size[1]/10
 #MAX_SPAWNS = 25 # for testing purposes
 
 class LostInSpace(Application):
-    def __init__(self, argparser):
-        Application.__init__(self, argparser)
+    def __init__(self, save=False, invader=False, auto=False, pattern='', **kwargs):
+        Application.__init__(self, **kwargs)
         self.base_color = None
         self.color = (1.0, 1.0, 1.0)
         # relative coordonate to image center
@@ -41,9 +41,10 @@ class LostInSpace(Application):
         self.color_level = [0]*6
         self.last_spawn_color = 0
         # Treating arguments
-        self.invader = self.args.invader
-        self.ai = self.args.auto
-        self.file = self.args.pattern
+        self.invader = invader
+        self.ai = auto
+        self.file = pattern
+        self.save = save
         self.last_events = {'up': False, 'down': False, 'right': False, 'left': False, 'action': False}
 
         if (self.file==''):
@@ -348,7 +349,7 @@ class LostInSpace(Application):
             self.event()
             time.sleep(0.15/self.speed)
 
-        if self.args.save:
+        if self.save:
             image = self.image.resize((1000,1000))
             image.show()
             if (self.ai):

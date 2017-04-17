@@ -1,5 +1,6 @@
 import argparse
 from .spectrum import SpectrumAnalyser
+from arbalet.application import get_application_parser
 
 parser = argparse.ArgumentParser(description='Musical spectrum display for the default system audio input')
 parser.add_argument('-v', '--vertical',
@@ -7,5 +8,9 @@ parser.add_argument('-v', '--vertical',
                     const=True,
                     default=False,
                     help='The spectrum must be vertical (less bands, more bins)')
-SpectrumAnalyser(parser).start()
+
+parser = get_application_parser(parser)
+args = parser.parse_args(parser)
+
+SpectrumAnalyser(**args.__dict__).start()
 

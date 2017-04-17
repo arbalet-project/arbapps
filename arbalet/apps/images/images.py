@@ -10,13 +10,17 @@
 """
 from PIL import Image
 from os.path import isfile
+from arbalet.colors import mul
 from arbalet.application import Application
 from time import sleep
 
 class ImageReader(Application):
-    def __init__(self, argparser):
-        Application.__init__(self, argparser)
+    def __init__(self, input, loop=True, **kwargs):
+        Application.__init__(self, **kwargs)
+        self.input = [input] if isinstance(input, (str, unicode)) else input
+        print("INPUT", input)
         self.image = None
+        self.loop = loop
         self.palette = None
         self.vertical = False
 
@@ -31,7 +35,7 @@ class ImageReader(Application):
                                                                        else (self.height, self.width)))
                     self.image.seek(self.image.tell()+1)
                 except EOFError:
-                    if self.args.loop:
+                    if self.loop:
                         self.image.seek(0)
                     else:
                         return
@@ -47,6 +51,6 @@ class ImageReader(Application):
                     self.model.set_pixel(h, w, mul(pixel, 1./256))
 
     def run(self):
-        for f in self.args.input:
-            self.play_file(f)
+            for f in self.input:
+                self.play_file(f)
 

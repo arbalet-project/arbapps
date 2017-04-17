@@ -25,15 +25,15 @@ class Snake(Application):
     PIXEL_COLOR='darkred'
     FOOD_COLOR='green'
     
-    def __init__(self, argparser, touch_mode='quadridirectional'):
-        Application.__init__(self, argparser, touch_mode=touch_mode)
+    def __init__(self, speed=0.15, food=3, touch_mode='quadridirectional', **kwargs):
+        Application.__init__(self, touch_mode=touch_mode, **kwargs)
         self.DIRECTION=DOWN
         self.HEAD=(5,5)
         self.queue=[self.HEAD]
         self.FOOD_POSITIONS={}
         self.rate=2
-        self.rate_increase=self.args.speed
-        self.start_food=self.args.food
+        self.rate_increase=speed
+        self.start_food=food
 
     def process_events(self):
         new_dir=None

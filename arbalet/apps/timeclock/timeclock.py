@@ -13,11 +13,10 @@ import datetime
 
 
 class TimeClockApp(Application):
-    def __init__(self, parser):
+    def __init__(self, color='darkred', **kwargs):
 
-        Application.__init__(self, parser)
-
-        self.CHAR_COLORS = self.args.type
+        Application.__init__(self, **kwargs)
+        self.CHAR_COLORS = color
         self.BG_COLOR = 'black'
 
     def run(self):

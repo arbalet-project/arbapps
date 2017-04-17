@@ -14,6 +14,9 @@ class Music(object):
         self.loops = 0  # -1 to repeat the music
         self.path = join(dirname(__file__), 'music')
         self.sounds = [None for file in self.files]
+        self.loader = None
+
+    def start(self):
         # Start loading (slow on RPi, thus threaded)
         self.loader = Thread(target=self.load_and_play)
         self.loader.daemon = True
