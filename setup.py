@@ -36,6 +36,5 @@ setup(
                 ('arbalet/apps/lightshero/songs/Feelings', ['arbalet/apps/lightshero/songs/Feelings/notes.mid']),
                 ('arbalet/apps/lightshero/songs/Feelings', ['arbalet/apps/lightshero/songs/Feelings/song.ini']),
                 ('arbalet/apps/lightshero/songs/Feelings', ['arbalet/apps/lightshero/songs/Feelings/song.ogg']),
-                ('arbalet/tools/sequencer/sequences', ['arbalet/tools/sequencer/sequences/default.json']),
     ],
 )
