@@ -44,7 +44,7 @@ class ImageReader(Application):
             for h in range(self.height):
                 for w in range(self.width):
                     pixel = image.getpixel((w, h) if self.vertical else (h, w))
-                    self.model.set_pixel(h, w, pixel)
+                    self.model.set_pixel(h, w, mul(pixel, 1./256))
 
     def run(self):
         for f in self.args.input:
