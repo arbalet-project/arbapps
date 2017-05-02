@@ -10,7 +10,7 @@ parser.add_argument('-v', '--vertical',
                     help='The spectrum must be vertical (less bands, more bins)')
 
 parser = get_application_parser(parser)
-args = parser.parse_args(parser)
+args = parser.parse_args()
 
 SpectrumAnalyser(**args.__dict__).start()
 

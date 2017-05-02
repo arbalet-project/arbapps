@@ -7,7 +7,7 @@ parser.add_argument('--speed', type=float, default=0.15)
 parser.add_argument('--food', type=int, default=3)
 
 parser = get_application_parser(parser)
-args = parser.parse_args(parser)
+args = parser.parse_args()
 
 Snake(**args.__dict__).start()
 
