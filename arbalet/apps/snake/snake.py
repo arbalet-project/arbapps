@@ -13,7 +13,6 @@
 import random
 from arbalet.application import Application
 from arbalet.tools import Rate
-import pygame
 
 LEFT=(0,-1)
 RIGHT=(0, 1)
@@ -27,8 +26,8 @@ class Snake(Application):
     
     def __init__(self, speed=0.15, food=3, touch_mode='quadridirectional', **kwargs):
         Application.__init__(self, touch_mode=touch_mode, **kwargs)
-        self.DIRECTION=DOWN
-        self.HEAD=(5,5)
+        self.DIRECTION=UP
+        self.HEAD = (self.height//2, self.width//2)
         self.queue=[self.HEAD]
         self.FOOD_POSITIONS={}
         self.rate=2
