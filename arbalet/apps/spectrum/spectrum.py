@@ -71,9 +71,10 @@ class SpectrumAnalyser(Application):
     """
     This is the main entry point of the spectrum analyser, it reads the file, computes the FFT and plays the sound
     """
-    def __init__(self, vertical=False, **kwargs):
+    def __init__(self, scan_devices=False, vertical=False, **kwargs):
         Application.__init__(self, **kwargs)
         self.renderer = None
+        self.scan_devices = scan_devices
         self.vertical = vertical
         self.framerate = 44100
         self.subprocess = None  # For mplayer
@@ -151,7 +152,7 @@ class SpectrumAnalyser(Application):
 
         stream.start_stream()
 
-        if self.args.scan_devices:
+        if self.scan_devices:
             files = []
             self.get_playable_files('/media/', files)
             print("{} playable files found.".format(len(files)))
