@@ -93,7 +93,6 @@ class Snake(Application):
                     self.process_extras()
             rate.sleep()
         self.game_over()
-        exit()
 
     def game_over(self):
         print("Game OVER")
