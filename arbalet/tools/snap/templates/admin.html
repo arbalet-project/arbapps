@@ -1,0 +1,49 @@
+<!doctype html>
+<title>Arbalet Lava admin page</title>
+
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+<style>
+body {
+    position: relative;
+    height: auto;
+}
+</style>
+</head>
+
+<body>
+  <table id="users">
+  <thead><tr><th>Username</th><th>Active?</th></tr></thead>
+  <tbody>
+    <tr><td>Turn off</td><td><label> 
+    {% if authorized_nick|string() == "turnoff" %}
+    <input type="radio" name="active_user" data-user-id=turnoff value="active" checked="checked">
+    {% else %}
+    <input type="radio" name="active_user" data-user-id=turnoff value="active">
+    {% endif %}
+    </label>
+    </td></tr>
+  	{% for n in nicknames %}
+    	<tr><td>{{ n }}</td><td><label> 
+      {% if n|string() == authorized_nick|string() %}
+    	<input type="radio" name="active_user" data-user-id={{ n }} value="active" checked="checked">
+      {% else %}
+      <input type="radio" name="active_user" data-user-id={{ n }} value="active">
+      {% endif %}
+    	</label>
+    	</td></tr>
+  	{% endfor %}
+  </tbody>
+</body>
+
+{% block endscript %}
+<script>
+$('[name=active_user]').change(function() {
+  $.post('/authorize', $(this).attr('data-user-id'));
+});
+
+$('#body').css('min-height', screen.height);
+</script>
+{% endblock endscript %}
