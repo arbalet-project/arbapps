@@ -1,0 +1,16 @@
+.bg {
+    background-image: url('../images/background.jpg');
+    background-size:cover;
+    color: #fff;
+}
+
+.page-header img {
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-bottom: 40px;
+    max-width:80%;
+}
+
+#nicknames li {
+    background: transparent;
+}
