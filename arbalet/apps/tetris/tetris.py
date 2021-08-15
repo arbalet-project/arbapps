@@ -177,7 +177,7 @@ class Tetris(Application):
 
     def wait_for_timeout_or_event(self, allow_events=True):
         t0 = time.time()
-        while time.time()-t0 < 1./self.speed:
+        while time.time()-t0 < 1/self.speed:
             time.sleep(0.07)
             if allow_events and self.process_events():
                 return
