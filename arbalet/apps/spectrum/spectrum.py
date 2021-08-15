@@ -35,7 +35,7 @@ class Renderer(object):
         self.num_bands = num_bands
         self.num_bins = num_bins
         self.vertical = vertical
-        self.colors = [hsv_to_rgb((float(c)/self.num_bands, 1., 1.)) for c in range(self.num_bands)]
+        self.colors = [hsv_to_rgb((c/self.num_bands, 1, 1.)) for c in range(self.num_bands)]
 
         # A window stores the last len_window samples to scale the height of the spectrum
         self.max = 150  # Empiric value of an average sum to start with
@@ -83,7 +83,7 @@ class SpectrumAnalyser(Application):
         self.max = 22050
         #self.db_scale = [self.framerate*2**(b-self.num_bands) for b in range(self.num_bands)]
         #self.db_scale = [self.min+self.max*2**(b-self.num_bands+1) for b in range(self.num_bands)]
-        self.db_scale = [self.max*(numpy.exp(-numpy.log(float(self.min)/self.max)/self.num_bands))**(b-self.num_bands) for b in range(1, self.num_bands+1)]
+        self.db_scale = [self.max*(numpy.exp(-numpy.log(self.min/self.max)/self.num_bands))**(b-self.num_bands) for b in range(1, self.num_bands+1)]
         print("Scale of maximum frequencies:", list(map(int, self.db_scale)))
 
     def get_fft(self, sample):
@@ -96,7 +96,7 @@ class SpectrumAnalyser(Application):
         except AttributeError:   # numpy<1.8
             fft_freq = [0.5/len(fft_data)*f for f in range(len(fft_data))]
         freq_hz = [abs(fft_freq[i])*self.framerate for i, fft in enumerate(fft_data)]
-        fft_freq_scaled = [0.]*len(self.db_scale)
+        fft_freq_scaled = [0]*len(self.db_scale)
         ref_index = 0
         for i, f in enumerate(fft_data):
             if freq_hz[i]>self.db_scale[ref_index]:
