@@ -101,7 +101,7 @@ class Snake(Application):
             self.model.set_pixel(x, y, self.FOOD_COLOR)
 
         while True:
-            rate.sleep_dur=1.0/self.rate
+            rate.sleep_dur=1/self.rate
             with self.model:
                 self.process_events()
                 new_pos=((self.HEAD[0]+self.DIRECTION[0])%self.height, (self.HEAD[1]+self.DIRECTION[1])%self.width)

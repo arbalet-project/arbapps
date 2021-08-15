@@ -35,7 +35,7 @@ class ImageReader(Application):
                         self.image.seek(0)
                     else:
                         return
-                sleep(self.image.info['duration']/1000.)  # Gif duration are in msec
+                sleep(self.image.info['duration']/1000)  # Gif duration are in msec
         else:
             raise IOError('No such file or directory: \'{}\''.format(f))
 

@@ -12,13 +12,13 @@ def gen_sweep_async(n_frames, n_frames_fade, n_frames_rand, colors):
     h0, s0, v0 = colors[0]
 
     # This loop fades up and is also the random seed
-    for f in xrange(n_frames_rand):
-        yield hsv_to_rgb(h0, s0, v0*(float(f)/n_frames_rand))
+    for f in range(n_frames_rand):
+        yield hsv_to_rgb(h0, s0, v0*f/n_frames_rand)
 
     # Infinite loop on color sequence
     while True:
-        for f in xrange(n_frames):
-            yield hsv_to_rgb((h0-float(f)/n_frames) % 1., s0, v0)
+        for f in range(n_frames):
+            yield hsv_to_rgb((h0-f/n_frames) % 1., s0, v0)
 
 
 def gen_sweep_rand(n_frames, n_frames_fade, n_frames_rand, colors):
@@ -34,8 +34,8 @@ def gen_sweep_rand(n_frames, n_frames_fade, n_frames_rand, colors):
     n_frames = n_frames + n_frames_rand
 
     # This loop fades up and is also the random seed
-    for f in xrange(n_frames_fade):
-        yield hsv_to_rgb(h0, s0, v0*(float(f)/n_frames_fade))
+    for f in range(n_frames_fade):
+        yield hsv_to_rgb(h0, s0, v0*f/n_frames_fade)
 
     while True:
         # Selection of the next couple of colors (col_1, col_2)
@@ -44,8 +44,8 @@ def gen_sweep_rand(n_frames, n_frames_fade, n_frames_rand, colors):
             h1, s1, v1 = colors[col_1]
             h2, s2, v2 = colors[col_2]
             # Linearly fading col_1 to col_2
-            for f in xrange(n_frames):
-                factor_2 = float(f)/n_frames
+            for f in range(n_frames):
+                factor_2 = f/n_frames
                 factor_1 = 1 - factor_2
                 yield hsv_to_rgb(h1*factor_1 + h2*factor_2,
                                  s1*factor_1 + s2*factor_2,
@@ -64,19 +64,19 @@ def gen_random_flashing(n_frames, n_frames_fade, n_frames_rand, colors):
     n_frames = n_frames + n_frames_rand
 
     # This loop fades up
-    for f in xrange(n_frames_fade):
-        yield hsv_to_rgb(h0, s0, v0*(float(f)/n_frames_fade))
+    for f in range(n_frames_fade):
+        yield hsv_to_rgb(h0, s0, v0*f/n_frames_fade)
 
     base = 1.1  # Exponential base. Higher the base is, lower the duration of fade will be
 
     def yield_exp(step):
-        e = 1 - base**(step - n_frames/2 +1)  # e = 1..0
+        e = 1 - base**(step - n_frames//2 +1)  # e = 1..0
         return hsv_to_rgb(h0, e*s0, v0)
 
     while True:
         # Exponential rise
-        for f in xrange(n_frames/2):
+        for f in range(n_frames//2):
             yield yield_exp(f)
         # Exponential fall
-        for f in xrange(n_frames/2, -1, -1):
+        for f in range(n_frames//2, -1, -1):
             yield yield_exp(f)
