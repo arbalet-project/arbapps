@@ -25,18 +25,18 @@ class ColorDemo(Application):
     def run(self):
         # Construct all pixel generators
         generators = []
-        for h in xrange(self.height):
+        for h in range(self.height):
             line = []
-            for w in xrange(self.width):
+            for w in range(self.width):
                 duration = random.randrange(0, self.durations[1]-self.durations[0])
-                line.append(self.generator(self.durations[0], int(2./self.rate.sleep_dur), duration, self.colors))
+                line.append(self.generator(self.durations[0], int(2/self.rate.sleep_dur), duration, self.colors))
             generators.append(line)
 
         # Browse all pixel generators at each time
         while True:
             with self.model:
-                for h in xrange(self.height):
-                    for w in xrange(self.width):
+                for h in range(self.height):
+                    for w in range(self.width):
                         try:
                             color = next(generators[h][w])
                         except StopIteration:
