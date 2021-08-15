@@ -42,7 +42,7 @@ class Pixeliser(Application):
         with self.model:
             for h in range(self.height):
                 for w in range(self.width):
-                    pixel = map(int, image[h][w])
+                    pixel = list(map(int, image[h][w]))
                     pixel = [pixel[2], pixel[1], pixel[0]] # OpenCV pixels in BGR order
                     self.model.set_pixel(h, w, pixel)
 
