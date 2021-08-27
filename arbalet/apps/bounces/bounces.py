@@ -35,7 +35,7 @@ else:
             Listener.__init__(self)
             self.swipe = swipe
             self.swipe_lock = swipe_lock
-            print "Leap listener is started!"
+            print("Leap listener is started!")
 
         def on_connect(self, controller):
             controller.enable_gesture(Gesture.TYPE_SWIPE)
@@ -111,7 +111,7 @@ class Bounces(Application):
         self.rate = Rate(rate)
 
         def rand():
-            return choice([-1, 1])*uniform(1./rate, 10./rate)
+            return choice([-1, 1])*uniform(1/rate, 10/rate)
 
         for ball in range(4):
             self.balls.append(Ball(ball, randint(0, self.height-1), randint(0, self.width-1),
@@ -141,8 +141,8 @@ class Bounces(Application):
                     self.model.set_pixel(ball.x, ball.y, ball.color)
                     if self.swipe[0] is not None:
                         # mapping axes (height, width) of Arbalet on axes (x, z) of Leap Motion
-                        x_speed_boost = self.swipe[0].direction[0] * self.swipe[0].speed / 500.
-                        y_speed_boost = self.swipe[0].direction[2] * self.swipe[0].speed / 500.
+                        x_speed_boost = self.swipe[0].direction[0] * self.swipe[0].speed / 500
+                        y_speed_boost = self.swipe[0].direction[2] * self.swipe[0].speed / 500
                         ball.x_speed += x_speed_boost
                         ball.y_speed += y_speed_boost
                 self.swipe[0] = None

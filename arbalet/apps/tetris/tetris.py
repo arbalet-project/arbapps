@@ -63,63 +63,29 @@ class Tetris(Application):
         self.score = 0
         self.playing = True
         self.tetromino = None
-        self.command = {'left': False, 'right': False, 'down': False, 'rotate': False}  # User commands (joy/keyboard)
         self.touchdown = False  # True if the tetro has reached the floor
         self.music = Music()
 
-    def process_events(self):
+    def handle_input(self):
         """
         Sleep until the next step and process user events: game commands + exit
         Previous commands are kept into account and extended events (i.e. a key stayed pressed) are propagated
         :return: True if user asked to abort sleeping (accelerate or quit), False otherwise
         """
-        self.command['rotate'] = False  # The rotate event cannot be extended
-        # Process new events
-        for event in self.arbalet.events.get():
-            # Joystick control
-            if event.type == pygame.JOYBUTTONDOWN:
-                self.command['rotate'] = True
-            elif event.type==pygame.JOYHATMOTION:
-                if event.value[1]==1:
-                    self.command['rotate'] = True
-                    self.command['down'] = False
-                elif event.value[1]==-1:
-                    self.command['down'] = True
-                elif event.value[1]==0:
-                    self.command['down'] = False
-                if event.value[0]==1:
-                    self.command['right'] = True
-                elif event.value[0]==-1:
-                    self.command['left'] = True
-                elif event.value[0]==0:
-                    self.command['left'] = False
-                    self.command['right'] = False
-            # Keyboard control
-            elif event.type in [pygame.KEYDOWN, pygame.KEYUP]:
-                if event.key==pygame.K_UP:
-                    self.command['rotate'] = event.type==pygame.KEYDOWN
-                elif event.key==pygame.K_DOWN:
-                    self.command['down'] = event.type==pygame.KEYDOWN
-                elif event.key==pygame.K_RIGHT:
-                    self.command['right'] = event.type==pygame.KEYDOWN
-                elif event.key==pygame.K_LEFT:
-                    self.command['left'] = event.type==pygame.KEYDOWN
+        self.command['special'] = False  # The rotate event cannot be extended
+        self.command['up'] = False  # The rotate event cannot be extended
+        self.process_events()
 
-        for event in self.arbalet.touch.get():
-            if event['key']=='up':
-                self.command['rotate'] = event['type']=='down'
-            elif event['key']=='down':
-                self.command['down'] = event['type']=='down'
-            elif event['key']=='right':
-                self.command['right'] = event['type']=='down'
-            elif event['key']=='left':
-                self.command['left'] = event['type']=='down'
-
-        changes_pending = self.command['left'] or self.command['right'] or self.command['rotate']
+        changes_pending = (
+            self.command['left']
+            or self.command['right']
+            or self.command['special']
+            or self.command['up']
+        )
         if changes_pending:
             old_position = deepcopy(self.tetromino.position)
             self.tetromino.update_position(0, -1 if self.command['left'] else 1 if self.command['right'] else 0)
-            if self.command['rotate']:
+            if self.command['special'] or self.command['up']:
                 self.rotate_current_tetro()
 
             self.old_grid_empty = deepcopy(self.grid)
@@ -177,9 +143,9 @@ class Tetris(Application):
 
     def wait_for_timeout_or_event(self, allow_events=True):
         t0 = time.time()
-        while time.time()-t0 < 1./self.speed:
+        while time.time()-t0 < 1/self.speed:
             time.sleep(0.07)
-            if allow_events and self.process_events():
+            if allow_events and self.handle_input():
                 return
 
     def check_and_delete_full_lines(self):

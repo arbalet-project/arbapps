@@ -12,7 +12,6 @@
 """
 import random
 from arbalet.core import Application, Rate
-import pygame
 
 LEFT=(0,-1)
 RIGHT=(0, 1)
@@ -34,50 +33,20 @@ class Snake(Application):
         self.rate_increase=self.args.speed
         self.start_food=self.args.food
 
-    def process_events(self):
+    def handle_input(self):
         new_dir=None
-        for event in self.arbalet.events.get():
-            # Joystick control
-            if event.type == pygame.JOYBUTTONDOWN:
-                #self.command['rotate'] = True
-                pass
-            elif event.type==pygame.JOYHATMOTION:
-                if event.value[1]==1 and self.DIRECTION != DOWN:
-                    new_dir = UP
-                elif event.value[1]==-1 and self.DIRECTION != UP:
-                     new_dir = DOWN
-                elif event.value[1]==0:
-                    pass
-                if event.value[0]==1 and self.DIRECTION != LEFT:
-                     new_dir = RIGHT
-                elif event.value[0]==-1 and self.DIRECTION != RIGHT:
-                     new_dir = LEFT
-                elif event.value[0]==0:
-                    pass
-            # Keyboard control
-            elif event.type in [pygame.KEYDOWN, pygame.KEYUP]:
-                if event.key==pygame.K_UP:
-                    new_dir=UP
-                elif event.key==pygame.K_DOWN:
-                    new_dir=DOWN
-                elif event.key==pygame.K_RIGHT:
-                    new_dir = RIGHT
-                elif event.key==pygame.K_LEFT:
-                    new_dir = LEFT
-
-        for event in self.arbalet.touch.get():
-            if event['key']=='up':
-                new_dir = UP
-            elif event['key']=='down':
-                new_dir = DOWN
-            elif event['key']=='right':
-                new_dir = RIGHT
-            elif event['key']=='left':
-                new_dir = LEFT
-
+        self.process_events()
+        if   self.command['right']:
+            new_dir = RIGHT
+        elif self.command['left']:
+            new_dir = LEFT
+        elif self.command['up']:
+            new_dir = UP
+        elif self.command['down']:
+            new_dir = DOWN
         if new_dir is not None:
             self.DIRECTION=new_dir
-        
+
     def process_extras(self, x=None, y=None):
         pass
 
@@ -101,9 +70,9 @@ class Snake(Application):
             self.model.set_pixel(x, y, self.FOOD_COLOR)
 
         while True:
-            rate.sleep_dur=1.0/self.rate
+            rate.sleep_dur=1/self.rate
             with self.model:
-                self.process_events()
+                self.handle_input()
                 new_pos=((self.HEAD[0]+self.DIRECTION[0])%self.height, (self.HEAD[1]+self.DIRECTION[1])%self.width)
                 #check
                 if new_pos in self.queue:

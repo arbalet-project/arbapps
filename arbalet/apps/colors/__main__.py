@@ -27,10 +27,10 @@ animations = {'swipe': { 'rate': 20, 'dur_min': 30, 'dur_max': 35, 'generator_id
                          },
 
               'flashes': { 'rate': 20, 'dur_min': 3, 'dur_max': 30, 'generator_id': 0,
-                           'colors': map(name_to_hsv, ['darkblue']) },
+                           'colors': list(map(name_to_hsv, ['darkblue'])) },
 
               'gender': { 'rate': 20, 'dur_min': 5, 'dur_max': 15, 'generator_id': 2,
-                           'colors': map(name_to_hsv, ['darkblue', 'deeppink']) },
+                           'colors': list(map(name_to_hsv, ['darkblue', 'deeppink'])) },
 
               'teddy':  { 'rate': 20, 'dur_min': 5, 'dur_max': 20, 'generator_id': 2,
                            'colors': [(0.5, 1.0, 0.11764705882352941), (0.08333333333333333, 1.0, 0.0784313725490196)]
@@ -47,7 +47,7 @@ animations = {'swipe': { 'rate': 20, 'dur_min': 30, 'dur_max': 35, 'generator_id
 parser = argparse.ArgumentParser(description='Color demonstrator and coloured ambient light')
 parser.add_argument('-t', '--type',
                     default='swipe',
-                    choices=animations.keys(),
+                    choices=list(animations.keys()),
                     help='Type of effect')
 
 ColorDemo(parser, animations).start()
